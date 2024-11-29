@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function ProfileScreen() {
+export default function ChatScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>個人資料</Text>
+      <Text style={styles.title}>聊聊</Text>
     </View>
   );
 }

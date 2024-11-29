@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../App';
+import { AuthStackParamList } from '../navigation/type';
 
-type RegisterScreenProps = NativeStackScreenProps<RootStackParamList, 'Register'>;
-export default function RegisterScreen({ navigation }: RegisterScreenProps){
+type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
+export default function RegisterScreen({ navigation }: Props){
     return(
         <View style={styles.container}>
             <TouchableOpacity style={styles.backButton}>
@@ -11,7 +11,7 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps){
                 onPress={() => navigation.goBack()}>返回</Text>
             </TouchableOpacity>
             <View style={styles.logo}>
-                <Text style={styles.logoText}>二手書交易平台</Text>
+                <Text style={styles.logoText}>註冊</Text>
             </View>
 
             <View>

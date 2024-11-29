@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, Image, ActivityIndicator } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-const LoadingScreen:React.FC = ({}) => {
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { AuthStackParamList } from '../navigation/type';
+
+type Props = NativeStackScreenProps<AuthStackParamList, 'Loading'>;
+export default function LoadingScreen({ navigation }: Props) {
     const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
         //setData();
         setTimeout(() => {
-          setIsLoading(false);
+            navigation.navigate('Login')
+            setIsLoading(false);
         }, 2000);
       }, []);
     return(
         <View style={styles.container}>
-            <Image source={require('../assets/Chiikawa.jpg')} style={styles.logo} />
+            <Image source={require('../../assets/Chiikawa.jpg')} style={styles.logo} />
             <Text style={styles.title}>二手書交易平台</Text>
-            {isLoading ? (
-                <ActivityIndicator size="large" color="#0000ff" />
-            ) : (
+            {isLoading && (
                 <ActivityIndicator size="large" color="#0000ff" />
             )}
         </View>
@@ -53,5 +55,3 @@ const styles = StyleSheet.create({
         fontSize: 18,
     },
 })
-
-export default LoadingScreen;
