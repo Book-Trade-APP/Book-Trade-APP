@@ -1,9 +1,8 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AuthStackParamList } from '../navigation/type';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 
-type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
-export default function LoginScreen({ navigation }: Props){
+export default function LoginScreen(){
+  const navigation = useNavigation<NavigationProp<any>>();
   const handleLogin = () => {
     /*
       Check if the account exists in the database.
@@ -11,7 +10,7 @@ export default function LoginScreen({ navigation }: Props){
       Check if the password is correct.
         if anything is wrong then show the error "帳號/密碼錯誤"
     */
-    navigation.replace('Main');
+    navigation.navigate('Main');
   }
 
   return(

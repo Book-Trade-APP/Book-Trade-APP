@@ -16,12 +16,21 @@ export type AuthStackParamList = {
 }
 export type HomeStackParamList = {
     Index: undefined;
+    Product: { productId: number};
 }
 export type CartStackParamList = {
     Index: undefined;
 }
 export type ProfileStackParamList = {
     Index: undefined;
+    Setting: undefined;
+    Collection: undefined;
+    Pending: undefined;
+    Completed: undefined;
+    Evaluate: undefined;
+    Seller: undefined;
+    Edit: undefined;
+    Report: undefined;
 }
 export type ChatStackParamList = {
     Index: undefined;
