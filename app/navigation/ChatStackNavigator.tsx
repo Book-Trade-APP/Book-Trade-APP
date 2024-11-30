@@ -1,12 +1,11 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import { ChatStackParamList } from './type';
 import ChatScreen from '../tabs/chat';
-
+const ChatStack = createStackNavigator<ChatStackParamList>(); // purchase
 export function ChatStackNavigator() {
-    const CartStack = createStackNavigator<ChatStackParamList>(); // purchase
     return (
-      <CartStack.Navigator screenOptions={{ headerShown: false }}>
-        <CartStack.Screen name="Index" component={ChatScreen} />
-      </CartStack.Navigator>
+      <ChatStack.Navigator screenOptions={{ headerShown: false }}>
+        <ChatStack.Screen name="Index" component={ChatScreen} />
+      </ChatStack.Navigator>
     );
 }
