@@ -10,7 +10,8 @@ import NotificationsScreen from '../tabs/notification';
 const MainTab = createBottomTabNavigator<MainTabParamList>(); // Bottom Tab
 export default function MainTabNavigator(){
     return(
-        <MainTab.Navigator 
+        <MainTab.Navigator
+            initialRouteName="Home"
             screenOptions={({ route }) => ({
                 tabBarIcon: ({ focused, color, size }) => {
                 let iconName: any;
