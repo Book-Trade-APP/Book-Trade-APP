@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, Image, ActivityIndicator } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AuthStackParamList } from '../navigation/type';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 
-type Props = NativeStackScreenProps<AuthStackParamList, 'Loading'>;
-export default function LoadingScreen({ navigation }: Props) {
+export default function LoadingScreen() {
+    const navigation = useNavigation<NavigationProp<any>>();
     const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
         //setData();
         setTimeout(() => {
-            navigation.navigate('Login')
+            navigation.navigate('Login');
             setIsLoading(false);
         }, 2000);
       }, []);

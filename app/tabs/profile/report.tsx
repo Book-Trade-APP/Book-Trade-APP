@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function ProductDetailScreen() {
+export default function ReportScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>商品詳細資料</Text>
+      <Text style={styles.title}>錯誤回報</Text>
     </View>
   );
 }

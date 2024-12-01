@@ -1,9 +1,7 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AuthStackParamList } from '../navigation/type';
-
-type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
-export default function RegisterScreen({ navigation }: Props){
+import { useNavigation } from '@react-navigation/native';
+export default function RegisterScreen(){
+    const navigation = useNavigation();
     return(
         <View style={styles.container}>
             <TouchableOpacity style={styles.backButton}>

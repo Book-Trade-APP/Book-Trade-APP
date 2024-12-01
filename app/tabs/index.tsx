@@ -4,10 +4,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { Product } from '../interface/Product';
 import { fake_products } from '../data/fakeProudctList';
 import { useState } from 'react';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { HomeStackParamList } from '../navigation/type';
 
-// 獲取螢幕寬高
 const { width } = Dimensions.get('window');
+
 export default function HomeScreen() {
+  const navigation = useNavigation<NavigationProp<HomeStackParamList>>();
+  
   const [searchText, setSearchText] = useState('');
   const [filteredProducts, setFilteredProducts] = useState(fake_products);
 
@@ -21,23 +25,27 @@ export default function HomeScreen() {
       ));
     }
   };
+
   const clearSearch = () => {
     setSearchText('');
     setFilteredProducts(fake_products);
   };
+
   const renderItem = ({ item }: { item: Product }) => (
-    <View style={styles.productContainer}>
+    <TouchableOpacity 
+      style={styles.productContainer} 
+      onPress={() => navigation.navigate('Product', { productId: item.id })}
+    >
       <Image source={item.image} style={styles.productImage} />
       <View style={styles.detailContainer}>
         <Text style={styles.productTitle}>{item.title}</Text>
         <Text style={styles.productPrice}>${item.price}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* 搜索框 */}
       <View style={styles.header}>
         <View style={styles.searchBox}>
           <Ionicons style={styles.searchImg} name="search-outline" size={20} />
@@ -55,9 +63,8 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* 商品列表 */}
       <FlatList
-        data={fake_products}
+        data={filteredProducts}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         contentContainerStyle={styles.content}
