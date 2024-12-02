@@ -1,36 +1,39 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, Modal, Button, TextInput } from 'react-native';
-import { useHideTabBar } from '../../hook/HideTabBar';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { useState } from 'react';
+import { useHideTabBar } from '../../hook/HideTabBar';
+
 export default function SettingScreen() {
   const navigation = useNavigation<NavigationProp<any>>();
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedField, setSelectedField] = useState(null);
-  const handleFieldPress = (field: any) => {
+  const [selectedField, setSelectedField] = useState<string | null>(null); 
+
+  const handleFieldPress = (field: string) => {
     setSelectedField(field);
     setModalVisible(true);
   };
+
   const handleSave = () => {
-    // console.log(`Saving ${selectedField}: ${fieldValue}`);
+    // 保存邏輯
     setModalVisible(false);
   };
-  function handleSaveAll(){
-    /* save everything changes*/
-    navigation.goBack();
-  }
 
+  const handleSaveAll = () => {
+    // 保存所有更改
+    navigation.goBack();
+  };
   useHideTabBar();
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back-outline" size={28}></Ionicons>
+          <Ionicons name="arrow-back-outline" size={28} />
         </TouchableOpacity>
         <Text style={styles.title}>修改個人訊息</Text>
-        <TouchableOpacity onPress={() => handleSaveAll()}>
+        <TouchableOpacity onPress={handleSaveAll}>
           <Text style={styles.saveText}>儲存</Text>
         </TouchableOpacity>
       </View>
@@ -56,22 +59,29 @@ export default function SettingScreen() {
           { label: "手機號碼", key: "phone" },
           { label: "Email", key: "email" },
         ].map((item) => (
-          <TouchableOpacity key={item.key} style={styles.infoRow} onPress={() => handleFieldPress(item.key)}>
+          <TouchableOpacity 
+            key={item.key} 
+            style={styles.infoRow} 
+            onPress={() => handleFieldPress(item.key)}
+          >
             <Text style={styles.infoLabel}>{item.label}</Text>
             <Text style={styles.infoAction}>立刻設定</Text>
           </TouchableOpacity>
         ))}
-        {/* <Modal
+      </View>
+
+      {/* Modal for editing field (optional, you can implement later) */}
+      {/* <Modal
         visible={modalVisible}
         transparent={true}
-        animationType="none"
+        animationType="slide"
         onRequestClose={() => setModalVisible(false)}
-        >
-        </Modal> */}
-      </View>
+      >
+        // Modal content
+      </Modal> */}
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -88,12 +98,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
   },
-  backButton: {
-    padding: 8,
-  },
-  backText: {
-    fontSize: 20,
-  },
   title: {
     fontSize: 18,
     fontWeight: "bold",
@@ -104,8 +108,9 @@ const styles = StyleSheet.create({
   },
   profileSection: {
     alignItems: "center",
-    backgroundColor: "#d3d3d3",
+    backgroundColor: "#fff",
     paddingVertical: 20,
+    marginTop: 10,
   },
   avatarButton: {
     alignItems: "center",
@@ -114,7 +119,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#fff",
+    backgroundColor: "#f0f0f0",
   },
   editText: {
     marginTop: 8,

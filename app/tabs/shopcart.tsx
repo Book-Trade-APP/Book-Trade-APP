@@ -4,10 +4,13 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList } from 'react
 import CheckBox from 'react-native-check-box';
 import { fake_cartItems } from '../data/fakeCartItem';
 import { CartItem } from '../interface/CartItem';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { MainTabParamList } from '../navigation/type';
+
 export default function ShoppingCartScreen() {
   const [cartItems, setCartItems] = useState(fake_cartItems);
   const [selectAll, setSelectAll] = useState<boolean>(false);
-
+  const navigation = useNavigation<NavigationProp<MainTabParamList>>();
   const handleToggleSelection = (id: number): void => {
     setCartItems(prevItems => {
       const updatedItems = prevItems.map(item =>
@@ -71,10 +74,19 @@ export default function ShoppingCartScreen() {
               onClick={() => handleToggleSelection(item.id)}
             />
             <Image style={styles.itemImage} source={item.image} />
-            <View style={styles.itemInfo}>
+            <TouchableOpacity 
+              style={styles.itemInfo} 
+              onPress={() => {
+                // 使用類型斷言解決類型不兼容問題
+                navigation.navigate('Home' as keyof MainTabParamList, {
+                  screen: 'Product',
+                  params: { productId: item.id, source: 'Cart' }
+                } as any);
+              }}
+            >
               <Text style={styles.title}>{item.title}</Text>
               <Text>{`$${item.price}`}</Text>
-            </View>
+            </TouchableOpacity>
             <View style={styles.quantityControl}>
               <TouchableOpacity
                 onPress={() => handleDecreaseQuantity(item.id)}
@@ -119,12 +131,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    paddingTop: 16,
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     paddingLeft: 16,
+    paddingTop: 16,
     marginBottom: 16,
   },
   itemContainer: {

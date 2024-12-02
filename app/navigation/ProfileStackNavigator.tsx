@@ -1,4 +1,4 @@
-import { createStackNavigator } from "@react-navigation/stack";
+import { createStackNavigator, } from "@react-navigation/stack";
 import { ProfileStackParamList } from "./type";
 import ProfileScreen from "../tabs/profile";
 import SettingScreen from "../tabs/profile/settings";
@@ -9,11 +9,12 @@ import EvaluateScreen from "../tabs/profile/evaluate";
 import ReportScreen from "../tabs/profile/report";
 import SellerScreen from "../tabs/profile/seller";
 import EditScreen from "../tabs/profile/edit";
+import { SlideUpTransition } from "../hook/SwitchPageAnimation";
 const ProfileStack = createStackNavigator<ProfileStackParamList>(); //personal settings
   // Profile Stack Navigator
 export function ProfileStackNavigator() {
     return (
-      <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
+      <ProfileStack.Navigator screenOptions={{cardStyleInterpolator: SlideUpTransition, headerShown: false, gestureEnabled: true, gestureDirection: 'vertical'}}>
         <ProfileStack.Screen name="Index" component={ProfileScreen} />
         <ProfileStack.Screen name="Setting" component={SettingScreen} />
         <ProfileStack.Screen name="Collection" component={CollectionScreen} />

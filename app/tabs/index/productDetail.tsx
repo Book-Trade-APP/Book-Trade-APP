@@ -1,25 +1,46 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, BackHandler } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHideTabBar } from "../../hook/HideTabBar";
-import { useRoute, RouteProp } from "@react-navigation/native";
+import { useRoute, useNavigation, RouteProp, NavigationProp } from "@react-navigation/native";
 import { fake_products } from "../../data/fakeProudctList";
-import { HomeStackParamList } from "../../navigation/type";
-import { useNavigation } from "@react-navigation/native";
-
+import { HomeStackParamList, MainTabParamList } from "../../navigation/type";
+import React, { useEffect } from "react";
 export default function ProductDetailScreen() {
   useHideTabBar();
   const route = useRoute<RouteProp<HomeStackParamList, "Product">>();
-  const navigation = useNavigation();
-  const { productId } = route.params;
+  const navigation = useNavigation<NavigationProp<MainTabParamList>>();
+  const { productId, source } = route.params;
+  const insets = useSafeAreaInsets();
   const product = fake_products.find((p) => p.id === productId);
-
+  const handleGoBack = () => {
+  if (source === 'Cart') {
+      // 如果是從購物車來的，返回到購物車
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Cart' }]
+      });
+    } else {
+      // 否則使用默認的返回邏輯
+      navigation.goBack();
+    }
+  };
   if (!product) {
     return null; // 處理無效 ID
   }
+  useEffect(() => {
+    // 禁用返回按钮
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress', 
+      () => true // 返回 true 表示阻止默認的返回行為
+    );
+
+    // 清理監聽器
+    return () => backHandler.remove();
+  }, []);
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scroll}>
+    <SafeAreaView style={[styles.container, {paddingBottom: insets.bottom}]}>
+      <ScrollView>
         {/* Product Image */}
         <View style={styles.imageContainer}>
           <Image source={product.image} style={styles.productImage} />
@@ -57,7 +78,7 @@ export default function ProductDetailScreen() {
       </ScrollView>
 
       {/* Back Button */}
-      <TouchableOpacity style={styles.floatingBackButton} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={styles.floatingBackButton} onPress={() => handleGoBack()}>
         <Ionicons name="arrow-back-outline" size={28} color="#fff" />
       </TouchableOpacity>
 
@@ -79,9 +100,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f5f5f5",
   },
-  scroll: {
-    flex: 1,
-  },
   imageContainer: {
     width: '100%',
     alignItems: "center",
@@ -90,6 +108,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: 300,
+    resizeMode: 'cover',
   },
   detailsContainer: {
     paddingHorizontal: 16,
