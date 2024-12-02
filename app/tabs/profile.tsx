@@ -9,6 +9,9 @@ export default function ProfileScreen() {
   }
   return (
     <SafeAreaView style={styles.container}>
+        <View style={styles.logoContainer}>
+          <Text style={styles.logoText}>二手書交易平台</Text>
+        </View>
       {/* Header Section */}
       <View style={styles.headerContainer}>
         <View style={styles.profileContainer}>
@@ -74,6 +77,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  logoContainer: {
+    backgroundColor: '#1AAC50'
+  },
+  logoText: {
+    textAlign: 'center',
+    padding: 20,
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: '900'
   },
   headerContainer: {
     flexDirection: 'row',
