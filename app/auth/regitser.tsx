@@ -1,12 +1,12 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 export default function RegisterScreen(){
     const navigation = useNavigation();
     return(
         <View style={styles.container}>
-            <TouchableOpacity style={styles.backButton}>
-                <Text style={styles.backButtonText}
-                onPress={() => navigation.goBack()}>返回</Text>
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back-outline" size={28} />
             </TouchableOpacity>
             <View style={styles.logo}>
                 <Text style={styles.logoText}>註冊</Text>
