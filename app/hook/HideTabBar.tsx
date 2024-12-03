@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 
 export function useHideTabBar() {
   const navigation = useNavigation();
+  const [tabBarHidden, setTabBarHidden] = useState(false);
 
   useEffect(() => {
     const parentNavigation = navigation.getParent();
@@ -10,14 +11,20 @@ export function useHideTabBar() {
       parentNavigation.setOptions({
         tabBarStyle: { display: 'none' },
       });
+      
+      // Confirm tab bar is hidden
+      setTabBarHidden(true);
     }
 
     return () => {
       if (parentNavigation) {
         parentNavigation.setOptions({
-          tabBarStyle: undefined, // 恢復為預設樣式
+          tabBarStyle: undefined, // Restore to default style
         });
+        setTabBarHidden(false);
       }
     };
   }, [navigation]);
+
+  return tabBarHidden;
 }
