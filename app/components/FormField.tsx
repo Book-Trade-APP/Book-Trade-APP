@@ -23,7 +23,8 @@ const styles = StyleSheet.create({
         marginBottom: 15,
     },
     label: {
-        width: 100,
+        textAlign: "right",
+        width: 99,
         fontSize: 16,
     },
     input: {

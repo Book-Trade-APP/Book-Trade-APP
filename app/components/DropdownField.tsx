@@ -35,18 +35,19 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
 
 const styles = StyleSheet.create({
     field: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 15,
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 15,
     },
     label: {
-        width: 100,
-        fontSize: 16,
+      textAlign: "right",
+      width: 100,
+      fontSize: 16,
     },
     dropdown: {
-        flex: 1,
-        height: 55,
-        borderWidth: 1,
-        backgroundColor: '#FFFFFF',
+      flex: 1,
+      height: 55,
+      borderWidth: 1,
+      backgroundColor: '#FFFFFF',
     },
 });

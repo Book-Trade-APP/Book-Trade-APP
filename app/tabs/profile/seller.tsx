@@ -6,6 +6,7 @@ import React, { useState }from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { FormField } from '../../components/FormField';
 import { DropdownField } from '../../components/DropdownField';
+import { Header } from '../../components/ProfieHeader';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from "expo-image-picker";
 
@@ -153,15 +154,7 @@ export default function SellerScreen() {
   return (
     <SafeAreaView style={styles.container}>
         {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back-outline" size={28} />
-        </TouchableOpacity>
-        <Text style={styles.title}>發佈新商品</Text>
-        <TouchableOpacity>
-          <Text style={styles.saveText} onPress={validateInputs}>發佈</Text>
-        </TouchableOpacity>
-      </View>
+      <Header title="發佈新商品" text="發佈" navigation={navigation} Change={validateInputs}></Header>
       <ScrollView>
         {/* Product Form */}
         <View style={styles.form}>
@@ -212,7 +205,7 @@ export default function SellerScreen() {
         </View>
         {/* Image */}
         <TouchableOpacity style={styles.imageButtonContainer} onPress={handleAddPhoto}>
-          <Ionicons name="images-outline" size={24} color={"#0000ff"} />
+          <Ionicons name="images-outline" size={24} color={"#007bff"} />
           <Text style={styles.imageText}>{photoUri ? "變更照片" : "新增照片"}</Text>
         </TouchableOpacity>
         {photoUri && (
@@ -229,24 +222,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f5f5f5",
     justifyContent: 'center',
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#fff",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  saveText: {
-    color: "#007bff",
-    fontSize: 16,
   },
   form: {
     padding: 15,
@@ -285,7 +260,7 @@ const styles = StyleSheet.create({
   },
   imageText: {
     marginLeft: 6,
-    color: '#0000ff',
+    color: '#007bff',
   },
   imageContainer: {
     alignItems: 'center', 

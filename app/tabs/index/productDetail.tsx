@@ -1,17 +1,23 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, BackHandler } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, BackHandler, ToastAndroid } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView} from "react-native-safe-area-context";
 import { useHideTabBar } from "../../hook/HideTabBar";
 import { useRoute, useNavigation, RouteProp, NavigationProp } from "@react-navigation/native";
 import { fake_products } from "../../data/fakeProudctList";
 import { HomeStackParamList, MainTabParamList } from "../../navigation/type";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 export default function ProductDetailScreen() {
   useHideTabBar();
   const route = useRoute<RouteProp<HomeStackParamList, "Product">>();
   const navigation = useNavigation<NavigationProp<MainTabParamList>>();
+  const [isCollected, setIsCollected] = useState(false);
   const { productId, source } = route.params;
   const product = fake_products.find((p) => p.id === productId);
+  const handleCollected = () => {
+    /* add/remove product to shop cart*/
+    setIsCollected(!isCollected)
+    {!isCollected ? ToastAndroid.show('商品已加入收藏', ToastAndroid.SHORT) : ToastAndroid.show('商品已取消收藏', ToastAndroid.SHORT)}
+  }
   const handleGoBack = () => {
   if (source === 'Cart') {
       // 如果是從購物車來的，返回到購物車
@@ -45,8 +51,13 @@ export default function ProductDetailScreen() {
 
         {/* Product Details */}
         <View style={styles.detailsContainer}>
-          <Text style={styles.title}>{product.name}</Text>
-          <Text style={styles.price}>${product.price}</Text>
+          <View>
+            <Text style={styles.title}>{product.name}</Text>
+            <Text style={styles.price}>${product.price}</Text>
+          </View>
+          <TouchableOpacity onPress={() => handleCollected()}>
+            <Ionicons style={styles.bookmarks} name={isCollected ? "bookmark-sharp" : "bookmark-outline"} color={isCollected ? "#FFC300" : "black"} size={24} />
+          </TouchableOpacity>
         </View>
 
         {/* Rating and Reviews */}
@@ -110,10 +121,15 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   detailsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     backgroundColor: "#fff",
     paddingVertical: 10,
     marginBottom: 10,
+  },
+  bookmarks: {
+    marginTop: 4,
   },
   title: {
     fontSize: 18,
