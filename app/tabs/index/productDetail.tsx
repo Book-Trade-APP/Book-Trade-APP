@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, BackHandler } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView} from "react-native-safe-area-context";
 import { useHideTabBar } from "../../hook/HideTabBar";
 import { useRoute, useNavigation, RouteProp, NavigationProp } from "@react-navigation/native";
 import { fake_products } from "../../data/fakeProudctList";
@@ -11,13 +11,11 @@ export default function ProductDetailScreen() {
   const route = useRoute<RouteProp<HomeStackParamList, "Product">>();
   const navigation = useNavigation<NavigationProp<MainTabParamList>>();
   const { productId, source } = route.params;
-  const insets = useSafeAreaInsets();
   const product = fake_products.find((p) => p.id === productId);
   const handleGoBack = () => {
   if (source === 'Cart') {
       // 如果是從購物車來的，返回到購物車
       navigation.reset({
-        index: 0,
         routes: [{ name: 'Cart' }]
       });
     } else {
@@ -34,23 +32,21 @@ export default function ProductDetailScreen() {
       'hardwareBackPress', 
       () => true // 返回 true 表示阻止默認的返回行為
     );
-
     // 清理監聽器
     return () => backHandler.remove();
   }, []);
   return (
-    <SafeAreaView style={[styles.container, {paddingBottom: insets.bottom}]}>
+    <SafeAreaView style={styles.container}>
       <ScrollView>
         {/* Product Image */}
         <View style={styles.imageContainer}>
-          <Image source={product.image} style={styles.productImage} />
+          <Image source={product.photouri} style={styles.productImage} />
         </View>
 
         {/* Product Details */}
         <View style={styles.detailsContainer}>
-          <Text style={styles.title}>{product.title}</Text>
+          <Text style={styles.title}>{product.name}</Text>
           <Text style={styles.price}>${product.price}</Text>
-          <Text style={styles.quantity}>剩餘數量：{product.quantity}件</Text>
         </View>
 
         {/* Rating and Reviews */}
@@ -65,21 +61,24 @@ export default function ProductDetailScreen() {
         <View style={styles.productInfoContainer}>
           <Text style={styles.productInfoTitle}>商品資訊</Text>
           <Text style={styles.detailText}>作者：{product.author}</Text>
-          <Text style={styles.detailText}>出版社：{product.publishes}</Text>
-          <Text style={styles.detailText}>出版日期：{product.date}</Text>
+          <Text style={styles.detailText}>出版社：{product.publisher}</Text>
+          <Text style={styles.detailText}>出版日期：{product.publishDate}</Text>
           <Text style={styles.detailText}>ISBN：{product.ISBN}</Text>
         </View>
 
         {/* Product Description */}
         <View style={styles.descriptionContainer}>
           <Text style={styles.descriptionTitle}>商品簡介</Text>
-          <Text style={styles.descriptionText}>{product.details}</Text>
+          <Text style={styles.descriptionText}>{product.description}</Text>
         </View>
       </ScrollView>
 
       {/* Back Button */}
       <TouchableOpacity style={styles.floatingBackButton} onPress={() => handleGoBack()}>
         <Ionicons name="arrow-back-outline" size={28} color="#fff" />
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.floatingCartButton} onPress={() => navigation.reset({routes: [{ name: 'Cart' }]})}>
+        <Ionicons name="cart-outline" size={28} color="#fff" />
       </TouchableOpacity>
 
       {/* Bottom Navigation */}
@@ -126,9 +125,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginRight: 8,
     marginBottom: 10,
-  },
-  quantity: {
-    marginRight: 5,
   },
   detailText: {
     fontSize: 14,
@@ -206,6 +202,17 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 50,
     left: 16,
+    backgroundColor: "#555",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  floatingCartButton: {
+    position: "absolute",
+    top: 50,
+    right: 16,
     backgroundColor: "#555",
     width: 40,
     height: 40,

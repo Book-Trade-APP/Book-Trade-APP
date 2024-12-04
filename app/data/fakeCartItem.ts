@@ -10,8 +10,9 @@ export const fake_cartItems: CartItem[] = cartIds.map(id => {
     
     return {
         id: product.id,
-        image: product.image,
-        title: product.title,
+        photouri: product.photouri,
+        name: product.name,
+        author: product.author,
         selected: false,
         price: product.price,
         quantity: 1, //預設選取數量為1個

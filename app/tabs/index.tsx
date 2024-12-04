@@ -21,7 +21,7 @@ export default function HomeScreen() {
       setFilteredProducts(fake_products);
     } else {
       setFilteredProducts(fake_products.filter((product) =>
-        product.title.toLowerCase().includes(text.toLowerCase())
+        product.name.toLowerCase().includes(text.toLowerCase())
       ));
     }
   };
@@ -36,9 +36,9 @@ export default function HomeScreen() {
       style={styles.productContainer} 
       onPress={() => navigation.navigate('Product', { productId: item.id, source: 'Home' })}
     >
-      <Image source={item.image} style={styles.productImage} />
+      <Image source={item.photouri} style={styles.productImage} />
       <View style={styles.detailContainer}>
-        <Text style={styles.productTitle}>{item.title}</Text>
+        <Text style={styles.productTitle}>{item.name}</Text>
         <Text style={styles.productPrice}>${item.price}</Text>
       </View>
     </TouchableOpacity>
