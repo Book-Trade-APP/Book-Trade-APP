@@ -6,7 +6,7 @@ import React, { useState }from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { FormField } from '../../components/FormField';
 import { DropdownField } from '../../components/DropdownField';
-import { Header } from '../../components/ProfieHeader';
+import { Header } from '../../components/ButtonHeader';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from "expo-image-picker";
 
@@ -219,9 +219,7 @@ export default function SellerScreen() {
 }
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "#f5f5f5",
-    justifyContent: 'center',
   },
   form: {
     padding: 15,

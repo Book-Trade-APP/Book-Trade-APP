@@ -1,7 +1,7 @@
 import { View, StyleSheet, ToastAndroid, TextInput } from 'react-native';
 import { useHideTabBar } from '../../hook/HideTabBar';
 import { useNavigation } from '@react-navigation/native';
-import { Header } from '../../components/ProfieHeader';
+import { Header } from '../../components/ButtonHeader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 export default function ReportScreen() {
