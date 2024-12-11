@@ -72,7 +72,9 @@ function generateFakeProductData() {
       ISBN: generateRandomISBN(),
       price: generateRandomPrice(),
       description: '我是一隻兔子\n\n\n',
-      photouri: imageMap[i] // 圖片路徑
+      photouri: imageMap[i], // 圖片路徑
+      selected: false,
+      collected: false
     };
     products.push(product);
   }

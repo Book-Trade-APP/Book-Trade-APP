@@ -3,9 +3,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
 import CheckBox from 'react-native-check-box';
 import { fake_cartItems } from '../data/fakeCartItem';
-import { CartItem } from '../interface/CartItem';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { MainTabParamList } from '../navigation/type';
+import { Product } from '../interface/Product';
 
 export default function ShoppingCartScreen() {
   const [cartItems, setCartItems] = useState(fake_cartItems);
@@ -43,11 +43,11 @@ export default function ShoppingCartScreen() {
 
       <FlatList
         data={cartItems} // 資料來源
-        keyExtractor={(item: CartItem) => item.id.toString()}
+        keyExtractor={(item: Product) => item.id.toString()}
         ListFooterComponent={
           <Text style={styles.footerText}>沒有更多商品了</Text>
         }
-        renderItem={({ item }: { item: CartItem }) => (
+        renderItem={({ item }: { item: Product }) => (
           <View style={styles.itemContainer}>
             <CheckBox
               style={styles.checkbox}
