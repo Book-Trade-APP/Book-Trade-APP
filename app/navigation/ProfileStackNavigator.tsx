@@ -14,7 +14,7 @@ const ProfileStack = createStackNavigator<ProfileStackParamList>(); //personal s
   // Profile Stack Navigator
 export function ProfileStackNavigator() {
     return (
-      <ProfileStack.Navigator screenOptions={{cardStyleInterpolator: SlideUpTransition, headerShown: false, gestureEnabled: true, gestureDirection: 'vertical'}}>
+      <ProfileStack.Navigator screenOptions={({ route }) => ({cardStyleInterpolator: route.name === 'Index' ? undefined : SlideUpTransition, headerShown: false, gestureEnabled: true, gestureDirection: 'vertical'})}>
         <ProfileStack.Screen name="Index" component={ProfileScreen} />
         <ProfileStack.Screen name="Setting" component={SettingScreen} />
         <ProfileStack.Screen name="Collection" component={CollectionScreen} />

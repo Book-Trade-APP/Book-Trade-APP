@@ -7,8 +7,26 @@ import { CartStackNavigator } from './CartStackNavigator';
 import { ProfileStackNavigator } from './ProfileStackNavigator';
 import { ChatStackNavigator } from './ChatStackNavigator';
 import NotificationsScreen from '../tabs/notification';
+import { useEffect, useState } from 'react';
+import { BackHandler, ToastAndroid } from 'react-native';
 const MainTab = createBottomTabNavigator<MainTabParamList>(); // Bottom Tab
 export default function MainTabNavigator(){
+    const [lastBackPress, setLastBackPress] = useState<number | null>(null);
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+          const now = Date.now();
+    
+          if (lastBackPress && now - lastBackPress < 2000) {
+            BackHandler.exitApp(); // 如果兩次按返回按鈕時間間隔小於2秒，退出應用程式
+            return true;
+          }
+    
+          setLastBackPress(now);
+          ToastAndroid.show('再按一次退出應用', ToastAndroid.SHORT); // 顯示提示
+          return true; // 阻止默認返回行為
+        })
+    }
+);
     return(
         <MainTab.Navigator
             initialRouteName="Home"

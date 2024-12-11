@@ -19,19 +19,36 @@ export default function ProductDetailScreen() {
     {!isCollected ? ToastAndroid.show('商品已加入收藏', ToastAndroid.SHORT) : ToastAndroid.show('商品已取消收藏', ToastAndroid.SHORT)}
   }
   const handleGoBack = () => {
-  if (source === 'Cart') {
-      // 如果是從購物車來的，返回到購物車
+    if (source === 'Cart') {
+        // 如果是從購物車來的，返回到購物車
+        navigation.reset({
+          routes: [{ name: 'Cart' }]
+        });
+    }else if(source === 'Collection'){
       navigation.reset({
-        routes: [{ name: 'Cart' }]
-      });
-    } else {
-      // 否則使用默認的返回邏輯
-      navigation.goBack();
+        routes: [{name: 'Profile', params: {screen: 'Collection'}}]
+      })
+    } 
+      
+    else {
+        // 否則使用默認的返回邏輯
+        navigation.goBack();
     }
   };
+
   if (!product) {
     return null; // 處理無效 ID
   }
+
+  const handleAddToCart = () => {
+    /* add product to cartIds*/
+    ToastAndroid.show("已新增至購物車", ToastAndroid.SHORT);
+  }
+  const handleBuy = () => {
+    /* add product to cartIds and show shopCartScreen*/
+    navigation.reset({routes: [{name: 'Cart'}]});
+  }
+
   useEffect(() => {
     // 禁用返回按钮
     const backHandler = BackHandler.addEventListener(
@@ -94,10 +111,10 @@ export default function ProductDetailScreen() {
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNavContainer}>
-        <TouchableOpacity style={styles.cartButton}>
+        <TouchableOpacity style={styles.cartButton} onPress={handleAddToCart}>
           <Text style={styles.buttonText}>加入購物車</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buyButton}>
+        <TouchableOpacity style={styles.buyButton} onPress={handleBuy}>
           <Text style={styles.buttonText}>直接購買</Text>
         </TouchableOpacity>
       </View>
