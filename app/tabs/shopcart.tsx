@@ -3,9 +3,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
 import CheckBox from 'react-native-check-box';
 import { fake_cartItems } from '../data/fakeCartItem';
-import { CartItem } from '../interface/CartItem';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { MainTabParamList } from '../navigation/type';
+import { Product } from '../interface/Product';
 
 export default function ShoppingCartScreen() {
   const [cartItems, setCartItems] = useState(fake_cartItems);
@@ -31,29 +31,10 @@ export default function ShoppingCartScreen() {
     );
   };
 
-  const handleIncreaseQuantity = (id: number): void => {
-    setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
-  };
-  const handleDecreaseQuantity = (id: number): void => {
-    setCartItems(prevItems =>
-      prevItems
-        .map(item =>
-          item.id === id
-            ? { ...item, quantity: item.quantity - 1 } // 直接減少數量
-            : item
-        )
-        .filter(item => item.quantity > 0) // 過濾掉數量為 0 的項目
-    );
-  };
-
   const calculateTotal = (): number => {
     return cartItems
       .filter(item => item.selected)
-      .reduce((total, item) => total + item.price * item.quantity, 0);
+      .reduce((total, item) => total + item.price, 0);
   };
 
   return (
@@ -62,18 +43,18 @@ export default function ShoppingCartScreen() {
 
       <FlatList
         data={cartItems} // 資料來源
-        keyExtractor={(item: CartItem) => item.id.toString()}
+        keyExtractor={(item: Product) => item.id.toString()}
         ListFooterComponent={
           <Text style={styles.footerText}>沒有更多商品了</Text>
         }
-        renderItem={({ item }: { item: CartItem }) => (
+        renderItem={({ item }: { item: Product }) => (
           <View style={styles.itemContainer}>
             <CheckBox
               style={styles.checkbox}
               isChecked={item.selected}
               onClick={() => handleToggleSelection(item.id)}
             />
-            <Image style={styles.itemImage} source={item.image} />
+            <Image style={styles.itemImage} source={item.photouri} />
             <TouchableOpacity 
               style={styles.itemInfo} 
               onPress={() => {
@@ -84,23 +65,11 @@ export default function ShoppingCartScreen() {
                 } as any);
               }}
             >
-              <Text style={styles.title}>{item.title}</Text>
-              <Text>{`$${item.price}`}</Text>
+              <Text style={styles.title}>{item.name}</Text>
+              <Text>{item.author}</Text>
             </TouchableOpacity>
-            <View style={styles.quantityControl}>
-              <TouchableOpacity
-                onPress={() => handleDecreaseQuantity(item.id)}
-                style={styles.quantityButton}
-              >
-                <Text style={styles.buttonText}>-</Text>
-              </TouchableOpacity>
-              <Text style={styles.quantityText}>{item.quantity}</Text>
-              <TouchableOpacity
-                onPress={() => handleIncreaseQuantity(item.id)}
-                style={styles.quantityButton}
-              >
-                <Text style={styles.buttonText}>+</Text>
-              </TouchableOpacity>
+            <View>
+              <Text style={styles.priceText}>{`$${item.price}`}</Text>
             </View>
           </View>
         )
@@ -163,23 +132,11 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: 'bold',
   },
-  quantityControl: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 10,
-  },
-  quantityButton: {
-    backgroundColor: '#ccc',
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    borderRadius: 5,
-    marginHorizontal: 5,
-  },
-  quantityText: {
+  priceText: {
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
-    width: 30, // 固定寬度，防止數字撐開
+    width: 50, // 固定寬度，防止數字撐開
   },
   buttonText: {
     fontSize: 16,

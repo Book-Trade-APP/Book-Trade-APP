@@ -13,47 +13,47 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   // 註冊處理函數
-  const handleRegister = async () => {
-    if (!email || !username || !password || !confirmPassword) {
-      Alert.alert("錯誤", "請填寫所有欄位");
-      return;
-    }
+  // const handleRegister = async () => {
+  //   if (!email || !username || !password || !confirmPassword) {
+  //     Alert.alert("錯誤", "請填寫所有欄位");
+  //     return;
+  //   }
 
-    if (password !== confirmPassword) {
-      Alert.alert("錯誤", "密碼與確認密碼不一致");
-      return;
-    }
+  //   if (password !== confirmPassword) {
+  //     Alert.alert("錯誤", "密碼與確認密碼不一致");
+  //     return;
+  //   }
 
-    try {
-      // 發送 POST 請求到後端 http://自己的ip:8000/register
-      const response = await axios.post("http://172.20.10.2:8000/register", { 
-        email: email,
-        username: username,
-        password: password,
-      });
+  //   try {
+  //     // 發送 POST 請求到後端 http://自己的ip:8000/register
+  //     const response = await axios.post("http://192.168.106.98:8000/register", { 
+  //       email: email,
+  //       username: username,
+  //       password: password,
+  //     });
 
-      if (response.status === 201) {
-        Alert.alert("成功", "註冊成功！");
-        navigation.goBack(); // 返回登入頁面
-      }
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-          // Axios 錯誤
-          if (error.response) {
-            if (error.response.status === 409) {
-              Alert.alert('錯誤', '帳戶已存在');
-            } else {
-              Alert.alert('錯誤', '伺服器錯誤，請稍後再試');
-            }
-          } else {
-            Alert.alert('錯誤', '無法連接到伺服器');
-          }
-        } else {
-          // 其他錯誤
-          Alert.alert('錯誤', '發生未知錯誤');
-        }
-      }
-    };
+  //     if (response.status === 201) {
+  //       Alert.alert("成功", "註冊成功！");
+  //       navigation.goBack(); // 返回登入頁面
+  //     }
+  //   } catch (error) {
+  //       if (axios.isAxiosError(error)) {
+  //         // Axios 錯誤
+  //         if (error.response) {
+  //           if (error.response.status === 409) {
+  //             Alert.alert('錯誤', '帳戶已存在');
+  //           } else {
+  //             Alert.alert('錯誤', '伺服器錯誤，請稍後再試');
+  //           }
+  //         } else {
+  //           Alert.alert('錯誤', '無法連接到伺服器');
+  //         }
+  //       } else {
+  //         // 其他錯誤
+  //         Alert.alert('錯誤', '發生未知錯誤');
+  //       }
+  //     }
+  //   };
 
   return (
     <View style={styles.container}>
@@ -94,7 +94,7 @@ export default function RegisterScreen() {
           value={confirmPassword}
           onChangeText={setConfirmPassword}
         />
-        <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
+        <TouchableOpacity style={styles.registerButton}>
           <Text style={styles.registerButtonText}>建立帳號</Text>
         </TouchableOpacity>
       </View>
