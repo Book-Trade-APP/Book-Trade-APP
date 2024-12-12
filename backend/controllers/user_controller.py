@@ -12,9 +12,15 @@ def register():
     try:
         data = request.json
         email = data.get("email")
-        username = data.get("username")
+        userName = data.get("userName")  # 使用 userName
         password = data.get("password")
-        user_service.register_user(email, username, password)
+        bio = data.get("bio", "")
+        gender = data.get("gender", "other")
+        birthday = data.get("birthday")
+        phone = data.get("phone")
+
+        # 調用服務層的註冊邏輯
+        user_service.register_user(email, userName, password, bio, gender, birthday, phone)
         return success_response(None, "註冊成功")
     except ValueError as e:
         return error_response(str(e), 400)
