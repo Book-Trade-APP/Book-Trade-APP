@@ -17,6 +17,6 @@ export const fake_cartItems: Product[] = cartIds.map(id => {
     
     return {
         ...product,
-        selected: true,
+        selected: false,
     };
 });

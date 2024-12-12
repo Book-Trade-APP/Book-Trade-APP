@@ -20,6 +20,7 @@ export type HomeStackParamList = {
 }
 export type CartStackParamList = {
     Index: undefined;
+    Checkout: {productId: number[]}
 }
 export type ProfileStackParamList = {
     Index: undefined;
