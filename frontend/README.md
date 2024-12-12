@@ -1,3 +1,4 @@
+# Book-Trade-APP frontend
 ### Installation and Usage
 
 1. Install Expo Go and have an account.
@@ -14,10 +15,10 @@
 
 
 ### Architecture
-+ **`auth`**: 登入系統
-+ **`components`**: 視覺化組件
-+ **`data`**: 暫存資料
-+ **`hook`**: 掛鉤
-+ **`interface`**: 介面
-+ **`navigation`**: 頁面導航
-+ **`tabs`**: 頁面
+- **`auth`**: 登入系統
+- **`components`**: 視覺化組件
+- **`data`**: 暫存資料
+- **`hook`**: 掛鉤
+- **`interface`**: 介面
+- **`navigation`**: 頁面導航
+- **`tabs`**: 頁面
