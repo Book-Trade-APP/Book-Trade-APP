@@ -4,31 +4,36 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList } from 'react
 import CheckBox from 'react-native-check-box';
 import { fake_cartItems } from '../data/fakeCartItem';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { MainTabParamList } from '../navigation/type';
+import { MainTabParamList, CartStackParamList } from '../navigation/type';
 import { Product } from '../interface/Product';
 
 export default function ShoppingCartScreen() {
   const [cartItems, setCartItems] = useState(fake_cartItems);
   const [selectAll, setSelectAll] = useState<boolean>(false);
+  const [checkOutButtonStatus, setCheckOutButtonStatus] = useState<boolean>(true);
   const navigation = useNavigation<NavigationProp<MainTabParamList>>();
+  const navigation2 = useNavigation<NavigationProp<CartStackParamList>>();
+
   const handleToggleSelection = (id: number): void => {
     setCartItems(prevItems => {
       const updatedItems = prevItems.map(item =>
         item.id === id ? { ...item, selected: !item.selected } : item
       );
-      // 檢查是否所有項目被選中
-      const allSelected = updatedItems.every(item => item.selected);
-      setSelectAll(allSelected);
+      const anySelected = updatedItems.some(item => item.selected);
+      setSelectAll(updatedItems.every(item => item.selected));
+      setCheckOutButtonStatus(!anySelected); // 根據是否有選中的項目來更新按鈕狀態
       return updatedItems;
     });
   };
-
+  
   const handleToggleSelectAll = (): void => {
     const newSelectAll = !selectAll;
     setSelectAll(newSelectAll);
-    setCartItems(prevItems =>
-      prevItems.map(item => ({ ...item, selected: newSelectAll }))
-    );
+    setCartItems(prevItems => {
+      const updatedItems = prevItems.map(item => ({ ...item, selected: newSelectAll }));
+      setCheckOutButtonStatus(!newSelectAll); // 如果全選，則按鈕應啟用；否則禁用
+      return updatedItems;
+    });
   };
 
   const calculateTotal = (): number => {
@@ -36,7 +41,13 @@ export default function ShoppingCartScreen() {
       .filter(item => item.selected)
       .reduce((total, item) => total + item.price, 0);
   };
-
+  const handleCheckout = () => {
+    const selectedProductIds = cartItems
+      .filter(item => item.selected)
+      .map(item => item.id);
+  
+    navigation2.navigate('Checkout', { productId: selectedProductIds });
+  };
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>購物車</Text>
@@ -86,7 +97,7 @@ export default function ShoppingCartScreen() {
           <Text style={styles.checkboxText}>全選</Text>
         </View>
         <Text style={styles.totalPrice}>總金額 ${calculateTotal()}</Text>
-        <TouchableOpacity style={styles.checkoutButton}>
+        <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout} disabled={checkOutButtonStatus}>
           <Text style={styles.checkoutText}>
             結帳 ({cartItems.filter(item => item.selected).length})
           </Text>

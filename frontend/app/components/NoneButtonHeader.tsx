@@ -5,6 +5,12 @@ type HeaderProps = {
     title: string; // (e.g., "修改個人訊息")
     back: () => void; 
 }
+/**
+ * Header(無按鈕)
+ * @param title 標題
+ * @param back 上一頁的動作
+ * @returns jsx<View>
+ */
 export const Headers: React.FC<HeaderProps> = ({ title, back }) => {
     return (
       <View style={styles.header}>

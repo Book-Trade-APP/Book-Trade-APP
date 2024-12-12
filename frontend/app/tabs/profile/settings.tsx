@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Button, TextInput} from 'react-native';
+import { Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
@@ -19,7 +20,9 @@ export default function SettingScreen() {
     // 保存邏輯
     setModalVisible(false);
   };
-
+  const closeModal = () => {
+    setModalVisible(false);
+  }
   const handleSaveAll = () => {
     // 保存所有更改
     navigation.goBack();
@@ -62,7 +65,7 @@ export default function SettingScreen() {
           <TouchableOpacity 
             key={item.key} 
             style={styles.infoRow} 
-            onPress={() => handleFieldPress(item.key)}
+            onPress={() => handleFieldPress(item.label)}
           >
             <Text style={styles.infoLabel}>{item.label}</Text>
             <Text style={styles.infoAction}>立刻設定</Text>
@@ -71,14 +74,30 @@ export default function SettingScreen() {
       </View>
 
       {/* Modal for editing field (optional, you can implement later) */}
-      {/* <Modal
+      <Modal
         visible={modalVisible}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={closeModal}
       >
-        // Modal content
-      </Modal> */}
+         <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalText}>{selectedField ? `修改${selectedField}` : '修改資訊'}</Text>
+            <TextInput 
+              style={styles.modalTextInput}
+              placeholder={`輸入新的${selectedField}`}
+            />
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity style={styles.modalButton} onPress={handleSave}>
+                <Text style={styles.modalButtonText}>儲存</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalButton} onPress={closeModal}>
+                <Text style={styles.modalButtonText}>取消</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -145,5 +164,56 @@ const styles = StyleSheet.create({
   infoAction: {
     color: "#007bff",
     fontSize: 14,
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // 半透明背景
+  },
+  modalContainer: {
+    width: 320,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    alignItems: 'center',
+    elevation: 10, // 提升卡片效果
+    shadowColor: '#000', // 添加陰影
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+  },
+  modalText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  modalTextInput: {
+    width: '100%',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  modalButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: '100%',
+  },
+  modalButton: {
+    backgroundColor: '#007bff',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginTop: 10,
+    flex: 1,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

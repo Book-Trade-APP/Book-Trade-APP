@@ -7,6 +7,14 @@ type HeaderProps = {
     navigation: any; 
     Change: () => void; //右上角按鈕
 }
+/**
+ * Header(有按鈕)
+ * @param title 標題
+ * @param text 按鈕文字
+ * @param navigation
+ * @param Change 按鈕動作
+ * @returns jsx<View>
+ */
 export const Header: React.FC<HeaderProps> = ({ title, text, navigation, Change}) => {
     return (
       <View style={styles.header}>
