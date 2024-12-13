@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import axios from "axios"; // 引入 axios 用於 API 請求
-
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { api } from "../../api/api";
+import { asyncPost } from "../../utils/fetch";
 export default function RegisterScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<any>>();
 
   // 用戶輸入狀態
   const [email, setEmail] = useState("");
@@ -13,47 +13,27 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   // 註冊處理函數
-  // const handleRegister = async () => {
-  //   if (!email || !username || !password || !confirmPassword) {
-  //     Alert.alert("錯誤", "請填寫所有欄位");
-  //     return;
-  //   }
-
-  //   if (password !== confirmPassword) {
-  //     Alert.alert("錯誤", "密碼與確認密碼不一致");
-  //     return;
-  //   }
-
-  //   try {
-  //     // 發送 POST 請求到後端 http://自己的ip:8000/register
-  //     const response = await axios.post("http://192.168.106.98:8000/register", { 
-  //       email: email,
-  //       username: username,
-  //       password: password,
-  //     });
-
-  //     if (response.status === 201) {
-  //       Alert.alert("成功", "註冊成功！");
-  //       navigation.goBack(); // 返回登入頁面
-  //     }
-  //   } catch (error) {
-  //       if (axios.isAxiosError(error)) {
-  //         // Axios 錯誤
-  //         if (error.response) {
-  //           if (error.response.status === 409) {
-  //             Alert.alert('錯誤', '帳戶已存在');
-  //           } else {
-  //             Alert.alert('錯誤', '伺服器錯誤，請稍後再試');
-  //           }
-  //         } else {
-  //           Alert.alert('錯誤', '無法連接到伺服器');
-  //         }
-  //       } else {
-  //         // 其他錯誤
-  //         Alert.alert('錯誤', '發生未知錯誤');
-  //       }
-  //     }
-  //   };
+  const handleRegister = async () => {
+    if (email === "" || username ==="" || password === "" || confirmPassword === "") {
+        Alert.alert("請輸入完整資料");
+        return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert("密碼不相符");
+      return;
+    }
+    const respone = await asyncPost(api.register, {
+      "email": email,
+      "username": username,
+      "password": password,
+    })
+    if (respone.status === 200) {
+      Alert.alert("註冊成功")
+      navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+    } else {
+      Alert.alert("Server error")
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -94,7 +74,7 @@ export default function RegisterScreen() {
           value={confirmPassword}
           onChangeText={setConfirmPassword}
         />
-        <TouchableOpacity style={styles.registerButton}>
+        <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
           <Text style={styles.registerButtonText}>建立帳號</Text>
         </TouchableOpacity>
       </View>
