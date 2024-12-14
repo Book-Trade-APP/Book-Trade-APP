@@ -7,42 +7,43 @@ export default function LoginScreen() {
   const navigation = useNavigation<NavigationProp<any>>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const handleLogin = () => {
-    navigation.reset({routes: [{name: "Main"}]});
-  }
+  // const handleLogin = () => {
+  //   navigation.reset({ routes: [{ name: "Main" }] });
+  // }
   //http://自己的ip:8000/login
-  // const handleLogin = async () => {
-  //   try {
-  //     const response = await axios.post('http://192.168.106.98:8000/login', {
-  //       email: email,
-  //       password: password,
-  //     });
-  
-  //     if (response.status === 200) {
-  //       // 登入成功
-  //       Alert.alert('成功', response.data.message);
-  //       navigation.navigate('Main'); // 跳轉到主頁面
-  //     }
-  //   } catch (error) {
-  //     if (axios.isAxiosError(error)) {
-  //       // Axios 錯誤
-  //       if (error.response) {
-  //         if (error.response.status === 404) {
-  //           Alert.alert('錯誤', '帳戶不存在');
-  //         } else if (error.response.status === 401) {
-  //           Alert.alert('錯誤', '帳號/密碼錯誤');
-  //         } else {
-  //           Alert.alert('錯誤', '伺服器錯誤，請稍後再試');
-  //         }
-  //       } else {
-  //         Alert.alert('錯誤', '無法連接到伺服器');
-  //       }
-  //     } else {
-  //       // 其他錯誤
-  //       Alert.alert('錯誤', '發生未知錯誤');
-  //     }
-  //   }
-  // };
+
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post('http://192.168.252.9:8000/login', {
+        email: email,
+        password: password,
+      });
+
+      if (response.status === 200) {
+        // 登入成功
+        Alert.alert('成功', response.data.message);
+        navigation.navigate('Main'); // 跳轉到主頁面
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // Axios 錯誤
+        if (error.response) {
+          if (error.response.status === 404) {
+            Alert.alert('錯誤', '帳戶不存在');
+          } else if (error.response.status === 401) {
+            Alert.alert('錯誤', '帳號/密碼錯誤');
+          } else {
+            Alert.alert('錯誤', '伺服器錯誤，請稍後再試');
+          }
+        } else {
+          Alert.alert('錯誤', '無法連接到伺服器');
+        }
+      } else {
+        // 其他錯誤
+        Alert.alert('錯誤', '發生未知錯誤');
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
