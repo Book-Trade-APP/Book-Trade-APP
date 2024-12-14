@@ -17,9 +17,10 @@
 
 輸入：
 
-```
-[POST] http://127.0.0.1:8000/users/Login
 
+`[POST] http://127.0.0.1:8000/users/login`  
+
+```
 {
     "email": "test@example.com",
     "password": "password123"
@@ -27,23 +28,63 @@
 ```
 
 回傳：
+- code 200
 
-```
-{
-    "data": {
+    ```
+    {
+        "body": {
+            "birthday": "",
+            "email": "test@example.com",
+            "gender": "",
+            "info": "",
+            "password": "YOUR_PASSWORD_AFTER_HASHED",
+            "phone": "",
+            "username": "YOUR_USER_NAME"
+        },
+        "code": 200,
         "message": "登入成功"
-    },
-    "message": "Success"
-}
-```
-
+    }
+    ```
+- code 400
+    ```
+    {
+        "code": 400,
+        "message": "電子郵件、名稱、密碼不得為空",
+        "body": {}
+    }
+    ```
+- code 401
+    ``` 
+    {
+        "code": 401,
+        "message": "帳號/密碼錯誤",
+        "body": {}
+    }
+    ```
+- code 404
+    ```
+    {
+        "code": 404,
+        "message": "帳戶不存在",
+        "body": {}
+    }
+    ```
+- code 500
+    ```
+    {
+        "code": 500,
+        "message": "Server Error",
+        "body": {}
+    }
+    ```
 ### 註冊
 
 輸入：
 
-```
-[POST] http://127.0.0.1:8000/users/register
 
+`[POST] http://127.0.0.1:8000/users/register`  
+
+```
 {
     "email": "test@example.com",
     "username": "testuser",
@@ -52,13 +93,38 @@
 ```
 
 回傳：
-
-```
-{
-    "data": null,
-    "message": "註冊成功"
-}
-```
+- code 201
+    ```
+    {
+        "code": 201,
+        "message": "註冊成功",
+        "body": {}
+    }
+    ```
+- code 400
+    ```
+    {
+        "code": 400,
+        "message": "電子郵件、名稱、密碼不得為空" | "電子郵件格式不正確",
+        "body": {}
+    }
+    ```
+- code 409
+    ```
+    {
+        "code": 409,
+        "message": "此電子郵件已經註冊過",
+        "body": {}
+    }
+    ```
+- code 500
+    ```
+    {
+        "code": 500,
+        "message": "Server Error",
+        "body": {}
+    }
+    ```
 
 ### 新增書籍
 

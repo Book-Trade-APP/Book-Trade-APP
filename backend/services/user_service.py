@@ -30,7 +30,7 @@ class UserService:
             # 電子郵件已經註冊過
             if user_exist:
                 return {
-                    "code":400,
+                    "code":409,
                     "message":"此電子郵件已經註冊過",
                     "body": {}
                 }
@@ -56,7 +56,7 @@ class UserService:
         
         # Success
         return {
-            "code":200,
+            "code":201,
             "message":"註冊成功",
             "body": {}
         }
