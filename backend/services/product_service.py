@@ -12,6 +12,7 @@ class ProductService:
         return True
     
     #! 會重複加資料
+    #todo: 驗證商品格式
     def add_product(self, product_data):
         try:
             # 商品資料不能為空

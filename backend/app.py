@@ -14,7 +14,7 @@ app.config.from_object(Config)
 app.config["MongoDB"] = init_db()
 
 # blueprint
-app.register_blueprint(product_bp, url_prefix="/items")
+app.register_blueprint(product_bp, url_prefix="/products")
 app.register_blueprint(user_bp, url_prefix="/users")
 
 # 全局錯誤處理

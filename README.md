@@ -130,58 +130,96 @@
 
 輸入：
 
+`[POST] http://127.0.0.1:8000/products//AddProducts`
 ```
-[POST] http://127.0.0.1:8000/items/Products
-
 {
-  "id": 1,
-  "name": "Python 入門書籍",
-  "language": "中文",
-  "category": "程式設計",
-  "condiction": "全新",
-  "author": "張三",
-  "publisher": "ABC 出版社",
-  "publishDate": "2024-01-01",
-  "ISBN": 1234567890123,
-  "price": 500,
-  "description": "一本適合初學者的 Python 書籍",
-  "photouri": "https://example.com/book.jpg",
-  "selected": false,
-  "collected": false
+    "name": "書本名稱",
+    "language": "繁體中文",
+    "category": "文學",
+    "condiction": "二手",
+    "author": "作者",
+    "publisher": "出版社",
+    "publishDate": "1945-01-01",
+    "ISBN": 1234567890123,
+    "price": 300,
+    "description":"這是一本書",
+    "photouri":"mple.com/image.jpg"
 }
 ```
 
 回傳：
-
-```
-{
-    "message": "商品新增成功"
-}
-```
-
+- code 201
+    ```
+    {
+        "body": {},
+        "code": 201,
+        "message": "商品新增成功"
+    }
+    ```
+- code 400
+    ```
+    {
+        "body": {},
+        "code": 400,
+        "message": "商品資料是空的" | "商品資料不能包含空值"
+    }
+    ```
+- code 500 (${error}視情況而定)
+    ```
+    {
+        "body": {},
+        "code": 500,
+        "message":"Sever Error(product_service.py): ${error}"
+    }
+    ```
 ### 查詢所有書籍
 
 輸入：
 
-```
-[GET] http://127.0.0.1:8000/items/GetAllProducts
-```
+`[GET] http://127.0.0.1:8000/items/GetAllProducts`
 
 回傳：
 
-```
-"products": [
-        {
-            "ISBN": 9781234567890,
-            "author": "F. Scott Fitzgerald",
-            "date": "1925-04-10",
-            "details": "A classic novel of the Jazz Age.",
-            "id": 1,
-            "image": "https://example.com/book.jpg",
-            "price": 300,
-            "publishes": "Scribner",
-            "quantity": 50,
-            "title": "The Great Gatsby"
-        }
-]
-```
+- code 200
+    ```
+    {
+        "body": [
+            {
+                "ISBN": 1234567890123,
+                "author": "張三",
+                "category": "程式設計",
+                "condiction": "全新",
+                "description": "一本適合初學者的 Python 書籍",
+                "language": "中文",
+                "name": "Java 放棄書籍",
+                "photouri": "https://example.com/book.jpg",
+                "price": 500,
+                "publishDate": "Mon, 01 Jan 2024 00:00:00 GMT",
+                "publisher": "ABC 出版社"
+            },
+            {
+                "ISBN": 1234567890123,
+                "author": "作者",
+                "category": "文學",
+                "condiction": "二手",
+                "description": "這是一本書",
+                "language": "繁體中文",
+                "name": "書本名稱",
+                "photouri": "mple.com/image.jpg",
+                "price": 300,
+                "publishDate": "1945-01-01",
+                "publisher": "出版社"
+            }
+        ],
+        "code": 200,
+        "message": "成功取得所有商品"
+    }
+    ```
+- code 500 (${error}視情況而定)
+    ```
+    {
+        "body": {},
+        "code": 500,
+        "message":"Sever Error(product_service.py): ${error}"
+    }
+    ```
