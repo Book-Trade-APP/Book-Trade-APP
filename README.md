@@ -1,12 +1,26 @@
 # How to use
 
+創建python 虛擬環境  
+
+`python -m venv venv`
+
+啟動虛擬環境(windows)  
+
+`.\venv\Scripts\activate`
+
+ctrl + shift + p  
+    ![選擇python 解譯器](./images/select_interpreter1.png)  
+    
+選擇python 解譯器(VScode)  
+    ![選擇python 解譯器](./images/select_interpreter2.png)
+
 安裝依賴
 
 `pip install or pip3 install`
 
 啟用後端
 
-` python app.py or  python3 app.py`
+`python app.py or  python3 app.py`
 
 
 .env.example 按照指示修改至.env
