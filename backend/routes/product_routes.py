@@ -1,4 +1,12 @@
-from controllers.product_controller import product_bp
+from flask import Blueprint
+from controllers.product_controller import add_product, get_all_products
 
-def register_product_routes(app):
-    app.register_blueprint(product_bp, url_prefix="/items")
+product_bp = Blueprint("product", __name__)
+
+@product_bp.route("/AddProducts", methods=["POST"])
+def add_product_routes():
+    add_product()
+
+@product_bp.route("/GetAllProducts", methods=["GET"])
+def get_all_products_routes():
+    get_all_products()

@@ -1,10 +1,8 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import request, jsonify, current_app
 from services.product_service import ProductService
-from views.response import success_response, error_response
+from utils.response import resp
 
-product_bp = Blueprint("product", __name__)
-
-@product_bp.route("/AddProducts", methods=["POST"])
+# 加入產品
 def add_product():
     product_service = ProductService(current_app.config["MongoDB"])
     try:
@@ -14,7 +12,7 @@ def add_product():
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 
-@product_bp.route("/GetAllProducts", methods=["GET"])
+# 取得所有產品
 def get_all_products():
     product_service = ProductService(current_app.config["MongoDB"])
     try:
