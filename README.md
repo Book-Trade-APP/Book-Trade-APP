@@ -15,8 +15,8 @@ ctrl + shift + p
     ![選擇python 解譯器](./images/select_interpreter2.png)
 
 安裝依賴
-
-`pip install or pip3 install`
+`pip install -r .\requirements.txt` or
+`pip3 install -r .\requirements.txt`
 
 啟用後端
 
