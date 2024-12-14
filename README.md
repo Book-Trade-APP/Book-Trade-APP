@@ -176,7 +176,7 @@
 
 輸入：
 
-`[GET] http://127.0.0.1:8000/items/GetAllProducts`
+`[GET] http://127.0.0.1:8000/products/GetAllProducts`
 
 回傳：
 
