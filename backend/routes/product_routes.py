@@ -5,8 +5,8 @@ product_bp = Blueprint("product", __name__)
 
 @product_bp.route("/AddProducts", methods=["POST"])
 def add_product_routes():
-    add_product()
+    return add_product()
 
 @product_bp.route("/GetAllProducts", methods=["GET"])
 def get_all_products_routes():
-    get_all_products()
+    return get_all_products()

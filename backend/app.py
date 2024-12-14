@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from config import Config, init_db
-# from routes.product_routes import product_bp
+from routes.product_routes import product_bp
 from routes.user_routes import user_bp
 
 app = Flask(__name__)
@@ -14,12 +14,8 @@ app.config.from_object(Config)
 app.config["MongoDB"] = init_db()
 
 # blueprint
-# app.register_blueprint(product_bp, url_prefix="/items")
+app.register_blueprint(product_bp, url_prefix="/items")
 app.register_blueprint(user_bp, url_prefix="/users")
-
-@app.route("/")
-def home():
-    return "<h1>Book Trade APP 後端服務</h1>"
 
 # 全局錯誤處理
 @app.errorhandler(Exception)

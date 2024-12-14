@@ -67,7 +67,7 @@ class UserService:
         if not (email and password):
                 return {
                     "code":400,
-                    "message":"電子郵件、名稱、密碼不得為空",
+                    "message":"電子郵件、密碼不得為空",
                     "body": {}
                 }
 
