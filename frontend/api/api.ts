@@ -1,5 +1,14 @@
-export enum api {
-    //根據"電腦"上的ip進行fetch 手機的預設網址也會是localhost，當使用localhost會無法找到電腦後端
-    login = "http://192.168.248.207:8000/users/Login",
-    register = "http://192.168.248.207:8000/users/Register"
-}
+import dotenv from "dotenv";
+dotenv.config();
+
+const url_path = `http://${process.env.IP}:${process.env.PORT}`;
+
+export const api = {
+    //user
+    login: `${url_path}/users/login`,
+    register: `${url_path}/users/register`,
+    update: `${url_path}/users/update`,
+    //product
+    AddProducts: `${url_path}/products/AddProducts`,
+    GetAllProducts: `${url_path}/products/GetAllProducts`
+};
