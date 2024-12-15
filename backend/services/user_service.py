@@ -1,14 +1,28 @@
+from copy import deepcopy
 import re
+from bson import ObjectId
 from flask_bcrypt import Bcrypt
+from flask_login import login_user
+from utils.User import User
+from flask import current_app 
+
 
 class UserService: 
     def __init__(self, db):
         self.db = db
         self.collection = db["users"]
         self.bcrypt = Bcrypt()
+        
+    # 檢查重要資訊是否有空值，有空=>True   
+    def _check_all_items(self, d: dict) -> bool:
+        validation = ["_id","username","email","password"]
+        for i in validation:
+            if not d[i]:
+                return True
+        return False
 
     # 註冊邏輯
-    def register_user(self, email, username, password):
+    def user_register(self, email, username, password):
         if not (email and username and password):
                 return {
                     "code":400,
@@ -36,10 +50,10 @@ class UserService:
                 }
                 
         except Exception as e:
-            print("登入錯誤:", str(e))
+            print("註冊錯誤:", str(e))
             return {
                 "code": 500,
-                "message": "Server Error",
+                "message": f"Server Error(user_service): {str(e)}",
                 "body": {}
             }
 
@@ -62,7 +76,7 @@ class UserService:
         }
         
     # 登入邏輯
-    def login_user(self, email, password):
+    def user_login(self, email, password):
 
         if not (email and password):
                 return {
@@ -71,47 +85,113 @@ class UserService:
                     "body": {}
                 }
 
-        user = self.collection.find_one({"email": email})
+        user_data = self.collection.find_one({"email": email})
         try:
-            if not user:
+            if not user_data:
                 return {
                     "code": 404,
                     "message": "帳戶不存在",
                     "body": {}
                 }
-            print("checked email")
             
-            if not self.bcrypt.check_password_hash(user["password"], password):
+            if not self.bcrypt.check_password_hash(user_data["password"], password):
                 return {
                     "code": 401,
                     "message": "帳號/密碼錯誤",
                     "body": {}
                 }
-            print("checked password")
 
             # Success
-            # 移除 _id 欄位，不然會出事(500)
-            user.pop("_id")
+            user = User(
+                    user_id=str(user_data["_id"]),
+                    username=user_data["username"],
+                    email=user_data["email"],
+                    password=user_data["password"],
+                    info=user_data["info"],
+                    gender=user_data["gender"],
+                    birthday=user_data["birthday"],
+                    phone=user_data["phone"]
+                )
+            login_user(user)
+
+            user_data["_id"] = str(user_data["_id"])
             return {
                 "code": 200,
                 "message": "登入成功",
-                "body": user
+                "body": user_data
             }
             
         except Exception as e:
             print("登入錯誤:", str(e))
             return {
                 "code": 500,
-                "message": "Server Error",
+                "message": f"Server Error(user_service): {str(e)}",
                 "body": {}
             }
     
-    # 驗證使用者
-    # ! not finish yet
-    def authenticate_user(self, request_data):
-        userName = request_data.get("username")
-        password = request_data.get("password")
-        
-        if not (userName and password):
-            raise ValueError("帳號/密碼不可為空值")
-        
+    # 更新使用者資訊
+    def user_update(self, request_data):
+        try:
+            if self._check_all_items(request_data):
+                return{
+                    "code": 400,
+                    "message":"名稱、密碼、email不能包含空值",
+                    "body": {}
+                }
+            id = request_data.get("_id")
+            user = self.collection.find_one({"_id": ObjectId(id)})
+            if not user:
+                return{
+                    "code": 404,
+                    "message": "帳戶不存在",
+                    "body": {}
+                }
+            userName = request_data.get('username')
+            email = request_data.get('email')
+            password = request_data.get("password")
+            info = request_data.get("info")
+            gender = request_data.get("gender")
+            birthday = request_data.get("birthday")
+            phone = request_data.get("phone")
+
+            hashed_password = self.bcrypt.generate_password_hash(password).decode('utf-8')
+            myquery = {"_id": ObjectId(id)}
+            newvalues = { "$set": {
+                "username": userName,
+                "email": email,
+                "password": hashed_password,
+                "info": info,
+                "gender":gender,
+                "birthday":birthday,
+                "phone":phone
+            } }
+            # Success
+            user_data =self.collection.update_one(myquery,newvalues)
+            # update login manager
+            user = User(
+                    user_id=id,
+                    username=userName,
+                    email=email,
+                    password=password,
+                    info=info,
+                    gender=gender,
+                    birthday=birthday,
+                    phone=phone
+                )
+            login_user(user)
+            return {
+                "code": 200,
+                "message": "更新個人資料成功",
+                "body": {
+                    "matched_count": user_data.matched_count,  # 匹配到的數量
+                    "modified_count": user_data.modified_count  # 修改的數量
+                }
+            }
+            
+        except Exception as e:
+            print("更新個人資料失敗:", str(e))
+            return {
+                "code": 500,
+                "message": f"Server Error(user_service): {str(e)}",
+                "body": {}
+            }

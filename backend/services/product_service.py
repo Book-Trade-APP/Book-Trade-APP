@@ -1,5 +1,3 @@
-import json
-
 class ProductService:
     def __init__(self, db):
         self.collection = db["products"]
@@ -8,8 +6,8 @@ class ProductService:
     def _check_all_items(self, d: dict) -> bool:
         for v in d.values():
             if not v:
-                return False
-        return True
+                return True
+        return False
     
     #! 會重複加資料
     #todo: 驗證商品格式
@@ -23,7 +21,7 @@ class ProductService:
                     "body": {}
                 }
             
-            if not self._check_all_items(product_data):
+            if self._check_all_items(product_data):
                 return {
                     "code": 400,
                     "message":"商品資料不能包含空值",
