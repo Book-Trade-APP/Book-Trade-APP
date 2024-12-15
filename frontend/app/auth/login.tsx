@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert} from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { api } from '../../api/api';
@@ -19,8 +19,15 @@ export default function LoginScreen() {
     })
     if (respone.status === 200) {
       navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+    } else if (
+      respone.status === 400 ||
+      respone.status === 401 ||
+      respone.status === 404 ||
+      respone.status === 500
+    ) {
+      Alert.alert(respone.data.message);
     } else {
-      Alert.alert("帳號或密碼錯誤");
+      Alert.alert("Server Error");
     }
   };
   return (
