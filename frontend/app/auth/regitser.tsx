@@ -14,9 +14,9 @@ export default function RegisterScreen() {
 
   // 註冊處理函數
   const handleRegister = async () => {
-    if (email === "" || username ==="" || password === "" || confirmPassword === "") {
-        Alert.alert("請輸入完整資料");
-        return;
+    if (email === "" || username === "" || password === "" || confirmPassword === "") {
+      Alert.alert("請輸入完整資料");
+      return;
     }
     if (password !== confirmPassword) {
       Alert.alert("密碼不相符");
@@ -27,11 +27,17 @@ export default function RegisterScreen() {
       "username": username,
       "password": password,
     })
-    if (respone.status === 200) {
+    if (respone.status === 201) {
       Alert.alert("註冊成功")
       navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+    } else if (
+      respone.status === 400 ||
+      respone.status === 409 ||
+      respone.status === 500
+    ) {
+      Alert.alert(respone.data.message)
     } else {
-      Alert.alert("Server error")
+      Alert.alert(`Server error`)
     }
   };
 

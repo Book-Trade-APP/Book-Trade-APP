@@ -1,5 +1,6 @@
 from flask import Blueprint
-from controllers.user_contorller import login, register
+from controllers.user_contorller import login, register, logout, update
+from flask_login import login_required
 
 # 初始化 Blueprint
 user_bp = Blueprint("user", __name__)
@@ -13,4 +14,16 @@ def register_route():
 @user_bp.route("/login", methods=["POST"])
 def login_route():
     return login()
+
+# 登出用戶
+@user_bp.route("/logout",methods=["POST"])
+@login_required
+def logout_route():
+    return logout()
+
+# 更新用戶資訊
+@user_bp.route("/update",methods=["POST"])
+# @login_required
+def update_route():
+    return update()
 
