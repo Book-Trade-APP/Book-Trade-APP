@@ -6,6 +6,7 @@ import { Headers } from "../../components/NoneButtonHeader";
 import { RouteProp, useNavigation } from "@react-navigation/native";
 import { CartStackParamList } from "../../navigation/type";
 import { fake_products } from "../../data/fakeProudctList";
+import { Ionicons } from '@expo/vector-icons';
 import { Product } from "../../interface/Product";
 import { useState } from "react";
 
@@ -19,10 +20,13 @@ export default function CheckoutScreen({ route }: { route: CheckoutScreenRoutePr
     const [selectedDates, setSelectedDates] = useState<{ [key: number]: string }>({}); // 每個商品的日期
 
     const { productId: selectedProductIds } = route.params;
-
+    //從fake_products中取得從Cart導航過來的id，所以只會出現已勾選的商品
     const selectedProducts = fake_products.filter(product =>
         selectedProductIds.includes(product.id)
     );
+    //從已勾選的商品中取得每項商品的價格
+    const totalAmount = selectedProducts.reduce((total, product) => total + product.price, 0);
+    const [selectedPayment, setSelectedPayment] = useState("cash"); // 預設為現金
 
     const handleDateChange = (event: any, selectedDate?: Date, productId?: number) => {
         setShowDatePickerFor(null); // 關閉日期選擇器
@@ -90,7 +94,21 @@ export default function CheckoutScreen({ route }: { route: CheckoutScreenRoutePr
             </View>
         </View>
     );
-
+    const renderPaymentOption = (iconName: "cash-outline" | "card-outline" | "checkmark", label: string, value: string) => (
+        <TouchableOpacity
+          style={[
+            styles.paymentOption,
+            selectedPayment === value && styles.selectedPaymentOption,
+          ]}
+          onPress={() => setSelectedPayment(value)}
+        >
+          <Ionicons name={iconName} size={24} />
+          <Text style={styles.paymentLabel}>{label}</Text>
+          {selectedPayment === value && (
+            <Ionicons name="checkmark" size={24} color="green" />
+          )}
+        </TouchableOpacity>
+      );
     return (
         <SafeAreaView style={{flex:1}}>
             <Headers title="結帳" back={() => navigation.goBack()} />
@@ -99,10 +117,17 @@ export default function CheckoutScreen({ route }: { route: CheckoutScreenRoutePr
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderItem}
                 ListEmptyComponent={<Text style={styles.emptyText}>伺服器發生錯誤</Text>}
+                ListFooterComponent={
+                <View style={styles.paymentContainer}>
+                    <Text style={styles.sectionTitle}>付款方式</Text>
+                    {renderPaymentOption("cash-outline", "現金", "cash")}
+                    {renderPaymentOption("card-outline", "信用卡", "creditCard")}
+                </View>}
             />
-            <View>
-                <TouchableOpacity>
-                    <Text>123</Text>
+            <View style={styles.footerContainer}>
+                <Text style={styles.totalAmount}>總金額: ${totalAmount}</Text>
+                <TouchableOpacity style={styles.checkoutButton} onPress={() => null}>
+                <Text style={styles.checkoutButtonText}>結帳</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -181,10 +206,64 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "#999",
     },
-    footerText: {
-        textAlign: 'center',
-        color: '#888',
+    paymentContainer: {
+        backgroundColor: "#ddd",
+        borderRadius: 10,
         marginVertical: 10,
-        fontSize: 14,
+        marginHorizontal: 16,
+        padding: 10,
+    },
+    paymentOption: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 10,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#ddd",
+        marginBottom: 10,
+    },
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: "bold",
+        marginLeft: 10,
+        marginBottom: 10,
+    },
+    selectedPaymentOption: {
+        borderColor: "green",
+        backgroundColor: "#eafeea",
+    },
+    paymentLabel: {
+        flex: 1,
+        marginLeft: 10,
+        fontSize: 16,
+    },
+    cashContainer: {
+        flexDirection: 'row',
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+    },
+    footerContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 16,
+        backgroundColor: "#fff",
+        borderTopWidth: 1,
+        borderColor: "#ddd",
+    },
+    totalAmount: {
+        fontSize: 18,
+        fontWeight: "bold",
+    },
+    checkoutButton: {
+        backgroundColor: "#4CAF50",
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+    borderRadius: 8,
       },
+    checkoutButtonText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "bold",
+    },
 });

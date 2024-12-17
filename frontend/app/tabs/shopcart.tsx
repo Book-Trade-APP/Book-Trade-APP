@@ -97,7 +97,7 @@ export default function ShoppingCartScreen() {
           <Text style={styles.checkboxText}>全選</Text>
         </View>
         <Text style={styles.totalPrice}>總金額 ${calculateTotal()}</Text>
-        <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout} disabled={checkOutButtonStatus}>
+        <TouchableOpacity style={[styles.checkoutButton, !checkOutButtonStatus && styles.activeCheckoutButton]} onPress={handleCheckout} disabled={checkOutButtonStatus}>
           <Text style={styles.checkoutText}>
             結帳 ({cartItems.filter(item => item.selected).length})
           </Text>
@@ -170,9 +170,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   checkoutButton: {
-    backgroundColor: '#a0a0a0',
+    backgroundColor: '#aaa',
     padding: 8,
     borderRadius: 5,
+  },
+  activeCheckoutButton: {
+    backgroundColor: "#4CAF50"
   },
   checkoutText: {
     color: '#fff',
