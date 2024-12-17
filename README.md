@@ -139,6 +139,58 @@ ctrl + shift + p
         "body": {}
     }
     ```
+### 更新使用者資料
+輸入：
+
+`[post] http://127.0.0.1:8000/users/update`
+```
+{
+    "_id":"675e12341234b6f1234af867",
+    "username":"test",
+    "info":"人生好累",
+    "gender":"男",
+    "birthday":"",
+    "phone":"0912345678",
+    "email":"test@gmail.com",
+    "password":"test"
+}
+```
+回傳：
+- code 200
+    ```
+    {
+        "body": {
+            "matched_count": 1,
+            "modified_count": 1
+        },
+        "code": 200,
+        "message": "更新個人資料成功"
+    }
+    ```
+- code 400
+    ```
+    {
+        "code": 400,
+        "message": "請提供正確的 JSON 資料",
+        "body": {}
+    }
+    ```
+- code 404
+    ```
+    {
+        "code": 404,
+        "message": "帳戶不存在",
+        "body": {}
+    }
+    ```
+- code 500
+    ```
+    {
+        "code": 500,
+        "message": "Server Error(user_service): ${error}",
+        "body": {}
+    }
+    ```
 
 ### 新增書籍
 

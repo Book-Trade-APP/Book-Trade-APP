@@ -1,5 +1,5 @@
 /venv
-/images
+/test
 .env
 
 __pycache__/
