@@ -65,7 +65,8 @@ class UserService:
             "info": "",
             "gender":"",
             "birthday":"",
-            "phone":""
+            "phone":"",
+            "cart_id":""
         })
         
         # Success
@@ -113,7 +114,6 @@ class UserService:
                     phone=user_data["phone"]
                 )
             login_user(user)
-
             user_data["_id"] = str(user_data["_id"])
             return {
                 "code": 200,
@@ -153,7 +153,7 @@ class UserService:
             gender = request_data.get("gender")
             birthday = request_data.get("birthday")
             phone = request_data.get("phone")
-
+            
             hashed_password = self.bcrypt.generate_password_hash(password).decode('utf-8')
             myquery = {"_id": ObjectId(id)}
             newvalues = { "$set": {
@@ -167,18 +167,6 @@ class UserService:
             } }
             # Success
             user_data =self.collection.update_one(myquery,newvalues)
-            # update login manager
-            user = User(
-                    user_id=id,
-                    username=userName,
-                    email=email,
-                    password=password,
-                    info=info,
-                    gender=gender,
-                    birthday=birthday,
-                    phone=phone
-                )
-            login_user(user)
             return {
                 "code": 200,
                 "message": "更新個人資料成功",
