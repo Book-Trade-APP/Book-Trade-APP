@@ -6,6 +6,7 @@ from config import Config, init_db
 from routes.product_routes import product_bp
 from routes.user_routes import user_bp
 from utils import User
+from routes.order_routes import order_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -43,6 +44,7 @@ def load_user(user_id):
 # blueprint
 app.register_blueprint(product_bp, url_prefix="/products")
 app.register_blueprint(user_bp, url_prefix="/users")
+app.register_blueprint(order_bp, url_prefix="/orders")
 
 # 全局錯誤處理
 @app.errorhandler(Exception)
