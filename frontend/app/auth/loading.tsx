@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, Image, ActivityIndicator } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { AuthStackParamList } from '../navigation/type';
 
 export default function LoadingScreen() {
-    const navigation = useNavigation<NavigationProp<any>>();
+    const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
     const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
         //setData();

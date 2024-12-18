@@ -13,6 +13,7 @@ export type AuthStackParamList = {
     Login: undefined;
     Register: undefined;
     Loading: undefined;
+    Forget: undefined;
 }
 export type HomeStackParamList = {
     Index: undefined;
