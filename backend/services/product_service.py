@@ -161,9 +161,9 @@ class ProductService:
             product = self.collection.find_one({"_id":ObjectId(product_id)})
             if not (user and product):
                 if not user:
-                    message = "user not find"
+                    message = "User not found"
                 else:
-                    message = "product not find"
+                    message = "Product not found"
                 return {
                     "code": 404,
                     "message":message,
@@ -262,7 +262,7 @@ class ProductService:
                 favorites = self.db["favorites"].find_one({"_id": ObjectId(user_favorites_id)})
                 if not favorites:
                     return {
-                        "code": 500,
+                        "code": 400,
                         "message": "找不到使用者的收藏資料",
                         "body": {}
                     }
