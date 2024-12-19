@@ -2,8 +2,8 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, Ale
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useHideTabBar } from '../../hook/HideTabBar';
-import React, { useState }from 'react';
-import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState }from 'react';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { FormField } from '../../components/FormField';
 import { DropdownField } from '../../components/DropdownField';
 import { Header } from '../../components/ButtonHeader';
@@ -11,6 +11,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { uploadImage } from '../../../utils/fetch';
 import { LoadingModal } from '../../components/LoadingModal';
 import * as ImagePicker from "expo-image-picker";
+import { ProfileStackParamList } from '../../navigation/type';
 
 export default function SellerScreen() {
   const [name, setName] = useState('');
@@ -21,11 +22,15 @@ export default function SellerScreen() {
   const [publisher, setPublisher] = useState('');
   const [publishDate, setPublishDate] = useState<string | undefined>();
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [ISBN, setISBN] = useState('');
-  const [price, setPrice] = useState('');
+  const [ISBN, setISBN] = useState<number>();
+  const [price, setPrice] = useState<number>();
   const [description, setDescription] = useState('');
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false); //提交動畫是否載入
+
+  const route = useRoute<RouteProp<ProfileStackParamList>>();
+  const { product } = route.params || {};
+
   const validateInputs = () => {
     // 書籍名稱檢查
     if (!name) {
@@ -66,7 +71,7 @@ export default function SellerScreen() {
       Alert.alert('錯誤', 'ISBN碼不能為空');
       return false;
     }
-    if (isNaN(Number(ISBN)) || (ISBN.length !== 10 && ISBN.length !== 13)) {
+    if (isNaN(Number(ISBN)) || (ISBN.toString().length !== 10 && ISBN.toString().length !== 13)) {
       Alert.alert('錯誤', 'ISBN碼必須是10或13位整數');
       return false;
     }
@@ -94,7 +99,22 @@ export default function SellerScreen() {
     }
     return true;
   };
-
+  // 初始化商品資料
+  useEffect(() => {
+    if (product) {
+      setName(product.name || '');
+      setLanguage(product.language || '');
+      setCategory(product.category || '');
+      setCondition(product.condiction || '');
+      setAutor(product.author || '');
+      setPublisher(product.publisher || '');
+      setPublishDate(product.publishDate || undefined);
+      setISBN(product.ISBN);
+      setPrice(product.price);
+      setDescription(product.description || '');
+      //setPhotoUri(product.photouri || null); 現在不能執行 因為假資料利用require取得照片位置 無法與Image-Picker所產生的照片 File:///...相容
+    }
+  }, [product]);
   const handlePostProduct = async() => {
     if (validateInputs()) {
       setIsLoading(true);
@@ -173,7 +193,7 @@ export default function SellerScreen() {
     <>
       <SafeAreaView style={styles.container}>
           {/* Header */}
-        <Header title="發佈新商品" text="發佈" navigation={navigation} Change={handlePostProduct}></Header>
+        <Header title={product ? "修改商品" : "發佈新商品"} text={product ? "修改" : "發佈"} navigation={navigation} Change={handlePostProduct}></Header>
         <ScrollView>
           {/* Product Form */}
           <View style={styles.form}>
@@ -218,8 +238,14 @@ export default function SellerScreen() {
               )}
             </TouchableOpacity>
           
-            <FormField label="ISBN碼：" placeholder="請輸入ISBN碼" keyboardType="numeric" value={ ISBN } onChangeText={ setISBN }/>
-            <FormField label="價格：" placeholder="請輸入價格" keyboardType="numeric" value={ price } onChangeText={ setPrice }/>
+            <FormField label="ISBN碼：" placeholder="請輸入ISBN碼" keyboardType="numeric" value={ ISBN?.toString() } onChangeText={(text) => {
+              const numericValue = Number(text); // 將文字轉換為數字
+              setISBN(isNaN(numericValue) ? undefined : numericValue); // 處理無效輸入
+            }}/>
+            <FormField label="價格：" placeholder="請輸入價格" keyboardType="numeric" value={ price?.toString() } onChangeText={(text) => {
+              const numericValue = Number(text); // 將文字轉換為數字
+              setPrice(isNaN(numericValue) ? undefined : numericValue); // 處理無效輸入
+            }}/>
             <FormField label="商品簡介：" placeholder="請輸入商品簡介" value= {description} onChangeText={ setDescription }/>
           </View>
           {/* Image */}
