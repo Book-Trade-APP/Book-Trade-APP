@@ -25,7 +25,7 @@ ctrl + shift + p
 
 .env.example 按照指示修改至.env
 
-## API使用教學
+## User API使用教學
 
 ### 登入
 
@@ -191,6 +191,7 @@ ctrl + shift + p
         "body": {}
     }
     ```
+## Product API使用教學
 
 ### 新增書籍
 
@@ -287,5 +288,193 @@ ctrl + shift + p
         "body": {},
         "code": 500,
         "message":"Sever Error(product_service.py): ${error}"
+    }
+    ```
+
+### 根據ID查詢書籍
+
+輸入：
+
+`[GET] http://127.0.0.1:8000/products/GetOneProduct`
+```
+{
+    "product_id":"123415ffbdb748acda6a1234"
+}
+```
+
+回傳：
+
+- code 200
+    ```
+    {
+        "body": {
+            "ISBN": 1234567890123,
+            "_id": "123415ffbdb748acda6a1234",
+            "author": "作者",
+            "category": "程式設計",
+            "condiction": "二手",
+            "description": "8成新，周老師上課用書",
+            "language": "英文",
+            "name": "JAVA 資料結構",
+            "photouri": "https://example.com/book.jpg",
+            "price": 500,
+            "publishDate": "2024-01-01T00:00:00.000Z",
+            "publisher": "TKU 出版社"
+        },
+        "code": 200,
+        "message": "成功取得該商品"
+    }
+    ```
+- code 500 (${error}視情況而定)
+
+    ```
+    {
+        "body": {},
+        "code": 500,
+        "message":"Sever Error(product_service.py): ${error}"
+    }
+    ```
+### 更新商品資料
+輸入：
+
+`[POST] http://127.0.0.1:8000/products/UpdateProduct`
+```
+{
+    "ISBN": 1234567890123,
+    "_id": "123415ffbdb748acda6a1234",
+    "author": "作者",
+    "category": "電腦資訊",
+    "condiction": "二手",
+    "description": "7成新，黃老師上課用書",
+    "language": "英文",
+    "name": "作業系統",
+    "photouri": "https://example.com/book.jpg",
+    "price": 400,
+    "publishDate": "2024-01-01T00:00:00.000Z",
+    "publisher": "TKU 出版社"
+}
+```
+
+- code 200
+    ```
+    {
+        "body": {
+            "matched_count": 1,
+            "modified_count": 1
+        },
+        "code": 200,
+        "message": "商品更新成功"
+    }
+    ```
+- code 400
+    ```
+    {
+        "body": {
+            "matched_count": 0,
+            "modified_count": 0
+        },
+        "code": 400,
+        "message": "找不到該商品資料"|"商品資料是空的"|"商品資料不能包含空值"
+    }
+    ```
+- code 500 (${error}視情況而定)
+
+    ```
+    {
+        "body": {},
+        "code": 500,
+        "message":"Sever Error(product_service.py): ${error}"
+    }
+    ```
+## 加到購物車
+
+輸入：
+
+`[POST] http://127.0.0.1:8000/products/AddToCart`
+```
+{
+    "user_id":"1234d08a079f7ab34ccd1234",
+    "product_id":"12348dc570408f6683801234"
+}
+```
+
+- code 200
+    ```
+    {
+        "body": {},
+        "code": 200,
+        "message": "商品成功新增到購物車"
+    }
+    ```
+- code 400
+    ```
+    {
+        "body": {},
+        "code": 400,
+        "message": "沒有取得任何資料"|"需要提供user_id 跟 product_id"|"商品重複加入"
+        
+    }
+    ```
+- code 404
+    ```
+    {
+        "body": {},
+        "code": 404,
+        "message": "User not found"|"Product not found"
+    }
+    ```
+- code 500 (${error}視情況而定)
+
+    ```
+    {
+        "body": {},
+        "code": 500,
+        "message":"Sever Error(product_service.py): ${error}"
+    }
+    ```
+## 加入收藏
+
+輸入：
+
+`[POST] http://127.0.0.1:8000/products/AddToFavorites`
+```
+{
+    "user_id":"1234d08a079f7ab34ccd1234",
+    "product_id":"12348dc570408f6683801234"
+}
+```
+
+- code 200
+    ```
+    {
+        "body": {},
+        "code": 200,
+        "message": "商品成功加到收藏"
+    }
+    ```
+- code 400
+    ```
+    {
+        "body": {},
+        "code": 400,
+        "message": "沒有取得任何資料"|"需要提供user_id 跟 product_id"|"商品重複加入"|"找不到使用者的收藏資料"
+        
+    }
+    ```
+- code 404
+    ```
+    {
+        "body": {},
+        "code": 404,
+        "message": "User not found"|"Product not found"
+    }
+    ```
+- code 500 (${error}視情況而定)
+
+    ```
+    {
+        "body": {},
+        "code": 500,
+        "message":"Sever Error(product_service.py): ${error}"|
     }
     ```

@@ -18,6 +18,11 @@ def get_all_products_routes():
 def get_one_product_by_id_routes():
     return get_one_product_by_id_controller()
 
+# 更新商品資料
+@product_bp.route("/UpdateProduct", methods=["POST"])
+def update_product_routes():
+    return update_product_controller()
+
 # 加入購物車
 @product_bp.route("/AddToCart",methods=["POST"])
 def add_to_cart_routes():
