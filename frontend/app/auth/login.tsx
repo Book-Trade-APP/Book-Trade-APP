@@ -1,11 +1,13 @@
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert} from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { api } from '../../api/api';
 import { asyncPost } from '../../utils/fetch';
+import { AuthStackParamList, RootStackParamList } from '../navigation/type';
 
 export default function LoginScreen() {
-  const navigation = useNavigation<NavigationProp<any>>();
+  const AuthNavigation = useNavigation<NavigationProp<AuthStackParamList>>();
+  const RootNavigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const handleLogin = async () => {
@@ -18,16 +20,9 @@ export default function LoginScreen() {
       "password": password
     })
     if (respone.status === 200) {
-      navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
-    } else if (
-      respone.status === 400 ||
-      respone.status === 401 ||
-      respone.status === 404 ||
-      respone.status === 500
-    ) {
-      Alert.alert(respone.data.message);
+      RootNavigation.reset({ index: 0, routes: [{ name: 'Main' }] });
     } else {
-      Alert.alert("Server Error");
+      Alert.alert("帳號或密碼錯誤");
     }
   };
   return (
@@ -55,11 +50,11 @@ export default function LoginScreen() {
           <Text style={styles.loginButtonText}>登入</Text>
         </TouchableOpacity>
         <View style={styles.bottom}>
-          <TouchableOpacity style={styles.registerButton}>
-            <Text style={styles.signupLink} onPress={() => navigation.navigate('Loading')}>忘記密碼?</Text>
+          <TouchableOpacity style={styles.Button}>
+            <Text style={styles.signupLink} onPress={() => AuthNavigation.navigate('Forget')}>忘記密碼?</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.registerButton}>
-            <Text style={styles.signupLink} onPress={() => navigation.navigate('Register')}>註冊帳號</Text>
+          <TouchableOpacity style={styles.Button}>
+            <Text style={styles.signupLink} onPress={() => AuthNavigation.navigate('Register')}>註冊帳號</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -112,7 +107,7 @@ const styles = StyleSheet.create({
     color: '#4CAF50',
     marginTop: 10,
   },
-  registerButton: {
+  Button: {
     justifyContent: 'center',
   },
   bottom: {

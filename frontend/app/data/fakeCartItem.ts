@@ -8,7 +8,7 @@ import { fake_products } from "./fakeProudctList";
  * 全部人的購物車會相同
  * 除非每個人都有自己的資料表?
  */
-export let cartIds: number[] = [1, 3, 5, 7, 9, 11];
+const cartIds: number[] = [1, 3, 5, 7, 9, 11];
 
 // 根據ID提取資料
 export const fake_cartItems: Product[] = cartIds.map(id => {

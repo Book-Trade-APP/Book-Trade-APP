@@ -1,42 +1,68 @@
-import { View, Text, StyleSheet, TextInput, FlatList, Image, Dimensions, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TextInput, FlatList, Image, Dimensions, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Product } from '../interface/Product';
-import { fake_products } from '../data/fakeProudctList';
-import { useState } from 'react';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { Product } from '../interface/Product';
 import { HomeStackParamList } from '../navigation/type';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<HomeStackParamList>>();
-  
   const [searchText, setSearchText] = useState('');
-  const [filteredProducts, setFilteredProducts] = useState(fake_products);
+  const [products, setProducts] = useState([]); // 存放所有商品
+  const [filteredProducts, setFilteredProducts] = useState([]); // 搜索後的商品
+
+  // 從 API 獲取數據
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('http://192.168.248.207:8000/products/GetAllProducts');
+        const data = await response.json();
+        if (data.code === 200) {
+          setProducts(data.body);
+          setFilteredProducts(data.body); // 初始值與所有商品相同
+        } else {
+          Alert.alert('錯誤', data.message || '無法獲取商品數據');
+        }
+      } catch (error) {
+        Alert.alert('錯誤', '無法連接到伺服器');
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const handleSearch = (text: string) => {
     setSearchText(text);
     if (text.trim() === '') {
-      setFilteredProducts(fake_products);
+      setFilteredProducts(products);
     } else {
-      setFilteredProducts(fake_products.filter((product) =>
-        product.name.toLowerCase().includes(text.toLowerCase())
-      ));
+      setFilteredProducts(
+        products.filter((product: Product) =>
+          product.name.toLowerCase().includes(text.toLowerCase())
+        )
+      );
     }
   };
 
   const clearSearch = () => {
     setSearchText('');
-    setFilteredProducts(fake_products);
+    setFilteredProducts(products);
   };
 
   const renderItem = ({ item }: { item: Product }) => (
-    <TouchableOpacity 
-      style={styles.productContainer} 
-      onPress={() => navigation.navigate('Product', { productId: item.id, source: 'Home' })}
+    <TouchableOpacity
+      style={styles.productContainer}
+      onPress={() =>
+        navigation.navigate('Product', { productId: item.id, source: 'Home' })
+      }
     >
-      <Image source={item.photouri} style={styles.productImage} />
+      <Image
+        source={{ uri: item.photouri }}
+        style={styles.productImage}
+      />
       <View style={styles.detailContainer}>
         <Text style={styles.productTitle}>{item.name}</Text>
         <Text style={styles.productPrice}>${item.price}</Text>
@@ -65,7 +91,7 @@ export default function HomeScreen() {
 
       <FlatList
         data={filteredProducts}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item._id.toString()}
         renderItem={renderItem}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
@@ -118,7 +144,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     padding: 10,
     borderRadius: 8,
-    width: width - 20, // 寬度與螢幕一致
+    width: width - 20,
     alignSelf: 'center',
   },
   productImage: {
@@ -138,6 +164,11 @@ const styles = StyleSheet.create({
   productPrice: {
     fontSize: 14,
     color: 'red',
+  },
+  updateText: {
+    marginTop: 10,
+    color: 'blue',
+    fontSize: 14,
   },
   footerText: {
     textAlign: 'center',

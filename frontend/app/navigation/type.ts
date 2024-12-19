@@ -1,3 +1,5 @@
+import { Product } from "../interface/Product";
+
 export type RootStackParamList = {
     Auth: undefined; //登入/註冊系統頁面 (最外層)
     Main: undefined; //主畫面連接底部導瀏覽
@@ -13,10 +15,11 @@ export type AuthStackParamList = {
     Login: undefined;
     Register: undefined;
     Loading: undefined;
+    Forget: undefined;
 }
 export type HomeStackParamList = {
     Index: undefined;
-    Product: { productId: number, source: String};
+    Product: { productId: string, source: String};
 }
 export type CartStackParamList = {
     Index: undefined;
@@ -29,7 +32,7 @@ export type ProfileStackParamList = {
     Pending: undefined;
     Completed: undefined;
     Evaluate: undefined;
-    Seller: undefined;
+    Seller: {product?: Product};
     Edit: undefined;
     Report: undefined;
 }
