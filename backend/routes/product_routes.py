@@ -1,5 +1,5 @@
 from flask import Blueprint
-from controllers.product_controller import add_product_controller, get_all_products_controller, add_to_cart_controller, add_to_favorites_controller
+from controllers.product_controller import *
 
 product_bp = Blueprint("product", __name__)
 
@@ -13,6 +13,11 @@ def add_product_routes():
 def get_all_products_routes():
     return get_all_products_controller()
 
+# 根據product_id, 取得一筆資料
+@product_bp.route("/GetOneProduct", methods=["GET"])
+def get_one_product_by_id_routes():
+    return get_one_product_by_id_controller()
+
 # 加入購物車
 @product_bp.route("/AddToCart",methods=["POST"])
 def add_to_cart_routes():
@@ -22,5 +27,3 @@ def add_to_cart_routes():
 @product_bp.route("/AddToFavorites",methods=["POST"])
 def add_to_favorites_routes():
     return add_to_favorites_controller()
-
-# 交易

@@ -41,7 +41,7 @@ class ProductService:
             # Success
             self.collection.insert_one(product_data)
             return {
-                "code": 201,
+                "code": 200,
                 "message":"商品新增成功",
                 "body": {}
             }
@@ -63,6 +63,25 @@ class ProductService:
                 "code":200,
                 "message":"成功取得所有商品",
                 "body": converted_body
+            }
+            
+        except Exception as e:
+            return {
+                "code": 500,
+                "message":f"Sever Error(product_service.py): {str(e)}",
+                "body": {}
+            }
+            
+    # 根據product_id, 取得一筆資料
+    def get_one_product_by_id(self,data: str):
+        try:
+            product_id = data["product_id"]
+            product = self.collection.find_one({"_id": ObjectId(product_id)})
+            product["_id"] = str(product["_id"])
+            return {
+                "code":200,
+                "message":"成功取得該商品",
+                "body": product
             }
             
         except Exception as e:
@@ -104,7 +123,7 @@ class ProductService:
                     "body": {}
                 }
             # 確定使用者有沒有購物車
-            user_cart_id = user.get("cart_id",[]) # ObjectId()
+            user_cart_id = user.get("cart_id","") 
             # 有存在
             if user_cart_id:
                 # 加入product_id list中
@@ -123,6 +142,12 @@ class ProductService:
                         {"_id": ObjectId(user_cart_id)},
                         {"$set": {"product_id": cart_product_ids}}
                     )
+                else:
+                    return {
+                        "code": 400,
+                        "message": "商品重複加入",
+                        "body": {}
+                    }
                 
             # 不存在
             else:
@@ -132,7 +157,7 @@ class ProductService:
                     "product_id": [ObjectId(product_id)]
                 }
                 result = self.db["cart"].insert_one(new_cart)
-                new_cart_id = result.inserted_id
+                new_cart_id = str(result.inserted_id) # str
 
                 # 更新使用者的 cart_id
                 self.db["users"].update_one(
@@ -152,5 +177,87 @@ class ProductService:
                 "body": {}
             }
     # 加入收藏
-    def add_to_favorite():
-        pass
+    def add_to_favorite(self, request_data):
+        try:
+            if not request_data:
+                return {
+                    "code": 400,
+                    "message":"沒有取得任何資料",
+                    "body": {}
+                }
+                
+            user_id = request_data["user_id"]
+            product_id = request_data["product_id"]
+            if not (user_id and product_id):
+                return {
+                    "code": 400,
+                    "message":"需要提供user_id 跟 product_id",
+                    "body": {}
+                }
+                
+            user = self.db["users"].find_one({"_id": ObjectId(user_id)})
+            product = self.collection.find_one({"_id":ObjectId(product_id)})
+            if not (user and product):
+                if not user:
+                    message = "user not find"
+                else:
+                    message = "product not find"
+                return {
+                    "code": 404,
+                    "message":message,
+                    "body": {}
+                }
+            # 確定使用者有沒有收藏資料
+            user_favorites_id = user.get("favorites_id","")
+            # 有存在
+            if user_favorites_id:
+                # 加入product_id list中
+                favorites = self.db["favorites"].find_one({"_id": ObjectId(user_favorites_id)})
+                if not favorites:
+                    return {
+                        "code": 500,
+                        "message": "找不到使用者的收藏資料",
+                        "body": {}
+                    }
+                favorites_product_ids = favorites.get("product_id")
+                # 更新favorites
+                if ObjectId(product_id) not in favorites_product_ids:
+                    favorites_product_ids.append(ObjectId(product_id))
+                    self.db["favorites"].update_one(
+                        {"_id": ObjectId(user_favorites_id)},
+                        {"$set": {"product_id": favorites_product_ids}}
+                    )
+                else:
+                    return {
+                        "code": 400,
+                        "message": "商品重複加入",
+                        "body": {}
+                    }
+                
+            # 不存在
+            else:
+                # 創建使用者收藏
+                new_favorites = {
+                    "user_id": ObjectId(user_id),
+                    "product_id": [ObjectId(product_id)]
+                }
+                result = self.db["favorites"].insert_one(new_favorites)
+                new_favorites_id = str(result.inserted_id)# 存進去用str
+
+                # 更新使用者的 favorites_id
+                self.db["users"].update_one(
+                    {"_id": ObjectId(user_id)},
+                    {"$set": {"favorites_id": new_favorites_id}}
+                )
+            return {
+                "code": 200,
+                "message": "商品成功加到收藏",
+                "body": {}
+            }
+            
+        except Exception as e:
+            return {
+                "code": 500,
+                "message":f"Sever Error(product_service.py): {str(e)}",
+                "body": {}
+            }
