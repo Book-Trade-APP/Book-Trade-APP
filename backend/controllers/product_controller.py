@@ -29,6 +29,21 @@ def get_all_products_controller():
             "message": str(e),
             "body": {}
         }), 500
+        
+# 根據product_id, 取得一筆資料     
+def get_one_product_by_id_controller():
+    product_service = ProductService(current_app.config["MongoDB"])
+    try:
+        data = request.json
+        response = product_service.get_one_product_by_id(data)
+        return jsonify(response), response["code"]
+
+    except Exception as e:
+        return jsonify({
+            "code": 500,
+            "message": str(e),
+            "body": {}
+        }), 500
 
 # 加入購物車
 def add_to_cart_controller():

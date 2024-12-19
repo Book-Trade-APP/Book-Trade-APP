@@ -66,7 +66,8 @@ class UserService:
             "gender":"",
             "birthday":"",
             "phone":"",
-            "cart_id":""
+            "cart_id":"",
+            "favorites_id":""
         })
         
         # Success
