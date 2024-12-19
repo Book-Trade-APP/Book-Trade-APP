@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { Product } from '../interface/Product';
 import { HomeStackParamList } from '../navigation/type';
+import { api } from '../../api/api';
 
 const { width } = Dimensions.get('window');
 
@@ -18,7 +19,7 @@ export default function HomeScreen() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('http://192.168.248.207:8000/products/GetAllProducts');
+        const response = await fetch(api.GetAllProducts);
         const data = await response.json();
         if (data.code === 200) {
           setProducts(data.body);
@@ -56,7 +57,7 @@ export default function HomeScreen() {
     <TouchableOpacity
       style={styles.productContainer}
       onPress={() =>
-        navigation.navigate('Product', { productId: item.id, source: 'Home' })
+        navigation.navigate('Product', { productId: item._id, source: 'Home' })
       }
     >
       <Image
