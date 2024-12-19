@@ -19,7 +19,7 @@ export type AuthStackParamList = {
 }
 export type HomeStackParamList = {
     Index: undefined;
-    Product: { productId: number, source: String};
+    Product: { productId: string, source: String};
 }
 export type CartStackParamList = {
     Index: undefined;
