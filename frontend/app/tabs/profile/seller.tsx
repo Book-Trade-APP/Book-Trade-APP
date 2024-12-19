@@ -8,6 +8,8 @@ import { FormField } from '../../components/FormField';
 import { DropdownField } from '../../components/DropdownField';
 import { Header } from '../../components/ButtonHeader';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { uploadImage } from '../../../utils/fetch';
+import { LoadingModal } from '../../components/LoadingModal';
 import * as ImagePicker from "expo-image-picker";
 
 export default function SellerScreen() {
@@ -23,6 +25,7 @@ export default function SellerScreen() {
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
   const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false); //提交動畫是否載入
   const validateInputs = () => {
     // 書籍名稱檢查
     if (!name) {
@@ -89,9 +92,25 @@ export default function SellerScreen() {
       Alert.alert('錯誤', '請新增一張照片');
       return false;
     }
-    Alert.alert('成功', '商品上架成功');
     return true;
   };
+
+  const handlePostProduct = async() => {
+    if (validateInputs()) {
+      setIsLoading(true);
+      try {
+        const response = await uploadImage(name, photoUri as string); //會取得照片url
+        setIsLoading(false);
+        if (response) {
+          Alert.alert('成功', `商品上架成功\n${response}`);
+          navigation.goBack();
+        }
+      } catch (error) {
+        setIsLoading(false);
+        Alert.alert("錯誤", "商品上架失敗");
+      }
+    }
+  }
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
     setShowDatePicker(false); // 關閉日期選擇器
@@ -144,7 +163,6 @@ export default function SellerScreen() {
       },
       { text: '取消', style: 'cancel' },
     ];
-  
     Alert.alert('新增照片', '請選擇照片來源', options);
   };
 
@@ -152,69 +170,75 @@ export default function SellerScreen() {
   const navigation = useNavigation();
   useHideTabBar();
   return (
-    <SafeAreaView style={styles.container}>
-        {/* Header */}
-      <Header title="發佈新商品" text="發佈" navigation={navigation} Change={validateInputs}></Header>
-      <ScrollView>
-        {/* Product Form */}
-        <View style={styles.form}>
-          <FormField label="書籍名稱：" placeholder="請輸入書籍名稱" value={ name } onChangeText={ setName }/>
-          <DropdownField
-            label="書籍語言："
-            selectedValue={language}
-            onValueChange={(value) => setLanguage(value)}
-            items={['中文', '英文']}
-          />
-          <DropdownField
-            label="書籍類別："
-            selectedValue={category}
-            onValueChange={(value) => setCategory(value)}
-            items={[
-              '文學', '藝術', '哲學宗教', '人文史地', '自然科普',
-              '社會科學', '商業理財', '語言學習', '醫療保健',
-              '旅遊休閒', '電腦資訊', '考試用書', '動畫/遊戲',
-            ]}
-          />
-          <DropdownField
-            label="書籍狀態："
-            selectedValue={condition}
-            onValueChange={(value) => setCondition(value)}
-            items={['全新', '二手']}
-          />
-          <FormField label="作者：" placeholder="請輸入作者名稱" value={ author } onChangeText={ setAutor }/>
-          <FormField label="出版社：" placeholder="請輸入出版社名稱" value={ publisher } onChangeText={ setPublisher }/>
-          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-            <FormField
-              label="出版日期："
-              value={publishDate}
-              editable= {false}
+    <>
+      <SafeAreaView style={styles.container}>
+          {/* Header */}
+        <Header title="發佈新商品" text="發佈" navigation={navigation} Change={handlePostProduct}></Header>
+        <ScrollView>
+          {/* Product Form */}
+          <View style={styles.form}>
+            <FormField label="書籍名稱：" placeholder="請輸入書籍名稱" value={ name } onChangeText={ setName }/>
+            <DropdownField
+              label="書籍語言："
+              selectedValue={language}
+              onValueChange={(value) => setLanguage(value)}
+              items={['中文', '英文']}
             />
-            {showDatePicker && (
-              <DateTimePicker
-                value={new Date()}
-                mode="date"
-                display='spinner'
-                onChange={handleDateChange}
+            <DropdownField
+              label="書籍類別："
+              selectedValue={category}
+              onValueChange={(value) => setCategory(value)}
+              items={[
+                '文學', '藝術', '哲學宗教', '人文史地', '自然科普',
+                '社會科學', '商業理財', '語言學習', '醫療保健',
+                '旅遊休閒', '電腦資訊', '考試用書', '動畫/遊戲',
+              ]}
+            />
+            <DropdownField
+              label="書籍狀態："
+              selectedValue={condition}
+              onValueChange={(value) => setCondition(value)}
+              items={['全新', '二手']}
+            />
+            <FormField label="作者：" placeholder="請輸入作者名稱" value={ author } onChangeText={ setAutor }/>
+            <FormField label="出版社：" placeholder="請輸入出版社名稱" value={ publisher } onChangeText={ setPublisher }/>
+            <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+              <FormField
+                label="出版日期："
+                value={publishDate}
+                editable= {false}
               />
-            )}
-          </TouchableOpacity>
-         
-          <FormField label="ISBN碼：" placeholder="請輸入ISBN碼" keyboardType="numeric" value={ ISBN } onChangeText={ setISBN }/>
-          <FormField label="價格：" placeholder="請輸入價格" keyboardType="numeric" value={ price } onChangeText={ setPrice }/>
-          <FormField label="商品簡介：" placeholder="請輸入商品簡介" value= {description} onChangeText={ setDescription }/>
-        </View>
-        {/* Image */}
-        <TouchableOpacity style={styles.imageButtonContainer} onPress={handleAddPhoto}>
-          <Ionicons name="images-outline" size={24} color={"#007bff"} />
-          <Text style={styles.imageText}>{photoUri ? "變更照片" : "新增照片"}</Text>
-        </TouchableOpacity>
-        {photoUri && (
-          <View style={styles.imageContainer}>
-            <Image source={{ uri: photoUri }} style={styles.image} />
+              {showDatePicker && (
+                <DateTimePicker
+                  value={new Date()}
+                  mode="date"
+                  display='spinner'
+                  onChange={handleDateChange}
+                />
+              )}
+            </TouchableOpacity>
+          
+            <FormField label="ISBN碼：" placeholder="請輸入ISBN碼" keyboardType="numeric" value={ ISBN } onChangeText={ setISBN }/>
+            <FormField label="價格：" placeholder="請輸入價格" keyboardType="numeric" value={ price } onChangeText={ setPrice }/>
+            <FormField label="商品簡介：" placeholder="請輸入商品簡介" value= {description} onChangeText={ setDescription }/>
           </View>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+          {/* Image */}
+          <TouchableOpacity style={styles.imageButtonContainer} onPress={handleAddPhoto}>
+            <Ionicons name="images-outline" size={24} color={"#007bff"} />
+            <Text style={styles.imageText}>{photoUri ? "變更照片" : "新增照片"}</Text>
+          </TouchableOpacity>
+          {photoUri && (
+            <View style={styles.imageContainer}>
+              <Image source={{ uri: photoUri }} style={styles.image} />
+            </View>
+          )}
+        </ScrollView>
+      </SafeAreaView>
+      <LoadingModal 
+          isLoading={isLoading} 
+          message="正在上傳商品..." 
+      />
+    </>
   );
 }
 const styles = StyleSheet.create({
@@ -266,6 +290,7 @@ const styles = StyleSheet.create({
   },
   image: {
     borderRadius: 10,
+    marginBottom: 50,
     width: 350,
     height: 350,
   }

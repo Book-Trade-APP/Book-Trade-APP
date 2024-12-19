@@ -3,8 +3,9 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from "reac
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { api } from "../../api/api";
 import { asyncPost } from "../../utils/fetch";
+import { AuthStackParamList } from "../navigation/type";
 export default function RegisterScreen() {
-  const navigation = useNavigation<NavigationProp<any>>();
+  const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
 
   // 用戶輸入狀態
   const [email, setEmail] = useState("");
@@ -14,9 +15,9 @@ export default function RegisterScreen() {
 
   // 註冊處理函數
   const handleRegister = async () => {
-    if (email === "" || username === "" || password === "" || confirmPassword === "") {
-      Alert.alert("請輸入完整資料");
-      return;
+    if (email === "" || username ==="" || password === "" || confirmPassword === "") {
+        Alert.alert("請輸入完整資料");
+        return;
     }
     if (password !== confirmPassword) {
       Alert.alert("密碼不相符");
@@ -27,25 +28,16 @@ export default function RegisterScreen() {
       "username": username,
       "password": password,
     })
-    if (respone.status === 201) {
+    if (respone.status === 200) {
       Alert.alert("註冊成功")
       navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-    } else if (
-      respone.status === 400 ||
-      respone.status === 409 ||
-      respone.status === 500
-    ) {
-      Alert.alert(respone.data.message)
     } else {
-      Alert.alert(`Server error`)
+      Alert.alert("Server error")
     }
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.backButtonText}>返回</Text>
-      </TouchableOpacity>
       <View style={styles.logo}>
         <Text style={styles.logoText}>註冊</Text>
       </View>
@@ -82,6 +74,11 @@ export default function RegisterScreen() {
         />
         <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
           <Text style={styles.registerButtonText}>建立帳號</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.loginContainer}>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.login} onPress={() => navigation.navigate('Login')}>返回登入</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -125,15 +122,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  backButton: {
-    position: "absolute",
-    top: 50,
-    left: 20,
-    padding: 10,
+  button: {
+    justifyContent: 'center',
   },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#4CAF50",
+  login: {
+    color: '#4CAF50',
+    marginTop: 10,
   },
+  loginContainer: {
+    alignItems: 'center',
+  }
 });
