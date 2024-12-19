@@ -78,7 +78,7 @@ class ProductService:
             if not request_data:
                 return {
                     "code": 400,
-                    "message":f"沒有取得任何資料",
+                    "message":"沒有取得任何資料",
                     "body": {}
                 }
                 
@@ -87,12 +87,12 @@ class ProductService:
             if not (user_id and product_id):
                 return {
                     "code": 400,
-                    "message":f"需要提供user_id 跟 product_id",
+                    "message":"需要提供user_id 跟 product_id",
                     "body": {}
                 }
                 
-            user = self.db["users"].find({"_id": ObjectId(user_id)})
-            product = self.collection.find({"_id":ObjectId(product_id)})
+            user = self.db["users"].find_one({"_id": ObjectId(user_id)})
+            product = self.collection.find_one({"_id":ObjectId(product_id)})
             if not (user and product):
                 if not user:
                     message = "user not find"
@@ -104,20 +104,44 @@ class ProductService:
                     "body": {}
                 }
             # 確定使用者有沒有購物車
-            user_cart = user["cart_id"]
-            cart_product_id = list(self.db["cart"].find({"_id": ObjectId(user_cart)})) # must be list
+            user_cart_id = user.get("cart_id",[]) # ObjectId()
             # 有存在
-            if cart_product_id != [] or cart_product_id != None:
-                new_product_id = cart_product_id + product_id
-                self.db["cart"].update_one({"_id": ObjectId(user_cart)},{"$set":{"product_id":new_product_id}})
+            if user_cart_id:
+                # 加入product_id list中
+                cart = self.db["cart"].find_one({"_id": ObjectId(user_cart_id)})
+                if not cart:
+                    return {
+                        "code": 500,
+                        "message": "無法找到購物車資料",
+                        "body": {}
+                    }
+                cart_product_ids = cart.get("product_id")
+                # 更新cart
+                if ObjectId(product_id) not in cart_product_ids:
+                    cart_product_ids.append(ObjectId(product_id))
+                    self.db["cart"].update_one(
+                        {"_id": ObjectId(user_cart_id)},
+                        {"$set": {"product_id": cart_product_ids}}
+                    )
+                
             # 不存在
             else:
-                self.db["cart"].insert_one({"user_id":ObjectId(user_id),"product_id":ObjectId(product_id)})
-                cart_id = self.db["cart"].find({"user_id":ObjectId(user_id)})["_id"]
-                self.db["users"].update_one({"_id": ObjectId(user_id)}, {'$set':{"cart_id":cart_id}})
+                # 創建新購物車
+                new_cart = {
+                    "user_id": ObjectId(user_id),
+                    "product_id": [ObjectId(product_id)]
+                }
+                result = self.db["cart"].insert_one(new_cart)
+                new_cart_id = result.inserted_id
+
+                # 更新使用者的 cart_id
+                self.db["users"].update_one(
+                    {"_id": ObjectId(user_id)},
+                    {"$set": {"cart_id": new_cart_id}}
+                )
             return {
-                "code": 201,
-                "message":"成功加入購物車",
+                "code": 200,
+                "message": "商品成功新增到購物車",
                 "body": {}
             }
             
@@ -127,12 +151,6 @@ class ProductService:
                 "message":f"Sever Error(product_service.py): {str(e)}",
                 "body": {}
             }
-            
-# {
-#     "user_id":"675eef76f84cb6f6196af867",
-#     "product_id":"675958f77edaae5261c7adea"
-# }
-    
     # 加入收藏
     def add_to_favorite():
         pass
