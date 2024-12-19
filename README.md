@@ -295,12 +295,7 @@ ctrl + shift + p
 
 輸入：
 
-`[GET] http://127.0.0.1:8000/products/GetOneProduct`
-```
-{
-    "product_id":"123415ffbdb748acda6a1234"
-}
-```
+`[GET] http://127.0.0.1:8000/products/GetOneProduct?product_id=123458f77edaae5261c71234`
 
 回傳：
 

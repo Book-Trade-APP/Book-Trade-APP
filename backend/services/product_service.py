@@ -73,10 +73,16 @@ class ProductService:
             }
             
     # 根據product_id, 取得一筆資料
-    def get_one_product_by_id(self,data: str):
-        try:
-            product_id = data["product_id"]
+    def get_one_product_by_id(self, product_id: str):
+        try:    
             product = self.collection.find_one({"_id": ObjectId(product_id)})
+            if not product:
+                return {
+                    "code": 404,
+                    "message": "找不到該商品",
+                    "body": {}
+                }
+                
             product["_id"] = str(product["_id"])
             return {
                 "code":200,

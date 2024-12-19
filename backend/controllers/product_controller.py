@@ -34,7 +34,7 @@ def get_all_products_controller():
 def get_one_product_by_id_controller():
     product_service = ProductService(current_app.config["MongoDB"])
     try:
-        data = request.json
+        data = request.args.get("product_id")
         response = product_service.get_one_product_by_id(data)
         return jsonify(response), response["code"]
 
