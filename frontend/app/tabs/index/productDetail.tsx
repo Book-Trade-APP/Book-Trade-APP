@@ -3,67 +3,80 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView} from "react-native-safe-area-context";
 import { useHideTabBar } from "../../hook/HideTabBar";
 import { useRoute, useNavigation, RouteProp, NavigationProp } from "@react-navigation/native";
-import { fake_products } from "../../data/fakeProudctList";
 import { HomeStackParamList, MainTabParamList } from "../../navigation/type";
 import React, { useEffect, useState } from "react";
+import { api } from "../../../api/api";
+import { asyncGet } from "../../../utils/fetch";
+import { Product } from "../../interface/Product";
 export default function ProductDetailScreen() {
-  useHideTabBar();
+  const tabBarHidden = useHideTabBar(); // 確保此 Hook 在組件頂層調用
   const route = useRoute<RouteProp<HomeStackParamList, "Product">>();
   const navigation = useNavigation<NavigationProp<MainTabParamList>>();
   const [isCollected, setIsCollected] = useState(false);
+  const [product, setProduct] = useState<Product>();
   const { productId, source } = route.params;
-  const product = fake_products.find((p) => p.id === productId);
-  const handleCollected = () => {
-    /* add/remove product to shop cart*/
-    setIsCollected(!isCollected)
-    {!isCollected ? ToastAndroid.show('商品已加入收藏', ToastAndroid.SHORT) : ToastAndroid.show('商品已取消收藏', ToastAndroid.SHORT)}
-  }
-  const handleGoBack = () => {
-    if (source === 'Cart') {
-        // 如果是從購物車來的，返回到購物車
-        navigation.reset({
-          routes: [{ name: 'Cart' }]
-        });
-    }else if(source === 'Collection'){
-      navigation.reset({
-        routes: [{name: 'Profile', params: {screen: 'Collection'}}]
-      })
-    } 
-      
-    else {
-        // 否則使用默認的返回邏輯
-        navigation.goBack();
+
+  useEffect(() => {
+    fetchProduct();
+  }, []);
+
+  const fetchProduct = async () => {
+    try {
+      const response = await asyncGet(`${api.GetOneProduct}?product_id=${productId}`);
+      if (response.code === 200) {
+        setProduct(response.body);
+      } else {
+        console.log("Failed to fetch", response);
+      }
+    } catch (error) {
+      console.log("API 調用失敗", error);
     }
   };
+
+  const handleCollected = () => {
+    setIsCollected(!isCollected);
+    ToastAndroid.show(
+      !isCollected ? "商品已加入收藏" : "商品已取消收藏",
+      ToastAndroid.SHORT
+    );
+  };
+
+  const handleGoBack = () => {
+    if (source === "Cart") {
+      navigation.reset({
+        routes: [{ name: "Cart" }],
+      });
+    } else if (source === "Collection") {
+      navigation.reset({
+        routes: [{ name: "Profile", params: { screen: "Collection" } }],
+      });
+    } else {
+      navigation.goBack();
+    }
+  };
+
+  const handleAddToCart = () => {
+    ToastAndroid.show("已新增至購物車", ToastAndroid.SHORT);
+  };
+
+  const handleBuy = () => {
+    navigation.reset({ routes: [{ name: "Cart" }] });
+  };
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", () => true);
+    return () => backHandler.remove();
+  }, []);
 
   if (!product) {
     return null; // 處理無效 ID
   }
-
-  const handleAddToCart = () => {
-    /* add product to cartIds*/
-    ToastAndroid.show("已新增至購物車", ToastAndroid.SHORT);
-  }
-  const handleBuy = () => {
-    /* add product to cartIds and show shopCartScreen*/
-    navigation.reset({routes: [{name: 'Cart'}]});
-  }
-
-  useEffect(() => {
-    // 禁用返回按钮
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress', 
-      () => true // 返回 true 表示阻止默認的返回行為
-    );
-    // 清理監聽器
-    return () => backHandler.remove();
-  }, []);
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
         {/* Product Image */}
         <View style={styles.imageContainer}>
-          <Image source={product.photouri} style={styles.productImage} />
+          <Image source={{uri: product.photouri}} style={styles.productImage} />
         </View>
 
         {/* Product Details */}
@@ -134,7 +147,7 @@ const styles = StyleSheet.create({
   productImage: {
     flex: 1,
     width: '100%',
-    height: 300,
+    height: 400,
     resizeMode: 'cover',
   },
   detailsContainer: {
