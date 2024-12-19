@@ -8,16 +8,17 @@ import { FormField } from '../../components/FormField';
 import { DropdownField } from '../../components/DropdownField';
 import { Header } from '../../components/ButtonHeader';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { uploadImage } from '../../../utils/fetch';
+import { asyncGet, asyncPost, uploadImage } from '../../../utils/fetch';
 import { LoadingModal } from '../../components/LoadingModal';
 import * as ImagePicker from "expo-image-picker";
 import { ProfileStackParamList } from '../../navigation/type';
+import { api } from '../../../api/api';
 
 export default function SellerScreen() {
   const [name, setName] = useState('');
   const [language, setLanguage] = useState('');
   const [category, setCategory] = useState('');
-  const [condition, setCondition] = useState('');
+  const [condiction, setcondiction] = useState('');
   const [author, setAutor] = useState('');
   const [publisher, setPublisher] = useState('');
   const [publishDate, setPublishDate] = useState<string | undefined>();
@@ -48,7 +49,7 @@ export default function SellerScreen() {
       return false;
     }
     // 書籍狀態檢查
-    if (!condition) {
+    if (!condiction) {
       Alert.alert('錯誤', '請選擇書籍狀態');
       return false;
     }
@@ -105,7 +106,7 @@ export default function SellerScreen() {
       setName(product.name || '');
       setLanguage(product.language || '');
       setCategory(product.category || '');
-      setCondition(product.condiction || '');
+      setcondiction(product.condiction || '');
       setAutor(product.author || '');
       setPublisher(product.publisher || '');
       setPublishDate(product.publishDate || undefined);
@@ -119,10 +120,24 @@ export default function SellerScreen() {
     if (validateInputs()) {
       setIsLoading(true);
       try {
-        const response = await uploadImage(name, photoUri as string); //會取得照片url
+        const image_url = await uploadImage(name, photoUri as string); //會取得照片url
+        const productData = {
+          "name": name,
+          "language": language,
+          "category": category,
+          "condiction": condiction,
+          "author": author,
+          "publisher": publisher,
+          "publishDate": publishDate, // 確保日期格式正確，例如 'YYYY-MM-DD'
+          "ISBN": ISBN, // 確保 ISBN 為數字且非 undefined
+          "price": price, // 確保價格為數字且非 undefined
+          "description": description,
+          "photouri": image_url,
+        };
+        const respone = await asyncPost(api.AddProducts, productData);
         setIsLoading(false);
-        if (response) {
-          Alert.alert('成功', `商品上架成功\n${response}`);
+        if (respone) {
+          Alert.alert('成功', `商品上架成功${respone}`);
           navigation.goBack();
         }
       } catch (error) {
@@ -131,7 +146,9 @@ export default function SellerScreen() {
       }
     }
   }
-
+  const handleEditProduct = async() => {
+    
+  }
   const handleDateChange = (event: any, selectedDate?: Date) => {
     setShowDatePicker(false); // 關閉日期選擇器
     if (selectedDate) {
@@ -192,8 +209,12 @@ export default function SellerScreen() {
   return (
     <>
       <SafeAreaView style={styles.container}>
-          {/* Header */}
-        <Header title={product ? "修改商品" : "發佈新商品"} text={product ? "修改" : "發佈"} navigation={navigation} Change={handlePostProduct}></Header>
+        {product
+          ? 
+          <Header title="修改商品" text="修改" navigation={navigation} Change={handleEditProduct}/>
+          :
+          <Header title="發佈新商品" text="發佈" navigation={navigation} Change={handlePostProduct}/>
+        }
         <ScrollView>
           {/* Product Form */}
           <View style={styles.form}>
@@ -216,8 +237,8 @@ export default function SellerScreen() {
             />
             <DropdownField
               label="書籍狀態："
-              selectedValue={condition}
-              onValueChange={(value) => setCondition(value)}
+              selectedValue={condiction}
+              onValueChange={(value) => setcondiction(value)}
               items={['全新', '二手']}
             />
             <FormField label="作者：" placeholder="請輸入作者名稱" value={ author } onChangeText={ setAutor }/>
