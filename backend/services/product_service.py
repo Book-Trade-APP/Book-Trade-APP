@@ -73,10 +73,16 @@ class ProductService:
             }
             
     # 根據product_id, 取得一筆資料
-    def get_one_product_by_id(self,data: str):
-        try:
-            product_id = data["product_id"]
+    def get_one_product_by_id(self, product_id: str):
+        try:    
             product = self.collection.find_one({"_id": ObjectId(product_id)})
+            if not product:
+                return {
+                    "code": 404,
+                    "message": "找不到該商品",
+                    "body": {}
+                }
+                
             product["_id"] = str(product["_id"])
             return {
                 "code":200,
@@ -90,7 +96,54 @@ class ProductService:
                 "message":f"Sever Error(product_service.py): {str(e)}",
                 "body": {}
             }
+
+    # 更新商品資料
+    def update_product(self, product_data):
+        try:
+            # 商品資料不能為空
+            if not product_data:
+                return {
+                    "code": 400,
+                    "message":"商品資料是空的",
+                    "body": {}
+                }
             
+            if self._check_all_items(product_data):
+                return {
+                    "code": 400,
+                    "message":"商品資料不能包含空值",
+                    "body": {}
+                }
+            
+            # Success
+            product_id = product_data.get("_id")
+            product_data.pop("_id")
+            update_data = self.collection.update_one({"_id": ObjectId(product_id)}, {"$set": product_data})
+            if update_data.matched_count == 0:
+                return {
+                    "code": 400,
+                    "message":"找不到該商品資料",
+                    "body": {
+                        "matched_count": update_data.matched_count,  # 匹配到的數量
+                        "modified_count": update_data.modified_count  # 修改的數量
+                    }
+                }
+            
+            return {
+                "code": 200,
+                "message":"商品更新成功",
+                "body": {
+                    "matched_count": update_data.matched_count,  # 匹配到的數量
+                    "modified_count": update_data.modified_count  # 修改的數量
+                }
+            }
+            
+        except Exception as e:
+            return {
+                "code": 500,
+                "message":f"Sever Error(product_service.py): {str(e)}",
+                "body": {}
+            }
     # 加入購物車    
     def add_to_cart(self, request_data):
         try:
@@ -114,9 +167,9 @@ class ProductService:
             product = self.collection.find_one({"_id":ObjectId(product_id)})
             if not (user and product):
                 if not user:
-                    message = "user not find"
+                    message = "User not found"
                 else:
-                    message = "product not find"
+                    message = "Product not found"
                 return {
                     "code": 404,
                     "message":message,
@@ -215,7 +268,7 @@ class ProductService:
                 favorites = self.db["favorites"].find_one({"_id": ObjectId(user_favorites_id)})
                 if not favorites:
                     return {
-                        "code": 500,
+                        "code": 400,
                         "message": "找不到使用者的收藏資料",
                         "body": {}
                     }
