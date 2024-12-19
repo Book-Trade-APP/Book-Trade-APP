@@ -1,5 +1,6 @@
 export interface Product {
-    id: number; //產品編號
+    id: string; //假資料的id序 到時候要刪掉
+    _id: string; //資料庫的Object id
     name: string; //書名
     language: string; //書籍語言
     category: string;//書籍類別
