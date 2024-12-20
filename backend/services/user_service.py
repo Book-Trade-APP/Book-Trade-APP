@@ -72,7 +72,7 @@ class UserService:
         
         # Success
         return {
-            "code":201,
+            "code":200,
             "message":"註冊成功",
             "body": {}
         }
@@ -179,6 +179,29 @@ class UserService:
             
         except Exception as e:
             print("更新個人資料失敗:", str(e))
+            return {
+                "code": 500,
+                "message": f"Server Error(user_service): {str(e)}",
+                "body": {}
+            }
+        
+    def find_user_by_id(self, user_id:str):
+        try:
+            user = self.collection.find_one({"_id": ObjectId(user_id)})
+            if not user:
+                return {
+                    "code": 404,
+                    "message": "找不到該用戶",
+                    "body": {}
+                }
+            user["_id"] = str(user["_id"])
+            return {
+                "code": 200,
+                "message": "成功找到用戶",
+                "body": user
+            }
+        except Exception as e:
+            print("查詢用戶失敗:", str(e))
             return {
                 "code": 500,
                 "message": f"Server Error(user_service): {str(e)}",

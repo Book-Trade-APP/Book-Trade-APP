@@ -79,3 +79,16 @@ def logout():
         "message":"Logout Success",
         "body": {}
     }),200
+    
+def find_user_by_id():
+    user_service = UserService(current_app.config["MongoDB"])
+    try:
+        user_id = request.args.get("_id")
+        response = user_service.find_user_by_id(user_id)
+        return jsonify(response), response["code"]
+    except Exception as e:
+        return jsonify({
+            "code": 500,
+            "message":f"Sever Error(user_contorller): {str(e)}",
+            "body": {}
+        }), 500

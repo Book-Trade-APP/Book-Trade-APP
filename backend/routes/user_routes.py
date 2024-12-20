@@ -1,5 +1,5 @@
 from flask import Blueprint
-from controllers.user_contorller import login, register, logout, update
+from controllers.user_contorller import login, register, logout, update, find_user_by_id
 from flask_login import login_required
 
 # 初始化 Blueprint
@@ -27,3 +27,8 @@ def logout_route():
 def update_route():
     return update()
 
+# 用ID取得用戶資訊
+@user_bp.route("/get_user_by_id",methods=["GET"])
+
+def get_user_by_id():
+    return find_user_by_id()
