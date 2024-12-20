@@ -234,7 +234,7 @@ class UserService:
             # Success
             old_evaluate = float(user.get("evaluate"))
             transaction_number = int(user.get("transaction_number"))
-            new_evaluate = (old_evaluate * transaction_number + evaluate) / (transaction_number + 1)
+            new_evaluate = round((old_evaluate * transaction_number + evaluate) / (transaction_number + 1),1)
             # 更新 transaction_number, evaluate
             self.collection.update_one({"_id":ObjectId(id)}, {"$set":{"transaction_number":transaction_number + 1,"evaluate":new_evaluate}})
             return {

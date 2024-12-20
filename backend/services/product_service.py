@@ -19,6 +19,7 @@ class ProductService:
             item["_id"] = str(item["_id"])
         return data
     
+    
     #! 會重複加資料
     #todo: 驗證商品格式
     def add_product(self, product_data):
@@ -320,8 +321,66 @@ class ProductService:
         pass
     
     # 從收藏刪除
-    def delete_from_favorites(self, data):
-        pass
+    def delete_from_favorites(self, request_data):
+        try:
+            if not request_data:
+                return {
+                    "code": 400,
+                    "message":"沒有取得任何request資料",
+                    "body": {}
+                }
+                
+            user_id = request_data.get("user_id")
+            delete_product_id = request_data.get("delete_product_id")
+            if not (user_id and delete_product_id):
+                return {
+                    "code": 400,
+                    "message":"需要提供user_id, delete_product_id",
+                    "body": {}
+                }
+                
+            user = self.db["users"].find_one({"_id": ObjectId(user_id)})
+            if not user:
+                return {
+                    "code": 404,
+                    "message":"沒有該使用者",
+                    "body": {}
+                }
+                
+            delete_product = self.db["products"].find_one({"_id":ObjectId(delete_product_id)})
+            if not delete_product:
+                return {
+                    "code": 404,
+                    "message":"沒有該商品",
+                    "body": {}
+                }
+            
+            user_favorites_id = user.get("favorites_id")
+            if not user_favorites_id:
+                return {
+                    "code": 404,
+                    "message":"使用者沒有favorites_id(沒有收藏資料)",
+                    "body": {}
+                }
+            # 從favorites找到porduct_id[]，刪掉delete_product_id
+            favorites = self.db["favorites"].find_one({"_id":ObjectId(user_favorites_id)})
+            all_produt_id = list(favorites.get("product_id"))
+            result = all_produt_id.remove(ObjectId(delete_product_id))                
+            if result == None:
+                result = []
+            self.db["favorites"].update_one({"_id":ObjectId(user_favorites_id)},{"$set":{"product_id":result}})
+            return {
+                "code": 200,
+                "message": "成功刪除該收藏商品",
+                "body": {}
+            }
+            
+        except Exception as e:
+            return {
+                "code": 500,
+                "message":f"Sever Error(product_service.py): {str(e)}",
+                "body": {}
+            }
     
     # user_id找收藏商品
     def get_favorites_by_user_id(self, request_data):
@@ -352,7 +411,7 @@ class ProductService:
             if not user_favorites_id:
                 return {
                     "code": 404,
-                    "message":"使用者沒有favorites_id",
+                    "message":"使用者沒有favorites_id(沒有收藏資料)",
                     "body": {}
                 }
             favorites = self.db["favorites"].find_one({"_id":ObjectId(user_favorites_id)})
