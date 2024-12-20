@@ -38,7 +38,7 @@ def add_to_favorites_routes():
 # def delete_from_cart_routes():
 #     return delete_from_cart_controller()
 
-# 從收藏刪除
+# 從收藏刪除一筆資料
 @product_bp.route("/DeleteFromFavorites",methods=["POST"])
 def delete_from_favorites_routes():
     return delete_from_favorites_controller()

@@ -331,11 +331,11 @@ class ProductService:
                 }
                 
             user_id = request_data.get("user_id")
-            delete_product_id = request_data.get("delete_product_id")
+            delete_product_id = request_data.get("product_id")
             if not (user_id and delete_product_id):
                 return {
                     "code": 400,
-                    "message":"需要提供user_id, delete_product_id",
+                    "message":"需要提供user_id, product_id",
                     "body": {}
                 }
                 
