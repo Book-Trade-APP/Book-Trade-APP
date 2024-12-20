@@ -314,3 +314,59 @@ class ProductService:
                 "message":f"Sever Error(product_service.py): {str(e)}",
                 "body": {}
             }
+            
+    # 從購物車刪除
+    def delete_from_cart(self, data):
+        pass
+    
+    # 從收藏刪除
+    def delete_from_favorites(self, data):
+        pass
+    
+    # user_id找收藏商品
+    def get_favorites_by_user_id(self, request_data):
+        try:
+            if not request_data:
+                return {
+                    "code": 400,
+                    "message":"沒有取得任何request資料",
+                    "body": {}
+                }
+                
+            user_id = request_data["user_id"]
+            if not user_id:
+                return {
+                    "code": 400,
+                    "message":"需要提供user_id",
+                    "body": {}
+                }
+                
+            user = self.db["users"].find_one({"_id": ObjectId(user_id)})
+            if not user:
+                return {
+                    "code": 404,
+                    "message":"沒有該使用者",
+                    "body": {}
+                }
+            user_favorites_id = user.get("favorites_id")
+            if not user_favorites_id:
+                return {
+                    "code": 404,
+                    "message":"使用者沒有favorites_id",
+                    "body": {}
+                }
+            favorites = self.db["favorites"].find_one({"_id":ObjectId(user_favorites_id)})
+            all_product_id = list(favorites.get("product_id"))
+            result = list(map(lambda x:str(x), all_product_id))
+            return {
+                "code": 200,
+                "message": "成功取得該使用者收藏的所有product_id資料",
+                "body": result
+            }
+            
+        except Exception as e:
+            return {
+                "code": 500,
+                "message":f"Sever Error(product_service.py): {str(e)}",
+                "body": {}
+            }
