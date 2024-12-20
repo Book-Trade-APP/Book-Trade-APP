@@ -111,7 +111,7 @@ def delete_from_favorites_controller():
     try:
         data = request.json
         response = product_service.delete_from_favorites(data)
-        return jsonify(response), response["code"]
+        return jsonify(response), response.get("code")
 
     except Exception as e:
         return jsonify({

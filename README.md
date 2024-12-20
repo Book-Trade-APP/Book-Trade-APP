@@ -191,6 +191,21 @@ ctrl + shift + p
         "body": {}
     }
     ```
+
+### 使用者評價
+說明：
+> 提供user_id: string, evaluate: double(評價1.0 ~ 5.0)，更新使用者評價分數。
+
+輸入：  
+
+`[POST] http://127.0.0.1:8000/users/evaluate`
+```
+{
+    "user_id":"6765a04b91cec6fff80e192b",
+    "evaluate":3.3
+}
+```
+
 ## Product API使用教學
 
 ### 新增書籍
@@ -473,3 +488,19 @@ ctrl + shift + p
         "message":"Sever Error(product_service.py): ${error}"|
     }
     ```
+### 刪除收藏
+
+說明：
+> 提供user_id 跟 product_id（要刪除的商品id），刪除一筆資料
+
+輸入：
+
+`[POST] http://127.0.0.1:8000/products/products/DeleteFromFavorites`
+
+```
+{
+    "user_id":"6765a04b91cec6fff80e192b",
+    "product_id":"675958f77edaae5261c7adea"
+}
+```
+
