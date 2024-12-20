@@ -1,12 +1,42 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
+import { clearUserData } from '../../utils/stroage';
+import { api } from '../../api/api';
+import { asyncGet } from '../../utils/fetch';
+import { getUserId } from '../../utils/stroage';
+import { useEffect, useState } from 'react';
+import React from 'react';
 export default function ProfileScreen() {
   const navigation = useNavigation<NavigationProp<any>>();
-  const handle_logout = () => {
-    navigation.navigate("Auth");
-  }
+  const [userName, setUserName] = useState<string | null>();
+
+  const fetchUserInformation = async () => {
+    try {
+      const id = await getUserId();
+      const user = await asyncGet(`${api.find}?_id=${id}`);
+      setUserName(user.body.username);
+    } catch (error) {
+      console.error("Failed to fetch user information:", error);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // 當頁面獲得焦點時執行
+      fetchUserInformation();
+    }, [])
+  );
+
+  const handle_logout = async () => {
+    const logout_response = await clearUserData();
+    if (logout_response) {
+      navigation.navigate("Auth");
+    } else {
+      Alert.alert("伺服器發生錯誤");
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
         <View style={styles.logoContainer}>
@@ -17,7 +47,7 @@ export default function ProfileScreen() {
         <View style={styles.profileContainer}>
           <Ionicons name="person-circle-outline" size={50} color="black" />
           <View style={styles.profileInfo}>
-            <Text style={styles.userId}>132497</Text>
+            <Text style={styles.userId}>{userName ? userName : "Loading..."}</Text>
             <Text style={styles.rating}>⭐ 5.0</Text>
           </View>
         </View>
@@ -28,7 +58,7 @@ export default function ProfileScreen() {
 
       {/* Buttons Section */}
       <View style={styles.buttonsRow}>
-        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('Collection')}>
+        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('Favorite')}>
           <Ionicons name="bookmark-outline" size={24} color="black" />
           <Text style={styles.buttonText}>已收藏</Text>
         </TouchableOpacity>

@@ -1,104 +1,225 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Button, TextInput} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, TextInput } from 'react-native';
 import { Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { Picker } from '@react-native-picker/picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useHideTabBar } from '../../hook/HideTabBar';
+import { LoadingModal } from '../../components/LoadingModal';
+import { getUserId } from '../../../utils/stroage';
+import { asyncGet, asyncPost } from '../../../utils/fetch';
+import { api } from '../../../api/api';
+
 
 export default function SettingScreen() {
   const navigation = useNavigation<NavigationProp<any>>();
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedField, setSelectedField] = useState<string | null>(null); 
+  const [selectedField, setSelectedField] = useState<{ label: string; key: string } | null>(null);
+  const [modalValue, setModalValue] = useState<string | Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [userData, setUserData] = useState({
+    _id: "",
+    userName: "",
+    info: "",
+    gender: "",
+    birthday: "",
+    phone: "",
+    email: "",
+    password: ""
+  });
 
-  const handleFieldPress = (field: string) => {
+  const fields = [
+    { label: "名稱", key: "userName" },
+    { label: "簡介", key: "info" },
+    { label: "性別", key: "gender" },
+    { label: "生日", key: "birthday" },
+    { label: "手機號碼", key: "phone" },
+    { label: "Email", key: "email" },
+  ] as const;
+
+  useEffect(() => {
+    const fetchUserInformation = async () => {
+      try {
+        const id = await getUserId();
+        const user = await asyncGet(`${api.find}?_id=${id}`);
+        setUserData({
+          _id: user.body._id,
+          userName: user.body.username,
+          info: user.body.info,
+          gender: user.body.gender,
+          birthday: user.body.birthday,
+          phone: user.body.phone,
+          email: user.body.email,
+          password: user.body.password
+        });
+      } catch (error) {
+        console.error("Failed to fetch user information:", error);
+      }
+    };
+    fetchUserInformation();
+  }, []);
+
+  const handleFieldPress = (field: typeof fields[number]) => {
     setSelectedField(field);
-    setModalVisible(true);
+    if (field.key === 'birthday') {
+      setShowDatePicker(true);
+      setModalValue(userData.birthday ? new Date(userData.birthday) : new Date());
+    } else {
+      setModalValue(userData[field.key as keyof typeof userData] || "");
+      setModalVisible(true);
+    }
   };
 
   const handleSave = () => {
-    // 保存邏輯
+    if (!selectedField) return;
+    setUserData(prevData => ({
+      ...prevData,
+      [selectedField.key]: modalValue instanceof Date
+        ? modalValue.toISOString().split('T')[0]
+        : modalValue
+    }));
     setModalVisible(false);
   };
+
+  const handleDateChange = (_: any, selectedDate: Date | undefined) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setUserData(prevData => ({
+        ...prevData,
+        birthday: selectedDate.toISOString().split('T')[0]
+      }));
+    }
+  };
+
   const closeModal = () => {
     setModalVisible(false);
-  }
-  const handleSaveAll = () => {
-    // 保存所有更改
-    navigation.goBack();
   };
+
+  const handleSaveAll = async () => {
+    try {
+      setIsLoading(true);
+      const response = await asyncPost(api.update, {
+        "_id": userData._id,
+        "username": userData.userName,
+        "info": userData.info,
+        "gender": userData.gender,
+        "birthday": userData.birthday,
+        "phone": userData.phone,
+        "email": userData.email,
+        "password": userData.password
+      });
+      if (response.status === 200) {
+        setIsLoading(false);
+        navigation.goBack();
+      } else {
+        throw new Error("回傳資料不正確");
+      }
+    } catch (error) {
+      setIsLoading(false);
+      console.error("Failed to save data:", error);
+      Alert.alert("資料修改失敗", "請稍後再試");
+    }
+  };
+
   useHideTabBar();
+
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back-outline" size={28} />
-        </TouchableOpacity>
-        <Text style={styles.title}>修改個人訊息</Text>
-        <TouchableOpacity onPress={handleSaveAll}>
-          <Text style={styles.saveText}>儲存</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Profile Picture Section */}
-      <View style={styles.profileSection}>
-        <TouchableOpacity style={styles.avatarButton}>
-          <Image
-            style={styles.avatar}
-            source={require("../../../assets/Chiikawa.jpg")}
-          />
-          <Text style={styles.editText}>編輯</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Info List */}
-      <View style={styles.infoList}>
-        {[
-          { label: "名稱", key: "name" },
-          { label: "簡介", key: "intro" },
-          { label: "性別", key: "sex" },
-          { label: "生日", key: "birthday" },
-          { label: "手機號碼", key: "phone" },
-          { label: "Email", key: "email" },
-        ].map((item) => (
-          <TouchableOpacity 
-            key={item.key} 
-            style={styles.infoRow} 
-            onPress={() => handleFieldPress(item.label)}
-          >
-            <Text style={styles.infoLabel}>{item.label}</Text>
-            <Text style={styles.infoAction}>立刻設定</Text>
+    <>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back-outline" size={28} />
           </TouchableOpacity>
-        ))}
-      </View>
+          <Text style={styles.title}>修改個人訊息</Text>
+          <TouchableOpacity onPress={handleSaveAll}>
+            <Text style={styles.saveText}>儲存</Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Modal for editing field (optional, you can implement later) */}
-      <Modal
-        visible={modalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={closeModal}
-      >
-         <View style={styles.modalBackground}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalText}>{selectedField ? `修改${selectedField}` : '修改資訊'}</Text>
-            <TextInput 
-              style={styles.modalTextInput}
-              placeholder={`輸入新的${selectedField}`}
+        <View style={styles.profileSection}>
+          <TouchableOpacity style={styles.avatarButton}>
+            <Image
+              style={styles.avatar}
+              source={require("../../../assets/Chiikawa.jpg")}
             />
-            <View style={styles.modalButtonContainer}>
-              <TouchableOpacity style={styles.modalButton} onPress={handleSave}>
-                <Text style={styles.modalButtonText}>儲存</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.modalButton} onPress={closeModal}>
-                <Text style={styles.modalButtonText}>取消</Text>
-              </TouchableOpacity>
+            <Text style={styles.editText}>編輯</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.infoList}>
+          {fields.map((field) => (
+            <TouchableOpacity
+              key={field.key}
+              style={styles.infoRow}
+              onPress={() => handleFieldPress(field)}
+            >
+              <Text style={styles.infoLabel}>{field.label}</Text>
+              <Text style={styles.infoAction}>
+                {field.key === "birthday" && userData[field.key]
+                  ? new Date(userData[field.key]).toLocaleDateString()
+                  : userData[field.key as keyof typeof userData] || "立刻設定"}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {showDatePicker && (
+          <DateTimePicker
+            value={modalValue instanceof Date ? modalValue : new Date()}
+            mode="date"
+            display="spinner"
+            onChange={handleDateChange}
+          />
+        )}
+
+        <Modal
+          visible={modalVisible}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={closeModal}
+        >
+          <View style={styles.modalBackground}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalText}>
+                {selectedField ? `修改${selectedField.label}` : ''}
+              </Text>
+              {selectedField?.key === 'gender' ? (
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={modalValue as string}
+                    onValueChange={(itemValue) => setModalValue(itemValue)}
+                    style={styles.picker}
+                  >
+                    <Picker.Item label="請選擇性別" enabled={false}/>
+                    <Picker.Item label="男" value="男" />
+                    <Picker.Item label="女" value="女" />
+                  </Picker>
+                </View>
+              ) : (
+                <TextInput
+                  style={styles.modalTextInput}
+                  value={modalValue as string}
+                  onChangeText={setModalValue}
+                  placeholder={selectedField ? `輸入新的${selectedField.label}` : ''}
+                />
+              )}
+              <View style={styles.modalButtonContainer}>
+                <TouchableOpacity style={styles.modalButton} onPress={handleSave}>
+                  <Text style={styles.modalButtonText}>儲存</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.modalButton} onPress={closeModal}>
+                  <Text style={styles.modalButtonText}>取消</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
-    </SafeAreaView>
+        </Modal>
+      </SafeAreaView>
+      <LoadingModal isLoading={isLoading} message="資料更新中..." />
+    </>
   );
 }
 
@@ -169,7 +290,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // 半透明背景
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
     width: 320,
@@ -177,8 +298,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 12,
     alignItems: 'center',
-    elevation: 10, // 提升卡片效果
-    shadowColor: '#000', // 添加陰影
+    elevation: 10,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
@@ -187,6 +308,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 12,
+  },
+  pickerContainer: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginBottom: 20,
+    overflow: 'hidden',
+  },
+  picker: {
+    width: '100%',
+    height: 55,
   },
   modalTextInput: {
     width: '100%',
@@ -201,6 +334,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: '100%',
+    gap: 10,
   },
   modalButton: {
     backgroundColor: '#007bff',

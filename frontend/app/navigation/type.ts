@@ -28,7 +28,7 @@ export type CartStackParamList = {
 export type ProfileStackParamList = {
     Index: undefined;
     Setting: undefined;
-    Collection: undefined;
+    Favorite: undefined;
     Pending: undefined;
     Completed: undefined;
     Evaluate: undefined;

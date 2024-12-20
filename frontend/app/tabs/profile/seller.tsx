@@ -121,23 +121,22 @@ export default function SellerScreen() {
       setIsLoading(true);
       try {
         const image_url = await uploadImage(name, photoUri as string); //會取得照片url
-        const productData = {
+        const response = await asyncPost(api.AddProducts, {
           "name": name,
           "language": language,
           "category": category,
           "condiction": condiction,
           "author": author,
           "publisher": publisher,
-          "publishDate": publishDate, // 確保日期格式正確，例如 'YYYY-MM-DD'
-          "ISBN": ISBN, // 確保 ISBN 為數字且非 undefined
-          "price": price, // 確保價格為數字且非 undefined
+          "publishDate": publishDate,
+          "ISBN": ISBN,
+          "price": price,
           "description": description,
           "photouri": image_url,
-        };
-        const respone = await asyncPost(api.AddProducts, productData);
+        });
         setIsLoading(false);
-        if (respone) {
-          Alert.alert('成功', `商品上架成功${respone}`);
+        if (response) {
+          Alert.alert('成功', `商品上架成功`);
           navigation.goBack();
         }
       } catch (error) {

@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { fake_collections } from '../../data/fakeCollection';
 import { MainTabParamList, ProfileStackParamList } from '../../navigation/type';
 import { Product } from '../../interface/Product';
-export default function CollectionScreen() {
+export default function FavoriteScreen() {
   const [collectionItems, setCollectionItems] = useState(fake_collections);
   const navigation = useNavigation<NavigationProp<ProfileStackParamList>>(); 
   const handleGoBack = () => {
