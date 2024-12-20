@@ -70,6 +70,20 @@ def update_controller():
             "message":f"Sever Error(user_contorller): {str(e)}",
             "body": {}
         }), 500
+        
+# 用ID取得用戶資訊
+def find_user_by_id_contorller():
+    user_service = UserService(current_app.config["MongoDB"])
+    try:
+        user_id = request.args.get("_id")
+        response = user_service.find_user_by_id(user_id)
+        return jsonify(response), response["code"]
+    except Exception as e:
+        return jsonify({
+            "code": 500,
+            "message":f"Sever Error(user_contorller): {str(e)}",
+            "body": {}
+        }), 500
 
 # 使用者評價
 def evaluate_controller():
@@ -77,7 +91,7 @@ def evaluate_controller():
         user_service = UserService(current_app.config["MongoDB"])
         data = request.json
         response = user_service.user_evaluate(data)
-        return jsonify(response), response["code"]
+        return jsonify(response), response.get("code")
     
     except Exception as e:
         return jsonify({
@@ -94,16 +108,4 @@ def logout():
         "message":"Logout Success",
         "body": {}
     }),200
-    
-def find_user_by_id_contorller():
-    user_service = UserService(current_app.config["MongoDB"])
-    try:
-        user_id = request.args.get("_id")
-        response = user_service.find_user_by_id(user_id)
-        return jsonify(response), response["code"]
-    except Exception as e:
-        return jsonify({
-            "code": 500,
-            "message":f"Sever Error(user_contorller): {str(e)}",
-            "body": {}
-        }), 500
+

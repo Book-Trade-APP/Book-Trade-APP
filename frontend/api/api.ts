@@ -9,6 +9,7 @@ export enum api {
     login = `${url_path}/users/login`,
     register = `${url_path}/users/register`,
     update=`${url_path}/users/update`,
+    evaluate=`${url_path}/users/evaluate`,
     //product
     AddProducts=`${url_path}/products/AddProducts`,
     GetOneProduct=`${url_path}/products/GetOneProduct`,

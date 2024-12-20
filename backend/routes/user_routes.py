@@ -37,3 +37,8 @@ def evaluate_route():
 def logout_route():
     return logout()
 
+# 測試用api，更新指定欄位的值
+# @user_bp.route("/UpdateKey",methods=["POST"])
+# def update_user_key_route():
+#     return update_user_key_controller()
+

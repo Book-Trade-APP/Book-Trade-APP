@@ -209,17 +209,32 @@ class UserService:
     def user_evaluate(self, data):
         try:
             id = data.get("user_id")
-            evaluate = int(data.get("evaluate"))
-            if not (id or evaluate):
+            evaluate = float(data.get("evaluate"))
+            if not id or evaluate is None:
                 return {
                     "code": 400,
                     "message": "請提供user_id, evaluate",
                     "body": {}
                 }
+                
             user = self.collection.find_one({"_id":ObjectId(id)})
-            old_evaluate = int(user.get("evaluate"))
+            if not user:
+                return{
+                    "code": 404,
+                    "message": "使用者不存在",
+                    "body": {}
+                }
+            
+            if evaluate < 1 or evaluate > 5:
+                return {
+                    "code": 400,
+                    "message": "評價分數必須在 1 到 5 之間",
+                    "body": {}
+                }
+            # Success
+            old_evaluate = float(user.get("evaluate"))
             transaction_number = int(user.get("transaction_number"))
-            new_evaluate = (old_evaluate + evaluate) / (transaction_number + 1)
+            new_evaluate = (old_evaluate * transaction_number + evaluate) / (transaction_number + 1)
             # 更新 transaction_number, evaluate
             self.collection.update_one({"_id":ObjectId(id)}, {"$set":{"transaction_number":transaction_number + 1,"evaluate":new_evaluate}})
             return {
