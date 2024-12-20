@@ -32,3 +32,18 @@ def add_to_cart_routes():
 @product_bp.route("/AddToFavorites",methods=["POST"])
 def add_to_favorites_routes():
     return add_to_favorites_controller()
+
+# 從購物車刪除
+# @product_bp.route("/DeleteFromCart",methods=["POST"])
+# def delete_from_cart_routes():
+#     return delete_from_cart_controller()
+
+# # 從收藏刪除
+# @product_bp.route("/DeleteFromFavorites",methods=["POST"])
+# def delete_from_favorites_routes():
+#     return delete_from_favorites_controller()
+    
+# user_id找收藏商品
+@product_bp.route("/GetFavoritesByUserId",methods=["POST"])
+def get_favorites_by_user_id():
+    return get_favorites_by_user_id_controller()
