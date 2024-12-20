@@ -74,7 +74,7 @@ class UserService:
         
         # Success
         return {
-            "code":201,
+            "code":200,
             "message":"註冊成功",
             "body": {}
         }
@@ -186,6 +186,24 @@ class UserService:
                 "message": f"Server Error(user_service): {str(e)}",
                 "body": {}
             }
+    # 根據id找用戶
+    def find_user_by_id(self, user_id:str):
+        try:
+            user = self.collection.find_one({"_id": ObjectId(user_id)})
+            if not user:
+                return {
+                    "code": 404,
+                    "message": "找不到該用戶",
+                    "body": {}
+                }
+            user["_id"] = str(user["_id"])
+            return {
+                "code": 200,
+                "message": "成功找到用戶",
+                "body": user
+            }
+        except Exception as e:
+            print("查詢用戶失敗:", str(e))
             
     # 使用者評價        
     def user_evaluate(self, data):

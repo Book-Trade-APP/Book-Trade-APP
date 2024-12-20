@@ -1,5 +1,5 @@
 from flask import Blueprint
-from controllers.user_contorller import login_controller, register_controller, update_controller, evaluate_controller, logout
+from controllers.user_contorller import login_controller, register_controller, update_controller,find_user_by_id_contorller, evaluate_controller, logout
 from flask_login import login_required
 
 # 初始化 Blueprint
@@ -21,6 +21,11 @@ def login_route():
 def update_route():
     return update_controller()
 
+# 用ID取得用戶資訊
+@user_bp.route("/get_user_by_id",methods=["GET"])
+def get_user_by_id():
+    return find_user_by_id_contorller()
+
 # 使用者評價
 @user_bp.route("/evaluate",methods=["POST"])
 def evaluate_route():
@@ -31,6 +36,4 @@ def evaluate_route():
 @login_required
 def logout_route():
     return logout()
-
-
 
