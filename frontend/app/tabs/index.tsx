@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, FlatList, Image, Dimensions, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { NavigationProp, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Product } from '../interface/Product';
 import { HomeStackParamList } from '../navigation/type';
 import { api } from '../../api/api';
@@ -15,25 +15,27 @@ export default function HomeScreen() {
   const [products, setProducts] = useState([]); // 存放所有商品
   const [filteredProducts, setFilteredProducts] = useState([]); // 搜索後的商品
 
-  // 從 API 獲取數據
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch(api.GetAllProducts);
-        const data = await response.json();
-        if (data.code === 200) {
-          setProducts(data.body);
-          setFilteredProducts(data.body); // 初始值與所有商品相同
-        } else {
-          Alert.alert('錯誤', data.message || '無法獲取商品數據');
-        }
-      } catch (error) {
-        Alert.alert('錯誤', '無法連接到伺服器');
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch(api.GetAllProducts);
+      const data = await response.json();
+      if (data.code === 200) {
+        setProducts(data.body);
+        setFilteredProducts(data.body); // 初始值與所有商品相同
+      } else {
+        Alert.alert('錯誤', data.message || '無法獲取商品數據');
       }
-    };
+    } catch (error) {
+      Alert.alert('錯誤', '無法連接到伺服器');
+    }
+  };
 
-    fetchProducts();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      // 當頁面獲得焦點時執行
+      fetchProducts();
+    }, [])
+  );
 
   const handleSearch = (text: string) => {
     setSearchText(text);
