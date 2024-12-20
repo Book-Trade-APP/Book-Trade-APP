@@ -6,8 +6,9 @@ import { useRoute, useNavigation, RouteProp, NavigationProp } from "@react-navig
 import { HomeStackParamList, MainTabParamList } from "../../navigation/type";
 import React, { useEffect, useState } from "react";
 import { api } from "../../../api/api";
-import { asyncGet } from "../../../utils/fetch";
+import { asyncGet, asyncPost } from "../../../utils/fetch";
 import { Product } from "../../interface/Product";
+import { getUserId } from "../../../utils/stroage";
 export default function ProductDetailScreen() {
   const tabBarHidden = useHideTabBar(); // 確保此 Hook 在組件頂層調用
   const route = useRoute<RouteProp<HomeStackParamList, "Product">>();
@@ -15,7 +16,6 @@ export default function ProductDetailScreen() {
   const [isCollected, setIsCollected] = useState(false);
   const [product, setProduct] = useState<Product>();
   const { productId, source } = route.params;
-
   useEffect(() => {
     fetchProduct();
   }, []);
@@ -33,12 +33,25 @@ export default function ProductDetailScreen() {
     }
   };
 
-  const handleCollected = () => {
+  const handleAddToFavorite = async() => {
     setIsCollected(!isCollected);
-    ToastAndroid.show(
-      !isCollected ? "商品已加入收藏" : "商品已取消收藏",
-      ToastAndroid.SHORT
-    );
+    const userId = await getUserId();
+    if (!isCollected) {
+      console.log(userId, productId);
+      const response = await asyncPost(api.AddToFavorite, {
+        "user_id": userId,
+        "product_id": productId
+      })
+      if (response.status === 200) {
+        ToastAndroid.show("商品已加入收藏", ToastAndroid.SHORT);
+      }
+    } else {
+      // const response = await asyncPost(api.DeleteToFavorite, {
+      //   "user_id": userId,
+      //   "product_id": productId
+      // })
+      ToastAndroid.show("商品已取消收藏",ToastAndroid.SHORT);
+    }
   };
 
   const handleGoBack = () => {
@@ -46,20 +59,36 @@ export default function ProductDetailScreen() {
       navigation.reset({
         routes: [{ name: "Cart" }],
       });
-    } else if (source === "Collection") {
+    } else if (source === "Favorite") {
       navigation.reset({
-        routes: [{ name: "Profile", params: { screen: "Collection" } }],
+        routes: [{ name: "Profile", params: { screen: "Favorite" } }],
       });
     } else {
       navigation.goBack();
     }
   };
 
-  const handleAddToCart = () => {
-    ToastAndroid.show("已新增至購物車", ToastAndroid.SHORT);
+  const handleAddToCart = async() => {
+    const userId = await getUserId();
+    const response = await asyncPost(api.AddToCart, {
+      "user_id": userId,
+      "product_id": productId,
+    })
+    //console.log(userId, productId)
+    if (response.status === 200){
+      ToastAndroid.show("已新增至購物車", ToastAndroid.SHORT);
+    } else if (response.status === 400){
+      ToastAndroid.show("已經加入到購物車了", ToastAndroid.SHORT);
+    } else {
+      ToastAndroid.show("新增失敗", ToastAndroid.SHORT);
+    }
   };
-
-  const handleBuy = () => {
+  const handleBuy = async () => {
+    const userId = await getUserId();
+    await asyncPost(api.AddToCart, {
+      "user_id": userId,
+      "product_id": productId
+    })
     navigation.reset({ routes: [{ name: "Cart" }] });
   };
 
@@ -85,7 +114,7 @@ export default function ProductDetailScreen() {
             <Text style={styles.title}>{product.name}</Text>
             <Text style={styles.price}>${product.price}</Text>
           </View>
-          <TouchableOpacity onPress={() => handleCollected()}>
+          <TouchableOpacity onPress={() => handleAddToFavorite()}>
             <Ionicons style={styles.bookmarks} name={isCollected ? "bookmark-sharp" : "bookmark-outline"} color={isCollected ? "#FFC300" : "black"} size={24} />
           </TouchableOpacity>
         </View>

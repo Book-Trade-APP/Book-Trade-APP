@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert} from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { api } from '../../api/api';
 import { asyncPost } from '../../utils/fetch';
 import { AuthStackParamList, RootStackParamList } from '../navigation/type';
-
+import { saveUserId } from '../../utils/stroage';
 export default function LoginScreen() {
   const AuthNavigation = useNavigation<NavigationProp<AuthStackParamList>>();
   const RootNavigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -15,11 +15,12 @@ export default function LoginScreen() {
       Alert.alert("請輸入帳號或密碼");
       return;
     }
-    const respone = await asyncPost(api.login, {
+    const response = await asyncPost(api.login, {
       "email": email,
       "password": password
     })
-    if (respone.status === 200) {
+    if (response.status === 200) {
+      saveUserId(response.data.body._id);
       RootNavigation.reset({ index: 0, routes: [{ name: 'Main' }] });
     } else {
       Alert.alert("帳號或密碼錯誤");
