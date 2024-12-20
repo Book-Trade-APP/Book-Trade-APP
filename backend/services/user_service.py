@@ -67,7 +67,9 @@ class UserService:
             "birthday":"",
             "phone":"",
             "cart_id":"",
-            "favorites_id":""
+            "favorites_id":"",
+            "evaluate":0,
+            "transaction_number":0
         })
         
         # Success
@@ -179,6 +181,35 @@ class UserService:
             
         except Exception as e:
             print("更新個人資料失敗:", str(e))
+            return {
+                "code": 500,
+                "message": f"Server Error(user_service): {str(e)}",
+                "body": {}
+            }
+            
+    # 使用者評價        
+    def user_evaluate(self, data):
+        try:
+            id = data.get("user_id")
+            evaluate = int(data.get("evaluate"))
+            if not (id or evaluate):
+                return {
+                    "code": 400,
+                    "message": "請提供user_id, evaluate",
+                    "body": {}
+                }
+            user = self.collection.find_one({"_id":ObjectId(id)})
+            old_evaluate = int(user.get("evaluate"))
+            transaction_number = int(user.get("transaction_number"))
+            new_evaluate = (old_evaluate + evaluate) / (transaction_number + 1)
+            # 更新 transaction_number, evaluate
+            self.collection.update_one({"_id":ObjectId(id)}, {"$set":{"transaction_number":transaction_number + 1,"evaluate":new_evaluate}})
+            return {
+                "code": 200,
+                "message": "成功更新使用者評價",
+                "body": {}
+            }
+        except Exception as e:
             return {
                 "code": 500,
                 "message": f"Server Error(user_service): {str(e)}",

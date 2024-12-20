@@ -3,7 +3,7 @@ from services.user_service import UserService
 from flask_login import logout_user
 
 # 登入
-def login():
+def login_controller():
     try:
         user_service = UserService(current_app.config["MongoDB"])
         data = request.json
@@ -26,7 +26,7 @@ def login():
         }), 500
 
 # 註冊
-def register():
+def register_controller():
     try:
         user_service = UserService(current_app.config["MongoDB"])
         data = request.json
@@ -50,7 +50,7 @@ def register():
         }), 500
 
 # 更新資料
-def update():
+def update_controller():
     try:
         user_service = UserService(current_app.config["MongoDB"])
         validation = {"_id", "username", "info", "gender", "birthday", "phone", "email", "password"}
@@ -62,6 +62,21 @@ def update():
                 "body": {}
             }), 400
         response = user_service.user_update(data)
+        return jsonify(response), response["code"]
+    
+    except Exception as e:
+        return jsonify({
+            "code": 500,
+            "message":f"Sever Error(user_contorller): {str(e)}",
+            "body": {}
+        }), 500
+
+# 使用者評價
+def evaluate_controller():
+    try:
+        user_service = UserService(current_app.config["MongoDB"])
+        data = request.json
+        response = user_service.user_evaluate(data)
         return jsonify(response), response["code"]
     
     except Exception as e:
