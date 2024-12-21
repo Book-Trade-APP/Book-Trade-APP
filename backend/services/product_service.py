@@ -1,4 +1,5 @@
 from bson import ObjectId
+from utils.response import ResponseHandler
 
 class ProductService:
     def __init__(self, db):
@@ -149,66 +150,56 @@ class ProductService:
     def add_to_cart(self, request_data):
         try:
             if not request_data:
-                return {
-                    "code": 400,
-                    "message":"沒有取得任何資料",
-                    "body": {}
-                }
+                return ResponseHandler(400,"沒有取得任何資料").response()
                 
             user_id = request_data["user_id"]
             product_id = request_data["product_id"]
-            if not (user_id and product_id):
-                return {
-                    "code": 400,
-                    "message":"需要提供user_id 跟 product_id",
-                    "body": {}
-                }
+            quantity = request_data["quantity"]
+            if not (user_id and product_id and quantity):
+                return ResponseHandler(400,"需要提供user_id, product_id, quantity").response()
                 
             user = self.db["users"].find_one({"_id": ObjectId(user_id)})
             product = self.collection.find_one({"_id":ObjectId(product_id)})
             if not (user and product):
-                if not user:
-                    message = "User not found"
-                else:
-                    message = "Product not found"
-                return {
-                    "code": 404,
-                    "message":message,
-                    "body": {}
-                }
+                message ="User not found" if not user else "Product not found"
+                return ResponseHandler(404,message).response()
+            
             # 確定使用者有沒有購物車
             user_cart_id = user.get("cart_id","") 
             # 有存在
             if user_cart_id:
-                # 加入product_id list中
+                # 加入products list中
                 cart = self.db["cart"].find_one({"_id": ObjectId(user_cart_id)})
                 if not cart:
-                    return {
-                        "code": 500,
-                        "message": "無法找到購物車資料",
-                        "body": {}
-                    }
-                cart_product_ids = cart.get("product_id")
+                    return ResponseHandler(404,"無法找到購物車資料").response()
+                
+                products = list(cart.get("products"))
+                # 要避免重複加入不然會有相同的ObjectId(product_id)
+                if any(ObjectId(product_id) == d.get("product_id") for d in products):
+                    return ResponseHandler(400, "商品重複加入").response()
+                    
                 # 更新cart
-                if ObjectId(product_id) not in cart_product_ids:
-                    cart_product_ids.append(ObjectId(product_id))
-                    self.db["cart"].update_one(
-                        {"_id": ObjectId(user_cart_id)},
-                        {"$set": {"product_id": cart_product_ids}}
-                    )
-                else:
-                    return {
-                        "code": 400,
-                        "message": "商品重複加入",
-                        "body": {}
-                    }
+                new_product = {
+                    "product_id": ObjectId(product_id),
+                    "quantity": quantity
+                }
+                products.append(new_product)
+                self.db["cart"].update_one(
+                    {"_id": ObjectId(user_cart_id)},
+                    {"$set": {"products": products}}
+                )
                 
             # 不存在
             else:
                 # 創建新購物車
                 new_cart = {
                     "user_id": ObjectId(user_id),
-                    "product_id": [ObjectId(product_id)]
+                    "products":[
+                        {
+                            "product_id": ObjectId(product_id),
+                            "quantity": quantity
+                        }
+                    ]
                 }
                 result = self.db["cart"].insert_one(new_cart)
                 new_cart_id = str(result.inserted_id) # str
@@ -218,18 +209,12 @@ class ProductService:
                     {"_id": ObjectId(user_id)},
                     {"$set": {"cart_id": new_cart_id}}
                 )
-            return {
-                "code": 200,
-                "message": "商品成功新增到購物車",
-                "body": {}
-            }
+            return ResponseHandler(200,"商品成功新增到購物車").response()
             
         except Exception as e:
-            return {
-                "code": 500,
-                "message":f"Sever Error(product_service.py): {str(e)}",
-                "body": {}
-            }
+            message=f"Sever Error(product_service.py: {str(e)}"
+            return ResponseHandler(message=message).response()
+        
     # 加入收藏
     def add_to_favorite(self, request_data):
         try:
@@ -317,8 +302,49 @@ class ProductService:
             }
             
     # 從購物車刪除
-    def delete_from_cart(self, data):
-        pass
+    def update_cart(self, request_data):
+        try:
+            if not request_data:
+                return ResponseHandler(400,"沒有取得任何request資料").response()
+            
+            user_id = request_data.get("user_id")
+            product_id = request_data.get("product_id")
+            quantity = request_data.get("quantity")
+            if not (user_id and product_id and quantity):
+                return ResponseHandler(400,"請提供user_id, product_id, quantity").response()
+            
+            user = self.db["users"].find_one({"_id":ObjectId(user_id)})
+            if not user:
+                return ResponseHandler(404,"沒有該使用者").response()
+            
+            product = self.db["products"].find_one({"_id":ObjectId(product_id)})
+            if not product:
+                return ResponseHandler(404,"沒有該商品").response()
+            
+            cart_id = user.get("cart_id")
+            if not cart_id:
+                return ResponseHandler(404,"沒有cart_id(沒有購物車資料)").response()
+            
+            # Success
+            cart = self.db["cart"]
+            find_cart = cart.find_one({"_id":ObjectId(cart_id)})
+            products = list(find_cart.get("products"))
+            # todo
+            
+            
+            all_product_id.remove(ObjectId(product_id))
+            if all_product_id == None:
+                all_product_id = []
+            update_cart = cart.update_one({"_id": ObjectId(cart_id)},{"$set": {"product_id": all_product_id}})
+            response_body ={
+                "matched_count": update_cart.matched_count,  # 匹配到的數量
+                "modified_count": update_cart.modified_count  # 修改的數量
+            }
+            return ResponseHandler(200,"已刪除該購物車資料",response_body).response()
+            
+        except Exception as e:
+            message=f"Sever Error(product_service.py: {str(e)}"
+            return ResponseHandler(message=message).response()
     
     # 從收藏刪除
     def delete_from_favorites(self, request_data):
@@ -365,10 +391,10 @@ class ProductService:
             # 從favorites找到porduct_id[]，刪掉delete_product_id
             favorites = self.db["favorites"].find_one({"_id":ObjectId(user_favorites_id)})
             all_produt_id = list(favorites.get("product_id"))
-            result = all_produt_id.remove(ObjectId(delete_product_id))                
-            if result == None:
-                result = []
-            self.db["favorites"].update_one({"_id":ObjectId(user_favorites_id)},{"$set":{"product_id":result}})
+            all_produt_id.remove(ObjectId(delete_product_id))      
+            if all_produt_id == None:
+                all_produt_id = []
+            self.db["favorites"].update_one({"_id":ObjectId(user_favorites_id)},{"$set":{"product_id":all_produt_id}})
             return {
                 "code": 200,
                 "message": "成功刪除該收藏商品",
