@@ -442,6 +442,33 @@ ctrl + shift + p
         "message":"Sever Error(product_service.py): ${error}"
     }
     ```
+## 更新購物車商品數量
+說明：  
+提供user_id, product_id, quantity(商品數量)，更新使用者的商品數量，如果數量為零則刪除  
+
+輸入：  
+
+`[POST] http://127.0.0.1:8000/products/UpdateCart`  
+```
+{
+    "user_id":"67667a4e363b851f265a10b6",
+    "product_id":"675958f77edaae5261c7adea",
+    "quantity": 14
+}
+```
+- code 200
+    ```
+    {
+        "body": {
+            "matched_count": 1,
+            "modified_count": 1
+        },
+        "code": 200,
+        "message": "已更新該購物車商品數量資料"
+    }
+    ```
+- 其他...
+
 ## 加入收藏
 
 輸入：
@@ -528,6 +555,7 @@ ctrl + shift + p
         "message": "成功取得該使用者收藏的所有product_id資料"
     }
     ```
+- other...
 
 ### user_id找購物車商品
 說明：  
@@ -542,6 +570,7 @@ ctrl + shift + p
     "user_id":"1234564e363b851f265a10b6"
 }
 ```
+
 輸出：  
 - code 200   
     ```
@@ -554,5 +583,6 @@ ctrl + shift + p
         "message": "成功取得該使用者購物車的所有product_id資料"
     }
     ```
+- other...
 
 
