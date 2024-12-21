@@ -89,19 +89,19 @@ export default function ProductDetailScreen() {
   };
   const handleFindThisProductIsFavorite = async () => {
     try {
-      if (!userId) return; // 如果 userId 尚未初始化，直接返回
+      if (!userId) return;
       const response = await asyncPost(api.GetFavoriteList, {
         user_id: userId,
       });
       if (response.status === 200) {
         const favoriteList: string[] = response.data.body;
         const isFavorited = favoriteList.includes(productId);
-        setIsFavorite(isFavorited); // 更新收藏状态
+        setIsFavorite(isFavorited); 
       } else {
-        console.log("收藏状态查询失败", response);
+        console.log(response);
       }
     } catch (error) {
-      console.log("收藏状态查询出错", error);
+      console.log(error);
     }
   };
   const handleGoBack = () => {
@@ -122,6 +122,7 @@ export default function ProductDetailScreen() {
     const response = await asyncPost(api.AddToCart, {
       "user_id": userId,
       "product_id": productId,
+      "quantity": 1,
     })
     //console.log(userId, productId)
     if (response.status === 200){
@@ -129,6 +130,7 @@ export default function ProductDetailScreen() {
     } else if (response.status === 400){
       ToastAndroid.show("已經加入到購物車了", ToastAndroid.SHORT);
     } else {
+      console.log(response)
       ToastAndroid.show("新增失敗", ToastAndroid.SHORT);
     }
   };
