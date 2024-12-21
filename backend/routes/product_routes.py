@@ -33,7 +33,7 @@ def add_to_cart_routes():
 def add_to_favorites_routes():
     return add_to_favorites_controller()
 
-# 從購物車刪除
+# 更新購物車商品數量
 @product_bp.route("/UpdateCart",methods=["POST"])
 def update_cart_routes():
     return update_cart_controller()
@@ -47,3 +47,8 @@ def delete_from_favorites_routes():
 @product_bp.route("/GetFavoritesByUserId",methods=["POST"])
 def get_favorites_by_user_id():
     return get_favorites_by_user_id_controller()
+
+# user_id找購物車商品
+@product_bp.route("/GetCartByUserId",methods=["POST"])
+def get_cart_by_user_id():
+    return get_cart_by_user_id_controller()

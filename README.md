@@ -504,3 +504,55 @@ ctrl + shift + p
 }
 ```
 
+### user_id找收藏商品
+說明：  
+根據user_id找收藏商品，返回所有收藏商品Id(porduct_id)string型態  
+
+輸入：  
+
+`[POST] http://127.0.0.1:8000/products/GetFavoritesByUserId`
+
+```
+{
+    "user_id":"1234564e363b851f265a10b6"
+}
+```
+輸出：  
+- code 200  
+    ```
+    {
+        "body": [
+            "6763e1bc7677b8502bed1344"
+        ],
+        "code": 200,
+        "message": "成功取得該使用者收藏的所有product_id資料"
+    }
+    ```
+
+### user_id找購物車商品
+說明：  
+根據user_id找購物車商品，返回所有購物車商品Id(porduct_id)string型態
+
+輸入：  
+
+`[POST] http://127.0.0.1:8000/products/GetCartByUserId`
+
+```
+{
+    "user_id":"1234564e363b851f265a10b6"
+}
+```
+輸出：  
+- code 200   
+    ```
+    {
+        "body": [
+            "675958f77edaae5261c7adea",
+            "6763e1bc7677b8502bed1344"
+        ],
+        "code": 200,
+        "message": "成功取得該使用者購物車的所有product_id資料"
+    }
+    ```
+
+

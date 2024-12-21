@@ -301,7 +301,7 @@ class ProductService:
                 "body": {}
             }
             
-    # 從購物車刪除
+    # 更新購物車商品數量
     def update_cart(self, request_data):
         try:
             if not request_data:
@@ -463,3 +463,31 @@ class ProductService:
                 "message":f"Sever Error(product_service.py): {str(e)}",
                 "body": {}
             }
+            
+    # user_id找購物車
+    def get_cart_by_user_id(self, request_data):
+        try:
+            if not request_data:
+                return ResponseHandler(400,"沒有取得任何request資料").response()
+                
+            user_id = request_data["user_id"]
+            if not user_id:
+                return ResponseHandler(400,"需要提供user_id").response()
+                
+            user = self.db["users"].find_one({"_id": ObjectId(user_id)})
+            if not user:
+                return ResponseHandler(404,"沒有該使用者").response()
+            
+            user_cart_id = user.get("cart_id")
+            if not user_cart_id:
+                return ResponseHandler(404,"使用者沒有cart_id(沒有購物車資料)").response()
+
+            # Success
+            cart = self.db["cart"].find_one({"_id":ObjectId(user_cart_id)})
+            products = list(cart.get("products"))
+            result = list(map(lambda d:str(d["product_id"]), products))
+            return ResponseHandler(200,"成功取得該使用者購物車的所有product_id資料",result).response()
+            
+        except Exception as e:
+            message=f"Sever Error(product_service.py: {str(e)}"
+            return ResponseHandler(message=message).response()
