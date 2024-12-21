@@ -6,22 +6,26 @@ import { NavigationProp, useFocusEffect, useNavigation } from '@react-navigation
 import { Product } from '../interface/Product';
 import { HomeStackParamList } from '../navigation/type';
 import { api } from '../../api/api';
+import { LoadingModal } from '../components/LoadingModal';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<HomeStackParamList>>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchText, setSearchText] = useState('');
   const [products, setProducts] = useState([]); // 存放所有商品
   const [filteredProducts, setFilteredProducts] = useState([]); // 搜索後的商品
 
   const fetchProducts = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch(api.GetAllProducts);
       const data = await response.json();
       if (data.code === 200) {
         setProducts(data.body);
         setFilteredProducts(data.body); // 初始值與所有商品相同
+        setIsLoading(false);
       } else {
         Alert.alert('錯誤', data.message || '無法獲取商品數據');
       }
@@ -68,41 +72,48 @@ export default function HomeScreen() {
       />
       <View style={styles.detailContainer}>
         <Text style={styles.productTitle}>{item.name}</Text>
+        <Text style={styles.author}>{item.author}</Text>
         <Text style={styles.productPrice}>${item.price}</Text>
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.searchBox}>
-          <Ionicons style={styles.searchImg} name="search-outline" size={20} />
-          <TextInput
-            style={styles.search}
-            placeholder="搜尋商品"
-            value={searchText}
-            onChangeText={handleSearch}
-          />
-          {searchText ? (
-            <TouchableOpacity onPress={clearSearch}>
-              <Ionicons name="close-circle" size={20} color="gray" />
-            </TouchableOpacity>
-          ) : null}
+    <>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.searchBox}>
+            <Ionicons style={styles.searchImg} name="search-outline" size={20} />
+            <TextInput
+              style={styles.search}
+              placeholder="搜尋商品"
+              value={searchText}
+              onChangeText={handleSearch}
+            />
+            {searchText ? (
+              <TouchableOpacity onPress={clearSearch}>
+                <Ionicons name="close-circle" size={20} color="gray" />
+              </TouchableOpacity>
+            ) : null}
+          </View>
         </View>
-      </View>
 
-      <FlatList
-        data={filteredProducts}
-        keyExtractor={(item) => item._id.toString()}
-        renderItem={renderItem}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-        ListFooterComponent={
-          <Text style={styles.footerText}>沒有更多商品了</Text>
-        }
-      />
-    </SafeAreaView>
+        <FlatList
+          data={filteredProducts}
+          keyExtractor={(item) => item._id.toString()}
+          renderItem={renderItem}
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+          ListFooterComponent={
+            <Text style={styles.footerText}>沒有更多商品了</Text>
+          }
+        />
+      </SafeAreaView>
+      {/* <LoadingModal 
+          isLoading={isLoading} 
+          message="正在載入商品..." 
+      /> */}
+    </>
   );
 }
 
@@ -164,8 +175,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 4,
   },
+  author: {
+    fontSize: 12,
+    paddingBottom: 10,
+    color: '#777'
+  },
   productPrice: {
-    fontSize: 14,
+    fontSize: 16,
     color: 'red',
   },
   updateText: {
