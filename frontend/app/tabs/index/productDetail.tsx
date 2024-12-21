@@ -13,12 +13,27 @@ export default function ProductDetailScreen() {
   const tabBarHidden = useHideTabBar(); // 確保此 Hook 在組件頂層調用
   const route = useRoute<RouteProp<HomeStackParamList, "Product">>();
   const navigation = useNavigation<NavigationProp<MainTabParamList>>();
-  const [isCollected, setIsCollected] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
   const [product, setProduct] = useState<Product>();
   const { productId, source } = route.params;
+  const [userId, setUserId] = useState<string | null>(null); 
   useEffect(() => {
-    fetchProduct();
+    const initializeUserId = async () => {
+      const id = await getUserId();
+      setUserId(id);
+    };
+    initializeUserId(); // 读取 userId
+    fetchProduct(); // 获取商品详情
+  
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", () => true);
+    return () => backHandler.remove();
   }, []);
+  
+  useEffect(() => {
+    if (userId) {
+      handleFindThisProductIsFavorite(); // 检查收藏状态
+    }
+  }, [userId, productId]); // 监听 userId 和 productId 的变化
 
   const fetchProduct = async () => {
     try {
@@ -32,28 +47,63 @@ export default function ProductDetailScreen() {
       console.log("API 調用失敗", error);
     }
   };
-
-  const handleAddToFavorite = async() => {
-    setIsCollected(!isCollected);
-    const userId = await getUserId();
-    if (!isCollected) {
-      console.log(userId, productId);
-      const response = await asyncPost(api.AddToFavorite, {
+  const handleRemoveFromFavorite = async () => {
+    try {
+      const response = await asyncPost(api.DeleteFromFavorites, {
         "user_id": userId,
-        "product_id": productId
-      })
+        "product_id": productId,
+      });
+  
       if (response.status === 200) {
-        ToastAndroid.show("商品已加入收藏", ToastAndroid.SHORT);
+        ToastAndroid.show("商品已取消收藏", ToastAndroid.SHORT);
+        setIsFavorite(false); // 更新收藏狀態
+      } else {
+        console.log("移除收藏失敗", response);
       }
-    } else {
-      // const response = await asyncPost(api.DeleteToFavorite, {
-      //   "user_id": userId,
-      //   "product_id": productId
-      // })
-      ToastAndroid.show("商品已取消收藏",ToastAndroid.SHORT);
+    } catch (error) {
+      console.log("API 調用失敗", error);
     }
   };
 
+  const handleAddToFavorite = async () => {
+    if (isFavorite) {
+      // 已收藏時調用移除收藏邏輯
+      await handleRemoveFromFavorite();
+    } else {
+      // 未收藏時調用添加收藏邏輯
+      try {
+        const response = await asyncPost(api.AddToFavorite, {
+          "user_id": userId,
+          "product_id": productId,
+        });
+        if (response.status === 200) {
+          ToastAndroid.show("商品已加入收藏", ToastAndroid.SHORT);
+          setIsFavorite(true); // 更新收藏狀態
+        } else {
+          console.log("添加收藏失敗", response);
+        }
+      } catch (error) {
+        console.log("API 調用失敗", error);
+      }
+    }
+  };
+  const handleFindThisProductIsFavorite = async () => {
+    try {
+      if (!userId) return; // 如果 userId 尚未初始化，直接返回
+      const response = await asyncPost(api.GetFavoriteList, {
+        user_id: userId,
+      });
+      if (response.status === 200) {
+        const favoriteList: string[] = response.data.body;
+        const isFavorited = favoriteList.includes(productId);
+        setIsFavorite(isFavorited); // 更新收藏状态
+      } else {
+        console.log("收藏状态查询失败", response);
+      }
+    } catch (error) {
+      console.log("收藏状态查询出错", error);
+    }
+  };
   const handleGoBack = () => {
     if (source === "Cart") {
       navigation.reset({
@@ -69,7 +119,6 @@ export default function ProductDetailScreen() {
   };
 
   const handleAddToCart = async() => {
-    const userId = await getUserId();
     const response = await asyncPost(api.AddToCart, {
       "user_id": userId,
       "product_id": productId,
@@ -84,18 +133,12 @@ export default function ProductDetailScreen() {
     }
   };
   const handleBuy = async () => {
-    const userId = await getUserId();
     await asyncPost(api.AddToCart, {
       "user_id": userId,
       "product_id": productId
     })
     navigation.reset({ routes: [{ name: "Cart" }] });
   };
-
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener("hardwareBackPress", () => true);
-    return () => backHandler.remove();
-  }, []);
 
   if (!product) {
     return null; // 處理無效 ID
@@ -114,8 +157,8 @@ export default function ProductDetailScreen() {
             <Text style={styles.title}>{product.name}</Text>
             <Text style={styles.price}>${product.price}</Text>
           </View>
-          <TouchableOpacity onPress={() => handleAddToFavorite()}>
-            <Ionicons style={styles.bookmarks} name={isCollected ? "bookmark-sharp" : "bookmark-outline"} color={isCollected ? "#FFC300" : "black"} size={24} />
+          <TouchableOpacity onPress={handleAddToFavorite}>
+            <Ionicons style={styles.bookmarks} name={isFavorite ? "bookmark-sharp" : "bookmark-outline"} color={isFavorite ? "#FFC300" : "black"} size={24} />
           </TouchableOpacity>
         </View>
 
