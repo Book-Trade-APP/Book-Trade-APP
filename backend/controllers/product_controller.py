@@ -1,5 +1,6 @@
 from flask import request, jsonify, current_app
 from services.product_service import ProductService
+from utils.response import ResponseHandler
 
 # 加入產品
 def add_product_controller():
@@ -66,14 +67,11 @@ def add_to_cart_controller():
     try:
         data = request.json
         response = product_service.add_to_cart(data)
-        return jsonify(response), response["code"]
+        return response
 
     except Exception as e:
-        return jsonify({
-            "code": 500,
-            "message": str(e),
-            "body": {}
-        }), 500
+        message=f"Sever Error(product_controller.py: {str(e)}"
+        return ResponseHandler(message=message).response()
 
 # 加入收藏
 def add_to_favorites_controller():
@@ -96,14 +94,12 @@ def delete_from_cart_controller():
     try:
         data = request.json
         response = product_service.delete_from_cart(data)
-        return jsonify(response), response["code"]
+        return response
 
     except Exception as e:
-        return jsonify({
-            "code": 500,
-            "message": str(e),
-            "body": {}
-        }), 500
+        message=f"Sever Error(product_controller.py: {str(e)}"
+        return ResponseHandler(message=message).response()
+        
 
 # 從收藏刪除   
 def delete_from_favorites_controller():
@@ -111,7 +107,7 @@ def delete_from_favorites_controller():
     try:
         data = request.json
         response = product_service.delete_from_favorites(data)
-        return jsonify(response), response.get("code")
+        return jsonify(response), response["code"]
 
     except Exception as e:
         return jsonify({

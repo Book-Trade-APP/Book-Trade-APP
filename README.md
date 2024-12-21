@@ -490,12 +490,12 @@ ctrl + shift + p
     ```
 ### 刪除收藏
 
-說明：
-> 提供user_id 跟 product_id（要刪除的商品id），刪除一筆資料
+說明：  
+提供user_id 跟 product_id（要刪除的商品id），刪除一筆資料
 
 輸入：
 
-`[POST] http://127.0.0.1:8000/products/products/DeleteFromFavorites`
+`[POST] http://127.0.0.1:8000/products/DeleteFromFavorites`
 
 ```
 {
