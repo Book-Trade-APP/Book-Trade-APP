@@ -586,3 +586,170 @@ ctrl + shift + p
 - other...
 
 
+### 創立訂單
+說明：
+輸入user_id,product_ids(array),quantities(array),payment_method，即可創立一個訂單
+
+輸入：
+
+`[POST] http://127.0.0.1:8000/orders/CreateOrder`
+
+```
+{
+    "user_id": "6763d08a079f7ab34ccd56da",
+    "product_ids": ["67595e27df035ca464ff2dba","675958f77edaae5261c7adea","675d8dc570408f66838017d1"],
+    "quantities": ["1","1","2"],
+    "payment_method": "Credit Card"
+}
+```
+
+輸出：
+
+```
+{
+    "body": {
+        "_id": "6766c49dbcbc630d2621b295",
+        "created_at": "Sat, 21 Dec 2024 13:37:33 GMT",
+        "payment_method": "Credit Card",
+        "product_ids": "[ObjectId('67595e27df035ca464ff2dba'), ObjectId('675958f77edaae5261c7adea'), ObjectId('675d8dc570408f66838017d1')]",
+        "quantities": [
+            "1",
+            "1",
+            "2"
+        ],
+        "status": "待處理",
+        "user_id": "6763d08a079f7ab34ccd56da"
+    },
+    "code": 200,
+    "message": "訂單創建成功"
+}
+```
+
+### 刪除訂單
+說明：
+輸入訂單id刪除資料
+
+輸入：
+`[DELETE] http://127.0.0.1:8000/orders/DeleteOrder?id=6766c49dbcbc630d2621b295`
+
+輸出：
+```
+{
+    "body": {},
+    "code": 200,
+    "message": "訂單刪除成功"
+}
+```
+
+### 查詢所有訂單
+說明：
+查詢目前資料庫內所有已成立訂單
+
+輸入：
+`[GET] http://127.0.0.1:8000/orders/GetAllOrders`
+
+輸出：
+```
+{
+    "body": [
+        {
+            "_id": "6762e0b963e4b6f407629c47",
+            "created_at": "Wed, 18 Dec 2024 14:48:25 GMT",
+            "payment_method": "Credit Card",
+            "product_id": [
+                "67595e32df035ca464ff2dbb"
+            ],
+            "status": "Pending",
+            "user_id": "674fca2bc1aded6a8520e5ff"
+        },
+        {
+            "_id": "6763fe5b3ed3620a55dbdfab",
+            "created_at": "Thu, 19 Dec 2024 11:07:07 GMT",
+            "payment_method": "Credit Card",
+            "product_ids": "[ObjectId('675958f77edaae5261c7adea'), ObjectId('675958f77edaae5261c7aded')]",
+            "quantities": [
+                2,
+                3
+            ],
+            "status": "待處理",
+            "user_id": "675eef76f84cb6f6196af867"
+        },
+        {
+            "_id": "6763fe5c3ed3620a55dbdfac",
+            "created_at": "Thu, 19 Dec 2024 11:07:08 GMT",
+            "payment_method": "Credit Card",
+            "product_ids": "[ObjectId('675958f77edaae5261c7adea'), ObjectId('675958f77edaae5261c7aded')]",
+            "quantities": [
+                2,
+                3
+            ],
+            "status": "待處理",
+            "user_id": "675eef76f84cb6f6196af867"
+        },
+        {
+            "_id": "6763fe5c3ed3620a55dbdfad",
+            "created_at": "Thu, 19 Dec 2024 11:07:08 GMT",
+            "payment_method": "Credit Card",
+            "product_ids": "[ObjectId('675958f77edaae5261c7adea'), ObjectId('675958f77edaae5261c7aded')]",
+            "quantities": [
+                2,
+                3
+            ],
+            "status": "待處理",
+            "user_id": "675eef76f84cb6f6196af867"
+        },
+        {
+            "_id": "67652d28d229c2f9695437e0",
+            "created_at": "Fri, 20 Dec 2024 08:39:04 GMT",
+            "payment_method": "Credit Card",
+            "product_ids": "[ObjectId('675958f77edaae5261c7adea')]",
+            "quantities": [
+                "3"
+            ],
+            "status": "待處理",
+            "user_id": "675eef76f84cb6f6196af867"
+        },
+        {
+            "_id": "676537b5e092dbb9efcf3147",
+            "created_at": "Fri, 20 Dec 2024 09:24:05 GMT",
+            "payment_method": "Credit Card",
+            "product_ids": "[ObjectId('67595e27df035ca464ff2dba'), ObjectId('675958f77edaae5261c7adea'), ObjectId('675d8dc570408f66838017d1')]",
+            "quantities": [
+                "1",
+                "1",
+                "2"
+            ],
+            "status": "待處理",
+            "user_id": "6763d08a079f7ab34ccd56da"
+        }
+    ],
+    "code": 200,
+    "message": "成功取得所有訂單"
+}
+```
+
+### 用order_id查詢單一訂單
+說明：
+輸入order_id即可抓取此筆訂單詳細資料
+
+輸入：
+`[GET] http://127.0.0.1:8000/orders/GetOrderById?id=6763fe5c3ed3620a55dbdfac`
+
+```
+{
+    "body": {
+        "_id": "6763fe5c3ed3620a55dbdfac",
+        "created_at": "Thu, 19 Dec 2024 11:07:08 GMT",
+        "payment_method": "Credit Card",
+        "product_ids": "[ObjectId('675958f77edaae5261c7adea'), ObjectId('675958f77edaae5261c7aded')]",
+        "quantities": [
+            2,
+            3
+        ],
+        "status": "待處理",
+        "user_id": "675eef76f84cb6f6196af867"
+    },
+    "code": 200,
+    "message": "成功取得訂單"
+}
+```
