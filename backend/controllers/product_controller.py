@@ -88,12 +88,12 @@ def add_to_favorites_controller():
             "body": {}
         }), 500
 
-# 從購物車刪除
-def delete_from_cart_controller():
+# 更新購物車商品數量
+def update_cart_controller():
     product_service = ProductService(current_app.config["MongoDB"])
     try:
         data = request.json
-        response = product_service.delete_from_cart(data)
+        response = product_service.update_cart(data)
         return response
 
     except Exception as e:
@@ -130,3 +130,15 @@ def get_favorites_by_user_id_controller():
             "message": str(e),
             "body": {}
         }), 500
+        
+# user_id找購物車商品
+def get_cart_by_user_id_controller():
+    product_service = ProductService(current_app.config["MongoDB"])
+    try:
+        data = request.json
+        response = product_service.get_cart_by_user_id(data)
+        return response
+
+    except Exception as e:
+        message=f"Sever Error(product_controller.py: {str(e)}"
+        return ResponseHandler(message=message).response()

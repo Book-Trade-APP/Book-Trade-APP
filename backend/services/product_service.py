@@ -301,7 +301,7 @@ class ProductService:
                 "body": {}
             }
             
-    # 從購物車刪除
+    # 更新購物車商品數量
     def update_cart(self, request_data):
         try:
             if not request_data:
@@ -310,7 +310,7 @@ class ProductService:
             user_id = request_data.get("user_id")
             product_id = request_data.get("product_id")
             quantity = request_data.get("quantity")
-            if not (user_id and product_id and quantity):
+            if not (user_id and product_id and (quantity is not None)):
                 return ResponseHandler(400,"請提供user_id, product_id, quantity").response()
             
             user = self.db["users"].find_one({"_id":ObjectId(user_id)})
@@ -325,22 +325,30 @@ class ProductService:
             if not cart_id:
                 return ResponseHandler(404,"沒有cart_id(沒有購物車資料)").response()
             
-            # Success
             cart = self.db["cart"]
             find_cart = cart.find_one({"_id":ObjectId(cart_id)})
+            if not find_cart:
+                return ResponseHandler(404,"沒有該購物車資料").response()
+            
             products = list(find_cart.get("products"))
-            # todo
+            # 數量是零刪除該商品資料
+            if quantity != 0:
+                for d in products:
+                    if d.get("product_id") == ObjectId(product_id):
+                        d["quantity"] = quantity
+                        break
+            else:
+                for d in products:
+                    if d.get("product_id") == ObjectId(product_id):
+                        products.remove(d)
+                
             
-            
-            all_product_id.remove(ObjectId(product_id))
-            if all_product_id == None:
-                all_product_id = []
-            update_cart = cart.update_one({"_id": ObjectId(cart_id)},{"$set": {"product_id": all_product_id}})
+            update_cart = cart.update_one({"_id": ObjectId(cart_id)},{"$set": {"products": products}})
             response_body ={
                 "matched_count": update_cart.matched_count,  # 匹配到的數量
                 "modified_count": update_cart.modified_count  # 修改的數量
             }
-            return ResponseHandler(200,"已刪除該購物車資料",response_body).response()
+            return ResponseHandler(200,"已更新該購物車商品數量資料",response_body).response()
             
         except Exception as e:
             message=f"Sever Error(product_service.py: {str(e)}"
@@ -455,3 +463,31 @@ class ProductService:
                 "message":f"Sever Error(product_service.py): {str(e)}",
                 "body": {}
             }
+            
+    # user_id找購物車
+    def get_cart_by_user_id(self, request_data):
+        try:
+            if not request_data:
+                return ResponseHandler(400,"沒有取得任何request資料").response()
+                
+            user_id = request_data["user_id"]
+            if not user_id:
+                return ResponseHandler(400,"需要提供user_id").response()
+                
+            user = self.db["users"].find_one({"_id": ObjectId(user_id)})
+            if not user:
+                return ResponseHandler(404,"沒有該使用者").response()
+            
+            user_cart_id = user.get("cart_id")
+            if not user_cart_id:
+                return ResponseHandler(404,"使用者沒有cart_id(沒有購物車資料)").response()
+
+            # Success
+            cart = self.db["cart"].find_one({"_id":ObjectId(user_cart_id)})
+            products = list(cart.get("products"))
+            result = list(map(lambda d:str(d["product_id"]), products))
+            return ResponseHandler(200,"成功取得該使用者購物車的所有product_id資料",result).response()
+            
+        except Exception as e:
+            message=f"Sever Error(product_service.py: {str(e)}"
+            return ResponseHandler(message=message).response()
