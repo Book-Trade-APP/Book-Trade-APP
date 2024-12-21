@@ -89,11 +89,11 @@ def add_to_favorites_controller():
         }), 500
 
 # 從購物車刪除
-def delete_from_cart_controller():
+def update_cart_controller():
     product_service = ProductService(current_app.config["MongoDB"])
     try:
         data = request.json
-        response = product_service.delete_from_cart(data)
+        response = product_service.update_cart(data)
         return response
 
     except Exception as e:
