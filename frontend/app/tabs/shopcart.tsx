@@ -1,60 +1,126 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
 import CheckBox from 'react-native-check-box';
-import { fake_cartItems } from '../data/fakeCartItem';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { useFocusEffect, NavigationProp, useNavigation } from '@react-navigation/native';
 import { MainTabParamList, CartStackParamList } from '../navigation/type';
 import { Product } from '../interface/Product';
+import { getUserId } from '../../utils/stroage';
+import { asyncGet, asyncPost } from '../../utils/fetch';
+import { api } from '../../api/api';
 
 export default function ShoppingCartScreen() {
-  const [cartItems, setCartItems] = useState(fake_cartItems);
+  const [cartList, setCartList] = useState<Product[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
   const [selectAll, setSelectAll] = useState<boolean>(false);
   const [checkOutButtonStatus, setCheckOutButtonStatus] = useState<boolean>(true);
-  const navigation = useNavigation<NavigationProp<MainTabParamList>>();
-  const navigation2 = useNavigation<NavigationProp<CartStackParamList>>();
+  const MainNavigation = useNavigation<NavigationProp<MainTabParamList>>();
+  const CartNavigation = useNavigation<NavigationProp<CartStackParamList>>();
 
-  const handleToggleSelection = (id: number): void => {
-    setCartItems(prevItems => {
+  const initializeUserId = async () => {
+    const id = await getUserId();
+    setUserId(id);
+  };
+
+  const getCartList = async () => {
+    if (!userId) return;
+    try {
+      const response = await asyncPost(api.GetCartList, {
+        user_id: userId,
+      });
+
+      if (response.status === 200 && Array.isArray(response.data.body)) {
+        const cartIds: string[] = response.data.body;
+        await findProductDetails(cartIds);
+      }
+    } catch (error) {
+      console.error('Error fetching cart list:', error);
+    }
+  };
+
+  const findProductDetails = async (cartIds: string[]) => {
+    const productDetails: Product[] = [];
+    try {
+      for (const productId of cartIds) {
+        const response = await asyncGet(`${api.GetOneProduct}?product_id=${productId}`);
+        if (response.code === 200) {
+          productDetails.push({ ...response.body, quantity: 1 }); // 初始化数量为 1
+        }
+      }
+      setCartList(productDetails);
+    } catch (error) {
+      console.error('Error fetching product details:', error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        await initializeUserId();
+        if (userId) {
+          await getCartList();
+        }
+      };
+
+      fetchData();
+    }, [userId])
+  );
+
+  const handleToggleSelection = (id: string): void => {
+    setCartList(prevItems => {
       const updatedItems = prevItems.map(item =>
-        item.id === id ? { ...item, selected: !item.selected } : item
+        item._id === id ? { ...item, selected: !item.selected } : item
       );
       const anySelected = updatedItems.some(item => item.selected);
       setSelectAll(updatedItems.every(item => item.selected));
-      setCheckOutButtonStatus(!anySelected); // 根據是否有選中的項目來更新按鈕狀態
+      setCheckOutButtonStatus(!anySelected);
       return updatedItems;
     });
   };
-  
+
   const handleToggleSelectAll = (): void => {
     const newSelectAll = !selectAll;
     setSelectAll(newSelectAll);
-    setCartItems(prevItems => {
+    setCartList(prevItems => {
       const updatedItems = prevItems.map(item => ({ ...item, selected: newSelectAll }));
-      setCheckOutButtonStatus(!newSelectAll); // 如果全選，則按鈕應啟用；否則禁用
+      setCheckOutButtonStatus(!newSelectAll);
       return updatedItems;
     });
   };
 
   const calculateTotal = (): number => {
-    return cartItems
+    return cartList
       .filter(item => item.selected)
-      .reduce((total, item) => total + item.price, 0);
+      .reduce((total, item) => total + item.price * item.quantity, 0);
   };
+
+  const handleQuantityChange = (id: string, delta: number) => {
+    setCartList(prevItems =>
+      prevItems.map(item =>
+        item._id === id
+          ? {
+              ...item,
+              quantity: Math.max(1, item.quantity + delta), // 确保数量最少为 1
+            }
+          : item
+      )
+    );
+  };
+
   const handleCheckout = () => {
-    const selectedProductIds = cartItems
+    const selectedProductIds = cartList
       .filter(item => item.selected)
-      .map(item => item.id);
-  
-    navigation2.navigate('Checkout', { productId: selectedProductIds });
+      .map(item => item._id);
+    console.log(selectedProductIds);
+    CartNavigation.navigate('Checkout', { productId: selectedProductIds });
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>購物車</Text>
-
       <FlatList
-        data={cartItems} // 資料來源
-        keyExtractor={(item: Product) => item.id.toString()}
+        data={cartList}
+        keyExtractor={(item: Product, index) => item._id || index.toString()}
         ListFooterComponent={
           <Text style={styles.footerText}>沒有更多商品了</Text>
         }
@@ -63,16 +129,15 @@ export default function ShoppingCartScreen() {
             <CheckBox
               style={styles.checkbox}
               isChecked={item.selected}
-              onClick={() => handleToggleSelection(item.id)}
+              onClick={() => handleToggleSelection(item._id)}
             />
-            <Image style={styles.itemImage} source={item.photouri} />
-            <TouchableOpacity 
-              style={styles.itemInfo} 
+            <Image style={styles.itemImage} source={{ uri: item.photouri }} />
+            <TouchableOpacity
+              style={styles.itemInfo}
               onPress={() => {
-                // 使用類型斷言解決類型不兼容問題
-                navigation.navigate('Home' as keyof MainTabParamList, {
+                MainNavigation.navigate('Home' as keyof MainTabParamList, {
                   screen: 'Product',
-                  params: { productId: item.id, source: 'Cart' }
+                  params: { productId: item._id, source: 'Cart' },
                 } as any);
               }}
             >
@@ -80,11 +145,25 @@ export default function ShoppingCartScreen() {
               <Text>{item.author}</Text>
             </TouchableOpacity>
             <View>
-              <Text style={styles.priceText}>{`$${item.price}`}</Text>
+              <View style={styles.quantityContainer}>
+                <TouchableOpacity
+                  style={styles.quantityButton}
+                  onPress={() => handleQuantityChange(item._id, -1)}
+                >
+                  <Text style={styles.quantityButtonText}>-</Text>
+                </TouchableOpacity>
+                <Text style={styles.quantityText}>{item.quantity}</Text>
+                <TouchableOpacity
+                  style={styles.quantityButton}
+                  onPress={() => handleQuantityChange(item._id, 1)}
+                >
+                  <Text style={styles.quantityButtonText}>+</Text>
+                </TouchableOpacity>
+                <Text style={styles.priceText}>{`$${item.price}`}</Text>
+              </View>
             </View>
           </View>
-        )
-      }
+        )}
       />
 
       <View style={styles.footer}>
@@ -97,9 +176,16 @@ export default function ShoppingCartScreen() {
           <Text style={styles.checkboxText}>全選</Text>
         </View>
         <Text style={styles.totalPrice}>總金額 ${calculateTotal()}</Text>
-        <TouchableOpacity style={[styles.checkoutButton, !checkOutButtonStatus && styles.activeCheckoutButton]} onPress={handleCheckout} disabled={checkOutButtonStatus}>
+        <TouchableOpacity
+          style={[
+            styles.checkoutButton,
+            !checkOutButtonStatus && styles.activeCheckoutButton,
+          ]}
+          onPress={handleCheckout}
+          disabled={checkOutButtonStatus}
+        >
           <Text style={styles.checkoutText}>
-            結帳 ({cartItems.filter(item => item.selected).length})
+            結帳 ({cartList.filter(item => item.selected).length})
           </Text>
         </TouchableOpacity>
       </View>
@@ -144,16 +230,28 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   priceText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    textAlign: 'center',
-    width: 50, // 固定寬度，防止數字撐開
+    textAlign: 'right',
+    color: '#f80',
+    width: 60,
   },
-  buttonText: {
-    fontSize: 16,
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  quantityButton: {
+    padding: 5,
+    borderRadius: 5,
+    marginHorizontal: 5,
+  },
+  quantityButtonText: {
+    fontSize: 20,
     fontWeight: 'bold',
   },
-  itemPrice: {
+  quantityText: {
+    fontSize: 20,
     fontWeight: 'bold',
   },
   footer: {
@@ -175,7 +273,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   activeCheckoutButton: {
-    backgroundColor: "#4CAF50"
+    backgroundColor: '#4CAF50',
   },
   checkoutText: {
     color: '#fff',
