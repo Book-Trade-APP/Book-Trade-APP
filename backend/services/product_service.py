@@ -15,64 +15,52 @@ class ProductService:
     
     # 提取並轉換 _id 值的方法
     def _convert_objectid_to_str(self, data):
-        for item in data:
-            # 將 MongoDB 的 ObjectId 轉換成字串格式
-            item["_id"] = str(item["_id"])
-        return data
-    
+        return list(map(lambda item: {**item, "_id": str(item["_id"])}, data))
     
     #! 會重複加資料
-    #todo: 驗證商品格式
-    def add_product(self, product_data):
+    def add_product(self, request_data):
         try:
             # 商品資料不能為空
-            if not product_data:
-                return {
-                    "code": 400,
-                    "message":"商品資料是空的",
-                    "body": {}
-                }
+            if not request_data:
+                return ResponseHandler(400,"商品資料是空的").response()
             
-            if self._check_all_items(product_data):
-                return {
-                    "code": 400,
-                    "message":"商品資料不能包含空值",
-                    "body": {}
-                }
+            if self._check_all_items(request_data):
+                return ResponseHandler(400,"商品資料不能包含空值").response()
             
             # Success
-            self.collection.insert_one(product_data)
-            return {
-                "code": 200,
-                "message":"商品新增成功",
-                "body": {}
+            new_product = {
+                "name": request_data.get("name"),
+                "language": request_data.get("language"),
+                "category": request_data.get("category"),
+                "condiction": request_data.get("condiction"),
+                "author": request_data.get("author"),
+                "publisher": request_data.get("publisher"),
+                "publishDate": request_data.get("publishDate"),
+                "ISBN": request_data.get("ISBN"),
+                "price": request_data.get("price"),
+                "description": request_data.get("description"),
+                "photouri": request_data.get("photouri"),
+                "quantity": request_data.get("quantity"),
+                "seller_id": request_data.get("seller_id")
             }
             
+            self.collection.insert_one(new_product)
+            return ResponseHandler(200,"商品新增成功").response()
+            
         except Exception as e:
-            return {
-                "code": 500,
-                "message":f"Sever Error(product_service.py): {str(e)}",
-                "body": {}
-            }
+            message=f"Sever Error(product_service.py: {str(e)}"
+            return ResponseHandler(message=message).response()
 
     # 返回所有商品
     def get_products(self):
         try:
             products = list(self.collection.find())
             converted_body = self._convert_objectid_to_str(products)
-            
-            return {
-                "code":200,
-                "message":"成功取得所有商品",
-                "body": converted_body
-            }
+            return ResponseHandler(200,"成功取得所有商品",converted_body).response()
             
         except Exception as e:
-            return {
-                "code": 500,
-                "message":f"Sever Error(product_service.py): {str(e)}",
-                "body": {}
-            }
+            message=f"Sever Error(product_service.py: {str(e)}"
+            return ResponseHandler(message=message).response()
             
     # 根據product_id, 取得一筆資料
     def get_one_product_by_id(self, product_id: str):
