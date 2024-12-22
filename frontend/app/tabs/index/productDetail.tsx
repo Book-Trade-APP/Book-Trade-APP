@@ -1,202 +1,235 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, BackHandler, ToastAndroid } from "react-native";
+import { View, Text, Image, TouchableOpacity, ScrollView, BackHandler, ToastAndroid, Alert, StyleSheet} from "react-native";
+import React, { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useHideTabBar } from "../../hook/HideTabBar";
 import { useRoute, useNavigation, RouteProp, NavigationProp } from "@react-navigation/native";
 import { HomeStackParamList, MainTabParamList } from "../../navigation/type";
-import React, { useEffect, useState } from "react";
 import { api } from "../../../api/api";
 import { asyncGet, asyncPost } from "../../../utils/fetch";
 import { Product } from "../../interface/Product";
 import { getUserId } from "../../../utils/stroage";
+
 export default function ProductDetailScreen() {
-  const tabBarHidden = useHideTabBar(); // 確保此 Hook 在組件頂層調用
+  const tabBarHidden = useHideTabBar();
   const route = useRoute<RouteProp<HomeStackParamList, "Product">>();
   const navigation = useNavigation<NavigationProp<MainTabParamList>>();
+  const { productId, source } = route.params;
+
   const [isFavorite, setIsFavorite] = useState(false);
   const [product, setProduct] = useState<Product>();
-  const { productId, source } = route.params;
-  const [userId, setUserId] = useState<string | null>(null); 
+  const [quantity, setQuantity] = useState<number>(1);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [sellerId, setSellerId] = useState<string>();
+  const [sellerUserName, setSellerUserName] = useState<string>("");
+  const [sellerHeadShot, setSellerHeadShot] = useState<string>("");
+  const [sellerEvaluate, setSellerEvaluate] = useState<string>("");
+
   useEffect(() => {
     const initializeUserId = async () => {
       const id = await getUserId();
       setUserId(id);
     };
-    initializeUserId(); // 读取 userId
-    fetchProduct(); // 获取商品详情
-  
+    initializeUserId();
+    fetchProduct();
+
     const backHandler = BackHandler.addEventListener("hardwareBackPress", () => true);
     return () => backHandler.remove();
   }, []);
-  
+
   useEffect(() => {
     if (userId) {
-      handleFindThisProductIsFavorite(); // 检查收藏状态
+      handleFindThisProductIsFavorite();
     }
-  }, [userId, productId]); // 监听 userId 和 productId 的变化
+  }, [userId, productId]);
+
+  useEffect(() => {
+    if (sellerId) {
+      fetchSellerInfo();
+    }
+  }, [sellerId]);
 
   const fetchProduct = async () => {
     try {
       const response = await asyncGet(`${api.GetOneProduct}?product_id=${productId}`);
       if (response.code === 200) {
-        setProduct(response.body);
+        const productData = response.body;
+        setProduct(productData);
+        setQuantity(productData.quantity || 1);
+        setSellerId(productData.seller_id);
       } else {
-        console.log("Failed to fetch", response);
+        console.log("Failed to fetch product:", response);
       }
     } catch (error) {
-      console.log("API 調用失敗", error);
+      console.log("API 调用失败:", error);
     }
   };
-  const handleRemoveFromFavorite = async () => {
+
+  const fetchSellerInfo = async () => {
     try {
-      const response = await asyncPost(api.DeleteFromFavorites, {
-        "user_id": userId,
-        "product_id": productId,
-      });
-  
-      if (response.status === 200) {
-        ToastAndroid.show("商品已取消收藏", ToastAndroid.SHORT);
-        setIsFavorite(false); // 更新收藏狀態
+      const response = await asyncGet(`${api.find}?_id=${sellerId}`);
+      if (response.code === 200) {
+        const sellerData = response.body;
+        setSellerUserName(sellerData.username);
+        setSellerHeadShot(sellerData.headshot);
+        setSellerEvaluate(sellerData.evaluate);
       } else {
-        console.log("移除收藏失敗", response);
+        console.log("Failed to fetch seller information:", response);
       }
     } catch (error) {
-      console.log("API 調用失敗", error);
+      console.error("Error fetching seller information:", error);
+    }
+  };
+
+  const handleFindThisProductIsFavorite = async () => {
+    try {
+      if (!userId) {
+        console.error("User ID is null or undefined.");
+        return;
+      }
+      const response = await asyncPost(api.GetFavoriteList, { user_id: userId });
+      if (response.status === 200) {
+        const favoriteList: string[] = response.data.body;
+        const isFavorited = favoriteList.includes(productId);
+        setIsFavorite(isFavorited);
+      } else {
+        console.log(response);
+      }
+    } catch (error) {
+      console.log("Error checking favorite status:", error);
     }
   };
 
   const handleAddToFavorite = async () => {
     if (isFavorite) {
-      // 已收藏時調用移除收藏邏輯
       await handleRemoveFromFavorite();
     } else {
-      // 未收藏時調用添加收藏邏輯
       try {
-        const response = await asyncPost(api.AddToFavorite, {
-          "user_id": userId,
-          "product_id": productId,
-        });
+        const response = await asyncPost(api.AddToFavorite, { user_id: userId, product_id: productId });
         if (response.status === 200) {
           ToastAndroid.show("商品已加入收藏", ToastAndroid.SHORT);
-          setIsFavorite(true); // 更新收藏狀態
+          setIsFavorite(true);
         } else {
-          console.log("添加收藏失敗", response);
+          console.log("添加收藏失败:", response);
         }
       } catch (error) {
-        console.log("API 調用失敗", error);
+        console.log("API 调用失败:", error);
       }
     }
   };
-  const handleFindThisProductIsFavorite = async () => {
+
+  const handleRemoveFromFavorite = async () => {
     try {
-      if (!userId) return;
-      const response = await asyncPost(api.GetFavoriteList, {
-        user_id: userId,
-      });
+      const response = await asyncPost(api.DeleteFromFavorites, { user_id: userId, product_id: productId });
       if (response.status === 200) {
-        const favoriteList: string[] = response.data.body;
-        const isFavorited = favoriteList.includes(productId);
-        setIsFavorite(isFavorited); 
+        ToastAndroid.show("商品已取消收藏", ToastAndroid.SHORT);
+        setIsFavorite(false);
       } else {
-        console.log(response);
+        console.log("移除收藏失败:", response);
       }
     } catch (error) {
-      console.log(error);
+      console.log("API 调用失败:", error);
     }
   };
+
+  const handleAddToCart = async () => {
+    if (quantity <= 0) {
+      Alert.alert("提示", "商品數量不足，無法添加到購物車");
+      return;
+    }
+    try {
+      const response = await asyncPost(api.AddToCart, { user_id: userId, product_id: productId, quantity: 1 });
+      if (response.status === 200) {
+        ToastAndroid.show("已新增至購物車", ToastAndroid.SHORT);
+      } else if (response.status === 400) {
+        ToastAndroid.show("已經加入到購物車了", ToastAndroid.SHORT);
+      } else {
+        console.log(response);
+        ToastAndroid.show("新增失败", ToastAndroid.SHORT);
+      }
+    } catch (error) {
+      console.log("Error adding to cart:", error);
+    }
+  };
+
+  const handleBuy = async () => {
+    try {
+      const response = await asyncPost(api.AddToCart, { user_id: userId, product_id: productId, quantity: 1 });
+      if (response.status === 200) {
+        navigation.reset({ routes: [{ name: "Cart" }] });
+      } else {
+        console.error("Error buying product:", response);
+      }
+    } catch (error) {
+      console.error("Error during purchase:", error);
+    }
+  };
+
   const handleGoBack = () => {
     if (source === "Cart") {
-      navigation.reset({
-        routes: [{ name: "Cart" }],
-      });
+      navigation.reset({ routes: [{ name: "Cart" }] });
     } else if (source === "Favorite") {
-      navigation.reset({
-        routes: [{ name: "Profile", params: { screen: "Favorite" } }],
-      });
+      navigation.reset({ routes: [{ name: "Profile", params: { screen: "Favorite" } }] });
     } else {
       navigation.goBack();
     }
   };
 
-  const handleAddToCart = async() => {
-    const response = await asyncPost(api.AddToCart, {
-      "user_id": userId,
-      "product_id": productId,
-      "quantity": 1,
-    })
-    //console.log(userId, productId)
-    if (response.status === 200){
-      ToastAndroid.show("已新增至購物車", ToastAndroid.SHORT);
-    } else if (response.status === 400){
-      ToastAndroid.show("已經加入到購物車了", ToastAndroid.SHORT);
-    } else {
-      console.log(response)
-      ToastAndroid.show("新增失敗", ToastAndroid.SHORT);
-    }
-  };
-  const handleBuy = async () => {
-    await asyncPost(api.AddToCart, {
-      "user_id": userId,
-      "product_id": productId
-    })
-    navigation.reset({ routes: [{ name: "Cart" }] });
-  };
-
   if (!product) {
-    return null; // 處理無效 ID
+    return null;
   }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        {/* Product Image */}
         <View style={styles.imageContainer}>
-          <Image source={{uri: product.photouri}} style={styles.productImage} />
+          <Image source={{ uri: product.photouri }} style={styles.productImage} />
         </View>
-
-        {/* Product Details */}
         <View style={styles.detailsContainer}>
           <View>
             <Text style={styles.title}>{product.name}</Text>
-            <Text style={styles.price}>${product.price}</Text>
+            <Text style={styles.price}>{`$${product.price}`}</Text>
+            <Text style={styles.quantity}>{`剩餘數量：${product.quantity}`}</Text>
           </View>
           <TouchableOpacity onPress={handleAddToFavorite}>
-            <Ionicons style={styles.bookmarks} name={isFavorite ? "bookmark-sharp" : "bookmark-outline"} color={isFavorite ? "#FFC300" : "black"} size={24} />
+            <Ionicons
+              style={styles.bookmarks}
+              name={isFavorite ? "bookmark-sharp" : "bookmark-outline"}
+              color={isFavorite ? "#FFC300" : "black"}
+              size={24}
+            />
           </TouchableOpacity>
         </View>
-
-        {/* Rating and Reviews */}
         <View style={styles.ratingContainer}>
-          <Ionicons name="person-circle-outline" size={28} />
-          <Text style={styles.reviewText}>132497</Text>
+          {
+          sellerHeadShot
+          ?
+          <Image style={styles.sellerImage} source={{ uri: sellerHeadShot }} />
+          :
+          <Ionicons name="person-circle-outline" size={32} />
+          }
+          <Text style={styles.reviewText}>{sellerUserName}</Text>
           <Ionicons name="star" size={20} color="#FFD700" />
-          <Text style={styles.ratingText}>5.0</Text>
+          <Text style={styles.ratingText}>{sellerEvaluate}</Text>
         </View>
-
-        {/* Additional Product Info */}
         <View style={styles.productInfoContainer}>
           <Text style={styles.productInfoTitle}>商品資訊</Text>
-          <Text style={styles.detailText}>作者：{product.author}</Text>
-          <Text style={styles.detailText}>出版社：{product.publisher}</Text>
-          <Text style={styles.detailText}>出版日期：{product.publishDate}</Text>
-          <Text style={styles.detailText}>ISBN：{product.ISBN}</Text>
+          <Text style={styles.detailText}>{`作者：${product.author}`}</Text>
+          <Text style={styles.detailText}>{`出版社：${product.publisher}`}</Text>
+          <Text style={styles.detailText}>{`出版日期：${product.publishDate}`}</Text>
+          <Text style={styles.detailText}>{`ISBN：${product.ISBN}`}</Text>
         </View>
-
-        {/* Product Description */}
         <View style={styles.descriptionContainer}>
           <Text style={styles.descriptionTitle}>商品簡介</Text>
           <Text style={styles.descriptionText}>{product.description}</Text>
         </View>
       </ScrollView>
-
-      {/* Back Button */}
-      <TouchableOpacity style={styles.floatingBackButton} onPress={() => handleGoBack()}>
+      <TouchableOpacity style={styles.floatingBackButton} onPress={handleGoBack}>
         <Ionicons name="arrow-back-outline" size={28} color="#fff" />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.floatingCartButton} onPress={() => navigation.reset({routes: [{ name: 'Cart' }]})}>
+      <TouchableOpacity style={styles.floatingCartButton} onPress={() => navigation.reset({ routes: [{ name: "Cart" }] })}>
         <Ionicons name="cart-outline" size={28} color="#fff" />
       </TouchableOpacity>
-
-      {/* Bottom Navigation */}
       <View style={styles.bottomNavContainer}>
         <TouchableOpacity style={styles.cartButton} onPress={handleAddToCart}>
           <Text style={styles.buttonText}>加入購物車</Text>
@@ -208,6 +241,7 @@ export default function ProductDetailScreen() {
     </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -246,6 +280,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
     marginBottom: 10,
   },
+  quantity: {
+    color: "#888"
+  },
   detailText: {
     fontSize: 14,
     marginBottom: 5,
@@ -259,9 +296,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     marginBottom: 10,
   },
+  sellerImage: {
+    width: 28, 
+    height: 28, 
+    borderRadius: 14
+  },
   reviewText: {
-    marginLeft: 8,
-    marginRight: 5,
+    marginLeft: 5,
+    marginRight: 10,
     fontSize: 14,
   },
   ratingText: {
