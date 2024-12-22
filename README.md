@@ -201,7 +201,7 @@ ctrl + shift + p
 `[POST] http://127.0.0.1:8000/users/evaluate`
 ```
 {
-    "user_id":"6765a04b91cec6fff80e192b",
+    "user_id":"1234504b91cec6fff80e192b",
     "evaluate":3.3
 }
 ```
@@ -215,17 +215,19 @@ ctrl + shift + p
 `[POST] http://127.0.0.1:8000/products//AddProducts`
 ```
 {
-    "name": "書本名稱",
-    "language": "繁體中文",
+    "name": "我爸的橘子",
+    "language": "中文",
     "category": "文學",
     "condiction": "二手",
-    "author": "作者",
-    "publisher": "出版社",
-    "publishDate": "1945-01-01",
-    "ISBN": 1234567890123,
-    "price": 300,
-    "description":"這是一本書",
-    "photouri":"mple.com/image.jpg"
+    "author": "台東朱自清",
+    "publisher": "上海印刷",
+    "publishDate": "15/10/1925",
+    "ISBN": 456789487,
+    "price": 2,
+    "description": "爛橘子",
+    "photouri": "uri",
+    "quantity": 1,
+    "seller_id": "12345678903b851f265a10b6"
 }
 ```
 
@@ -267,17 +269,20 @@ ctrl + shift + p
     {
         "body": [
             {
-                "ISBN": 1234567890123,
-                "author": "張三",
-                "category": "程式設計",
-                "condiction": "全新",
-                "description": "一本適合初學者的 Python 書籍",
+                "ISBN": 456789487,
+                "_id": "67677bb1a17b2332eddf34c1",
+                "author": "台東朱自清",
+                "category": "文學",
+                "condiction": "二手",
+                "description": "爛橘子",
                 "language": "中文",
-                "name": "Java 放棄書籍",
-                "photouri": "https://example.com/book.jpg",
-                "price": 500,
-                "publishDate": "Mon, 01 Jan 2024 00:00:00 GMT",
-                "publisher": "ABC 出版社"
+                "name": "我爸的橘子",
+                "photouri": "uri",
+                "price": 2,
+                "publishDate": "15/10/1925",
+                "publisher": "上海印刷",
+                "quantity": 1,
+                "seller_id": "12345678903b851f265a10b6"
             },
             {
                 "ISBN": 1234567890123,
@@ -289,8 +294,10 @@ ctrl + shift + p
                 "name": "書本名稱",
                 "photouri": "mple.com/image.jpg",
                 "price": 300,
-                "publishDate": "1945-01-01",
-                "publisher": "出版社"
+                "publishDate": "01/01/1925",
+                "publisher": "出版社",
+                "quantity": 1,
+                "seller_id": "12345678903b851f265a10b6"
             }
         ],
         "code": 200,
@@ -329,7 +336,9 @@ ctrl + shift + p
             "photouri": "https://example.com/book.jpg",
             "price": 500,
             "publishDate": "2024-01-01T00:00:00.000Z",
-            "publisher": "TKU 出版社"
+            "publisher": "TKU 出版社",
+            "quantity": 1,
+            "seller_id": "12345678903b851f265a10b6"
         },
         "code": 200,
         "message": "成功取得該商品"
@@ -361,7 +370,9 @@ ctrl + shift + p
     "photouri": "https://example.com/book.jpg",
     "price": 400,
     "publishDate": "2024-01-01T00:00:00.000Z",
-    "publisher": "TKU 出版社"
+    "publisher": "TKU 出版社",
+    "quantity": 1,
+    "seller_id": "12345678903b851f265a10b6"
 }
 ```
 
