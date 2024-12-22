@@ -45,13 +45,13 @@ class OrderService:
 
             # 返回訂單資料
             new_order = self.orders.find_one({"_id": result.inserted_id})
-            return {"code": 201, "message": "訂單創建成功", "body": self._convert_objectid_to_str(new_order)}
+            return {"code": 200, "message": "訂單創建成功", "body": self._convert_objectid_to_str(new_order)}
 
         except Exception as e:
             return {"code": 500, "message": f"Server Error: {str(e)}", "body": {}}
 
-    # 2. 刪除訂單
-    def delete_order(self, order_id):
+    # 2. 輸入訂單id刪除訂單
+    def delete_order_by_id(self, order_id):
         try:
             result = self.orders.delete_one({"_id": ObjectId(order_id)})
             if result.deleted_count == 0:

@@ -15,7 +15,7 @@ def create_order_controller():
 # 2. 刪除訂單
 def delete_order_controller(order_id):
     order_service = OrderService(current_app.config["MongoDB"])
-    response = order_service.delete_order(order_id)
+    response = order_service.delete_order_by_id(order_id)
     return jsonify(response), response["code"]
 
 # 3. 查詢所有訂單
