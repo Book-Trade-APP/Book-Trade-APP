@@ -31,14 +31,11 @@ def get_one_product_by_id_controller():
     try:
         data = request.args.get("product_id")
         response = product_service.get_one_product_by_id(data)
-        return jsonify(response), response["code"]
+        return response
 
     except Exception as e:
-        return jsonify({
-            "code": 500,
-            "message": str(e),
-            "body": {}
-        }), 500
+        message=f"Sever Error(product_controller.py: {str(e)}"
+        return ResponseHandler(message=message).response()
         
 # 更新產品資料
 def update_product_controller():
@@ -70,14 +67,11 @@ def add_to_favorites_controller():
     try:
         data = request.json
         response = product_service.add_to_favorite(data)
-        return jsonify(response), response["code"]
+        return response
 
     except Exception as e:
-        return jsonify({
-            "code": 500,
-            "message": str(e),
-            "body": {}
-        }), 500
+        message=f"Sever Error(product_controller.py: {str(e)}"
+        return ResponseHandler(message=message).response()
 
 # 更新購物車商品數量
 def update_cart_controller():

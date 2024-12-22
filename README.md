@@ -372,7 +372,6 @@ ctrl + shift + p
     "publishDate": "2024-01-01T00:00:00.000Z",
     "publisher": "TKU 出版社",
     "quantity": 1,
-    "seller_id": "12345678903b851f265a10b6"
 }
 ```
 
