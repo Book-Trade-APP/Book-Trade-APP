@@ -69,7 +69,8 @@ class UserService:
             "cart_id":"",
             "favorites_id":"",
             "evaluate":0,
-            "transaction_number":0
+            "transaction_number":0,
+            "headshot":""
         })
         
         # Success

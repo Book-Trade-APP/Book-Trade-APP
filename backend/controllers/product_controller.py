@@ -8,28 +8,22 @@ def add_product_controller():
     try:
         data = request.json
         response = product_service.add_product(data)
-        return jsonify(response), response["code"]
+        return response
 
     except Exception as e:
-        return jsonify({
-            "code": 500,
-            "message": str(e),
-            "body": {}
-        }), 500
+        message=f"Sever Error(product_controller.py: {str(e)}"
+        return ResponseHandler(message=message).response()
 
 # 取得所有產品
 def get_all_products_controller():
     product_service = ProductService(current_app.config["MongoDB"])
     try:
         response = product_service.get_products()
-        return jsonify(response), response["code"]
+        return response
 
     except Exception as e:
-        return jsonify({
-            "code": 500,
-            "message": str(e),
-            "body": {}
-        }), 500
+        message=f"Sever Error(product_controller.py: {str(e)}"
+        return ResponseHandler(message=message).response()
         
 # 根據product_id, 取得一筆資料     
 def get_one_product_by_id_controller():
@@ -37,14 +31,11 @@ def get_one_product_by_id_controller():
     try:
         data = request.args.get("product_id")
         response = product_service.get_one_product_by_id(data)
-        return jsonify(response), response["code"]
+        return response
 
     except Exception as e:
-        return jsonify({
-            "code": 500,
-            "message": str(e),
-            "body": {}
-        }), 500
+        message=f"Sever Error(product_controller.py: {str(e)}"
+        return ResponseHandler(message=message).response()
         
 # 更新產品資料
 def update_product_controller():
@@ -52,14 +43,11 @@ def update_product_controller():
     try:
         data = request.json
         response = product_service.update_product(data)
-        return jsonify(response), response["code"]
+        return response
 
     except Exception as e:
-        return jsonify({
-            "code": 500,
-            "message": str(e),
-            "body": {}
-        }), 500
+        message=f"Sever Error(product_controller.py: {str(e)}"
+        return ResponseHandler(message=message).response()
         
 # 加入購物車
 def add_to_cart_controller():
@@ -79,14 +67,11 @@ def add_to_favorites_controller():
     try:
         data = request.json
         response = product_service.add_to_favorite(data)
-        return jsonify(response), response["code"]
+        return response
 
     except Exception as e:
-        return jsonify({
-            "code": 500,
-            "message": str(e),
-            "body": {}
-        }), 500
+        message=f"Sever Error(product_controller.py: {str(e)}"
+        return ResponseHandler(message=message).response()
 
 # 更新購物車商品數量
 def update_cart_controller():
