@@ -88,52 +88,46 @@ class ProductService:
             }
 
     # 更新商品資料
-    def update_product(self, product_data):
+    def update_product(self, request_data):
         try:
             # 商品資料不能為空
-            if not product_data:
-                return {
-                    "code": 400,
-                    "message":"商品資料是空的",
-                    "body": {}
-                }
+            if not request_data:
+                return ResponseHandler(400,"商品資料是空的").response()
             
-            if self._check_all_items(product_data):
-                return {
-                    "code": 400,
-                    "message":"商品資料不能包含空值",
-                    "body": {}
-                }
+            if self._check_all_items(request_data):
+                return ResponseHandler(400,"商品資料不能包含空值").response()
             
             # Success
-            product_id = product_data.get("_id")
-            product_data.pop("_id")
-            update_data = self.collection.update_one({"_id": ObjectId(product_id)}, {"$set": product_data})
-            if update_data.matched_count == 0:
-                return {
-                    "code": 400,
-                    "message":"找不到該商品資料",
-                    "body": {
-                        "matched_count": update_data.matched_count,  # 匹配到的數量
-                        "modified_count": update_data.modified_count  # 修改的數量
-                    }
-                }
-            
-            return {
-                "code": 200,
-                "message":"商品更新成功",
-                "body": {
-                    "matched_count": update_data.matched_count,  # 匹配到的數量
-                    "modified_count": update_data.modified_count  # 修改的數量
-                }
+            new_product = {
+                "name": request_data.get("name"),
+                "language": request_data.get("language"),
+                "category": request_data.get("category"),
+                "condiction": request_data.get("condiction"),
+                "author": request_data.get("author"),
+                "publisher": request_data.get("publisher"),
+                "publishDate": request_data.get("publishDate"),
+                "ISBN": request_data.get("ISBN"),
+                "price": request_data.get("price"),
+                "description": request_data.get("description"),
+                "photouri": request_data.get("photouri"),
+                "quantity": request_data.get("quantity")
             }
+            product_id = request_data.get("_id")
+            update_data = self.collection.update_one({"_id": ObjectId(product_id)}, {"$set": new_product})
+            body =  {
+                "matched_count": update_data.matched_count,  # 匹配到的數量
+                "modified_count": update_data.modified_count  # 修改的數量
+            }
+            
+            if update_data.matched_count == 0:
+                return ResponseHandler(400,"找不到該商品資料",body).response()
+            else:
+                return ResponseHandler(200,"商品更新成功",body).response()
             
         except Exception as e:
-            return {
-                "code": 500,
-                "message":f"Sever Error(product_service.py): {str(e)}",
-                "body": {}
-            }
+            message=f"Sever Error(product_service.py: {str(e)}"
+            return ResponseHandler(message=message).response()
+        
     # 加入購物車    
     def add_to_cart(self, request_data):
         try:

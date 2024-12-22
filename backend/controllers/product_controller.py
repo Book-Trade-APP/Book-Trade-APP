@@ -46,14 +46,11 @@ def update_product_controller():
     try:
         data = request.json
         response = product_service.update_product(data)
-        return jsonify(response), response["code"]
+        return response
 
     except Exception as e:
-        return jsonify({
-            "code": 500,
-            "message": str(e),
-            "body": {}
-        }), 500
+        message=f"Sever Error(product_controller.py: {str(e)}"
+        return ResponseHandler(message=message).response()
         
 # 加入購物車
 def add_to_cart_controller():
