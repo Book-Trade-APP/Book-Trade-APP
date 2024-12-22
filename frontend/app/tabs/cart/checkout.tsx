@@ -3,26 +3,28 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useHideTabBar } from "../../hook/HideTabBar";
 import { Headers } from "../../components/NoneButtonHeader";
-import { RouteProp, useNavigation } from "@react-navigation/native";
+import { NavigationProp, RouteProp, useNavigation } from "@react-navigation/native";
 import { CartStackParamList } from "../../navigation/type";
 import { Ionicons } from "@expo/vector-icons";
 import { Product } from "../../interface/Product";
 import { useEffect, useState } from "react";
-import { asyncGet } from "../../../utils/fetch";
+import { asyncGet, asyncPost } from "../../../utils/fetch";
 import { api } from "../../../api/api";
+import { getUserId } from "../../../utils/stroage";
 
 type CheckoutScreenRouteProp = RouteProp<CartStackParamList, "Checkout">;
 
 export default function CheckoutScreen({ route }: { route: CheckoutScreenRouteProp }) {
-  const navigation = useNavigation();
+  const CartNavigation = useNavigation<NavigationProp<CartStackParamList>>();
   useHideTabBar();
 
-  const [showDatePickerFor, setShowDatePickerFor] = useState<string | null>(null); // 改为 string | null
-  const [selectedDates, setSelectedDates] = useState<{ [key: string]: string }>({}); // 键类型改为 string
+  const [showDatePickerFor, setShowDatePickerFor] = useState<string | null>(null);
+  const [selectedDates, setSelectedDates] = useState<{ [key: string]: string }>({}); 
   const [selectProducts, setSelectProducts] = useState<Product[]>([]);
+  const [selectedPayment, setSelectedPayment] = useState("Cash");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { productId: selectedProductIds } = route.params;
-
+  const { productId: selectedProductIds, quantity } = route.params;
+  const totalAmount = selectProducts.reduce((total, product, index) => total + product.price * quantity[index], 0);
   const fetchSelectedProducts = async () => {
     setIsLoading(true);
     try {
@@ -48,9 +50,6 @@ export default function CheckoutScreen({ route }: { route: CheckoutScreenRoutePr
     fetchSelectedProducts();
   }, []);
 
-  const totalAmount = selectProducts.reduce((total, product) => total + product.price, 0);
-  const [selectedPayment, setSelectedPayment] = useState("cash");
-
   const handleDateChange = (event: any, selectedDate?: Date, productId?: string) => {
     setShowDatePickerFor(null);
     if (selectedDate && productId) {
@@ -63,8 +62,106 @@ export default function CheckoutScreen({ route }: { route: CheckoutScreenRoutePr
       }));
     }
   };
+  const deleteCartItem = async () => {
+    try {
+      const userId = await getUserId();
+      // 使用 Promise.all 同步處理所有商品的請求
+      const responses = await Promise.all(
+        selectedProductIds.map((productId) =>
+          asyncPost(api.UpdateCart, {
+            user_id: userId,
+            product_id: productId,
+            quantity: 0,
+          })
+        )
+      );
+  
+      // 檢查所有請求的結果
+      const failedResponses = responses.filter((response) => response.status !== 200);
+      if (failedResponses.length > 0) {
+        console.error("以下商品的數量更新失敗：", failedResponses);
+      }
+    } catch (error) {
+      console.error("更新購物車數量時發生錯誤：", error);
+    }
+  };
+  const getProductsInformation = async (product_id: string) => {
+    try {
+      const response = await asyncGet(`${api.GetOneProduct}?product_id=${product_id}`);
+      if (response.code === 200) {
+        return response.body;
+      } else {
+        console.error(`Failed to fetch product information for product ID ${product_id}`, response);
+        return null;
+      }
+    } catch (error) {
+      console.error(`Error fetching product information for product ID ${product_id}`, error);
+      return null;
+    }
+  };
+  const updateProductsQuantity = async (product_id: string, minus_quantity: number) => {
+    try {
+      const product = await getProductsInformation(product_id);
+      if (product) {
+        const updatedQuantity = product.quantity - minus_quantity;
+        if (updatedQuantity < 0) {
+          console.warn(`Product ID ${product_id} quantity cannot be negative. Skipping update.`);
+          return;
+        }
+        const response = await asyncPost(api.UpdateProduct, {
+          ISBN: product.ISBN,
+          _id: product._id,
+          author: product.author,
+          category: product.category,
+          condiction: product.condiction,
+          description: product.description,
+          language: product.language,
+          name: product.name,
+          photouri: product.photouri,
+          price: product.price,
+          publishDate: product.publishDate,
+          publisher: product.publisher,
+          quantity: updatedQuantity,
+        });
+        if (response.status !== 200) {
+          console.error(`Failed to update product quantity for product ID ${product_id}`, response);
+        }
+      }
+    } catch (error) {
+      console.error(`Error updating product quantity for product ID ${product_id}`, error);
+    }
+  };
+  const handleSendCheckout = async () => {
+    try {
+      const response = await asyncPost(api.CreateOrder, {
+        user_id: await getUserId(),
+        product_ids: selectedProductIds,
+        quantities: quantity,
+        payment_method: selectedPayment,
+      });
+  
+      if (response.status === 200) {
+        // 更新每個商品的數量
+        await Promise.all(
+          selectedProductIds.map((productId, index) =>
+            updateProductsQuantity(productId, quantity[index])
+          )
+        );
+  
+        // 刪除購物車中的商品
+        await deleteCartItem();
+  
+        // 導向成功頁面
+        CartNavigation.navigate("Success");
+      } else {
+        console.log("Failed to create orders: ", response);
+      }
+    } catch (error) {
+      console.log("Failed to process checkout: ", error);
+    }
+  };
 
-  const renderItem = ({ item }: { item: Product }) => (
+  const renderItem = ({ item, index }: { item: Product; index: number }) => (
     <View style={styles.card}>
       <View style={styles.row}>
         <Image style={styles.itemImage} source={{ uri: item.photouri }} />
@@ -90,14 +187,14 @@ export default function CheckoutScreen({ route }: { route: CheckoutScreenRoutePr
         <View style={styles.detailRow}>
           <TouchableOpacity
             style={styles.labelContainer}
-            onPress={() => setShowDatePickerFor(item._id)} // _id 类型为 string
+            onPress={() => setShowDatePickerFor(item._id)}
           >
             <Text style={styles.detailLabel}>約定時間</Text>
             <Text style={styles.detailInput}>
-              {selectedDates[item._id] || "請選擇約定時間"} {/* 使用 string 作为键 */}
+              {selectedDates[item._id] || "請選擇約定時間"}
             </Text>
           </TouchableOpacity>
-          {showDatePickerFor === item._id && ( // 比较 string 类型
+          {showDatePickerFor === item._id && (
             <DateTimePicker
               value={new Date()}
               mode="date"
@@ -107,6 +204,8 @@ export default function CheckoutScreen({ route }: { route: CheckoutScreenRoutePr
           )}
         </View>
       </View>
+      {/* 顯示數量在商品容器右下角 */}
+      <Text style={styles.quantityLabel}>{`x${quantity[index]}`}</Text>
     </View>
   );
 
@@ -115,7 +214,7 @@ export default function CheckoutScreen({ route }: { route: CheckoutScreenRoutePr
     label: string,
     value: string
   ) => (
-    <TouchableOpacity disabled //關閉信用卡選項
+    <TouchableOpacity //disabled //關閉信用卡選項
       style={[
         styles.paymentOption,
         selectedPayment === value && styles.selectedPaymentOption,
@@ -131,14 +230,14 @@ export default function CheckoutScreen({ route }: { route: CheckoutScreenRoutePr
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>正在加载...</Text>
+        <Text style={styles.loadingText}>正在加載...</Text>
       </View>
     );
   }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Headers title="結帳" back={() => navigation.goBack()} />
+      <Headers title="結帳" back={() => CartNavigation.goBack()} />
       <FlatList
         data={selectProducts}
         keyExtractor={(item) => item._id.toString()}
@@ -147,14 +246,14 @@ export default function CheckoutScreen({ route }: { route: CheckoutScreenRoutePr
         ListFooterComponent={
           <View style={styles.paymentContainer}>
             <Text style={styles.sectionTitle}>付款方式</Text>
-            {renderPaymentOption("cash-outline", "現金", "cash")}
-            {renderPaymentOption("card-outline", "信用卡", "creditCard")}
+            {renderPaymentOption("cash-outline", "現金", "Cash")}
+            {renderPaymentOption("card-outline", "信用卡", "Credit Card")}
           </View>
         }
       />
       <View style={styles.footerContainer}>
         <Text style={styles.totalAmount}>總金額: ${totalAmount}</Text>
-        <TouchableOpacity style={styles.checkoutButton} onPress={() => Alert.alert("結帳成功")}>
+        <TouchableOpacity style={styles.checkoutButton} onPress={handleSendCheckout}>
           <Text style={styles.checkoutButtonText}>結帳</Text>
         </TouchableOpacity>
       </View>
@@ -302,5 +401,16 @@ const styles = StyleSheet.create({
     loadingText: {
         fontSize: 18,
         color: "#555",
+    },
+    quantityLabel: {
+      position: "absolute",
+      top: 10,
+      right: 10,
+      fontSize: 14,
+      fontWeight: "bold",
+      color: "#333",
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 4,
     },
 });
