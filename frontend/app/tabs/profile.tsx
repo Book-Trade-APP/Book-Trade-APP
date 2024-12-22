@@ -11,12 +11,14 @@ import React from 'react';
 export default function ProfileScreen() {
   const navigation = useNavigation<NavigationProp<any>>();
   const [userName, setUserName] = useState<string | null>();
-
+  const [evaluate, setEvaluate] = useState<number>(0.0);
   const fetchUserInformation = async () => {
     try {
       const id = await getUserId();
       const user = await asyncGet(`${api.find}?_id=${id}`);
       setUserName(user.body.username);
+      setEvaluate(user.body.evaluate);
+      console.log(user)
     } catch (error) {
       console.error("Failed to fetch user information:", error);
     }
@@ -48,7 +50,7 @@ export default function ProfileScreen() {
           <Ionicons name="person-circle-outline" size={50} color="black" />
           <View style={styles.profileInfo}>
             <Text style={styles.userId}>{userName ? userName : "Loading..."}</Text>
-            <Text style={styles.rating}>⭐ 5.0</Text>
+            <Text style={styles.rating}>{evaluate ? `⭐ ${evaluate}` : "Loading..."}</Text>
           </View>
         </View>
         <TouchableOpacity style={styles.headerIcons} onPress={() => navigation.navigate('Setting')}>
