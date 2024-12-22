@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Alert } from 'react-native';
 import CheckBox from 'react-native-check-box';
 import { useFocusEffect, NavigationProp, useNavigation } from '@react-navigation/native';
 import { MainTabParamList, CartStackParamList } from '../navigation/type';
@@ -13,7 +13,7 @@ export default function ShoppingCartScreen() {
   const [cartList, setCartList] = useState<Product[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [selectAll, setSelectAll] = useState<boolean>(false);
-  const [checkOutButtonStatus, setCheckOutButtonStatus] = useState<boolean>(true);
+  const [checkOutButtonStatus, setCheckOutButtonStatus] = useState<boolean>(true); //disabled默認為true
   const MainNavigation = useNavigation<NavigationProp<MainTabParamList>>();
   const CartNavigation = useNavigation<NavigationProp<CartStackParamList>>();
 
@@ -37,17 +37,19 @@ export default function ShoppingCartScreen() {
       console.error('Error fetching cart list:', error);
     }
   };
-
+  
   const findProductDetails = async (cartIds: string[]) => {
     const productDetails: Product[] = [];
     try {
       for (const productId of cartIds) {
         const response = await asyncGet(`${api.GetOneProduct}?product_id=${productId}`);
         if (response.code === 200) {
-          productDetails.push({ ...response.body, quantity: 1 }); // 初始化数量为 1
+          productDetails.push({ ...response.body, quantity: 1, selected: false }); // 初始化數量為 1
         }
       }
       setCartList(productDetails);
+      setSelectAll(false);
+      setCheckOutButtonStatus(true);
     } catch (error) {
       console.error('Error fetching product details:', error);
     }
@@ -94,25 +96,60 @@ export default function ShoppingCartScreen() {
       .reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
-  const handleQuantityChange = (id: string, delta: number) => {
-    setCartList(prevItems =>
-      prevItems.map(item =>
-        item._id === id
-          ? {
-              ...item,
-              quantity: Math.max(1, item.quantity + delta), // 确保数量最少为 1
+  const handleQuantityChange = async (id: string, delta: number) => {
+    try {
+      const productResponse = await asyncGet(`${api.GetOneProduct}?product_id=${id}`);
+      if (productResponse.code !== 200) {
+        console.error('Error fetching product quantity:', productResponse);
+        return;
+      }
+
+      const maxQuantity = productResponse.body.quantity;
+
+      setCartList(prevItems =>
+        prevItems.map(item => {
+          if (item._id === id) {
+            const newQuantity = item.quantity + delta;
+
+            if (newQuantity > maxQuantity) {
+              Alert.alert('錯誤', '商品數量沒有那麼多');
+              return item;
             }
-          : item
-      )
-    );
+
+            if (newQuantity <= 0) {
+              asyncPost(api. UpdateCart, {
+                user_id: userId,
+                product_id: id,
+                quantity: 0,
+              }).catch(error => console.error("error updating cart: ", error))
+              return null;
+            }
+
+            asyncPost(api.UpdateCart, {
+              user_id: userId,
+              product_id: id,
+              quantity: newQuantity,
+            }).catch(error => console.error('Error updating cart: ', error));
+
+            return { ...item, quantity: newQuantity };
+          }
+          return item;
+        }).filter(Boolean) as Product[] // 过滤掉被删除的商品
+      );
+    } catch (error) {
+      console.error('Error handling quantity change:', error);
+    }
   };
 
   const handleCheckout = () => {
-    const selectedProductIds = cartList
-      .filter(item => item.selected)
-      .map(item => item._id);
-    console.log(selectedProductIds);
-    CartNavigation.navigate('Checkout', { productId: selectedProductIds });
+    const selectedProducts = cartList.filter(item => item.selected);
+
+    const productId = selectedProducts.map(item => item._id);
+    const quantity = selectedProducts.map(item => item.quantity);
+
+    console.log({ productId, quantity });
+
+    CartNavigation.navigate('Checkout', { productId, quantity });
   };
 
   return (
@@ -177,10 +214,7 @@ export default function ShoppingCartScreen() {
         </View>
         <Text style={styles.totalPrice}>總金額 ${calculateTotal()}</Text>
         <TouchableOpacity
-          style={[
-            styles.checkoutButton,
-            !checkOutButtonStatus && styles.activeCheckoutButton,
-          ]}
+          style={[styles.checkoutButton, !checkOutButtonStatus && styles.activeCheckoutButton]}
           onPress={handleCheckout}
           disabled={checkOutButtonStatus}
         >
@@ -233,7 +267,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'right',
-    color: '#f80',
     width: 60,
   },
   quantityContainer: {
