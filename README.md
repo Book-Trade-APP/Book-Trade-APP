@@ -763,3 +763,55 @@ ctrl + shift + p
     "message": "成功取得訂單"
 }
 ```
+
+
+### 用user_id查詢特定狀態訂單
+說明：
+`[POST] http://127.0.0.1:8000/orders/GetOrderByUserId`
+
+
+輸入：
+
+```
+{
+    "user_id": "67667a4e363b851f265a10b6",
+    "status" : "待處理" //狀態有(待處理、已完成、待評價、已取消)
+}
+```
+
+回傳：
+
+```
+{
+    "body": [
+        {
+            "_id": "67693d3833e26f81d3053569",
+            "product_ids": [
+                "67595e27df035ca464ff2dba",
+                "675958f77edaae5261c7adea",
+                "675d8dc570408f66838017d1"
+            ],
+            "quantities": [
+                "1",
+                "1",
+                "2"
+            ]
+        },
+        {
+            "_id": "67693fad00813a83a58257dc",
+            "product_ids": [
+                "67595e27df035ca464ff2dba",
+                "675958f77edaae5261c7adea",
+                "675d8dc570408f66838017d1"
+            ],
+            "quantities": [
+                "1",
+                "7",
+                "2"
+            ]
+        }
+    ],
+    "code": 200,
+    "message": "成功取得訂單"
+}
+```

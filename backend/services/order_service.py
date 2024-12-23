@@ -99,3 +99,27 @@ class OrderService:
 
         except Exception as e:
             return {"code": 500, "message": f"Server Error: {str(e)}", "body": {}}
+        
+        
+        
+    #5. 用user_id查詢不同狀態訂單(待處理、已完成、待評價、已取消)
+    def get_order_by_user_id(self, user_id, status):
+        try:
+            orders = list(self.orders.find({"user_id": (user_id), "status": status}))
+            if not orders:
+                return {"code": 404, "message": "找不到該訂單", "body": {}}
+            
+            filtered_orders = []
+            for order in orders:
+                filtered_order = {
+                    "_id": str(order["_id"]),
+                    "product_ids": [str(pid) for pid in eval(order["product_ids"])],
+                    "quantities": order["quantities"]
+                }
+                filtered_orders.append(filtered_order)
+            
+            return {"code": 200, "message": "成功取得訂單", "body": filtered_orders}
+
+        except Exception as e:
+            return {"code": 500, "message": f"Server Error: {str(e)}", "body": {}}
+
