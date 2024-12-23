@@ -8,11 +8,12 @@ import { FormField } from '../../components/FormField';
 import { DropdownField } from '../../components/DropdownField';
 import { Header } from '../../components/ButtonHeader';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { asyncGet, asyncPost, uploadImage } from '../../../utils/fetch';
+import { asyncPost, uploadImage } from '../../../utils/fetch';
 import { LoadingModal } from '../../components/LoadingModal';
 import * as ImagePicker from "expo-image-picker";
 import { ProfileStackParamList } from '../../navigation/type';
 import { api } from '../../../api/api';
+import { getUserId } from '../../../utils/stroage';
 
 export default function SellerScreen() {
   const [name, setName] = useState('');
@@ -25,6 +26,7 @@ export default function SellerScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [ISBN, setISBN] = useState<number>();
   const [price, setPrice] = useState<number>();
+  const [quantity, setQuantity] = useState<number>();
   const [description, setDescription] = useState('');
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false); //提交動畫是否載入
@@ -85,6 +87,14 @@ export default function SellerScreen() {
       Alert.alert('錯誤', '價格必須為正整數');
       return false;
     }
+    if (!quantity) {
+      Alert.alert('錯誤', '數量不能為空');
+      return false;
+    }
+    if (isNaN(Number(quantity)) || Number(quantity) <= 0) {
+      Alert.alert('錯誤', '數量必須為正整數');
+      return false;
+    }
     // 商品簡介檢查
     if (!description) {
       Alert.alert('錯誤', '商品簡介不能為空');
@@ -112,6 +122,7 @@ export default function SellerScreen() {
       setPublishDate(product.publishDate || undefined);
       setISBN(product.ISBN);
       setPrice(product.price);
+      setQuantity(product.quantity);
       setDescription(product.description || '');
       //setPhotoUri(product.photouri || null); 現在不能執行 因為假資料利用require取得照片位置 無法與Image-Picker所產生的照片 File:///...相容
     }
@@ -121,6 +132,7 @@ export default function SellerScreen() {
       setIsLoading(true);
       try {
         const image_url = await uploadImage(name, photoUri as string); //會取得照片url
+        const userId = await getUserId();
         const response = await asyncPost(api.AddProducts, {
           "name": name,
           "language": language,
@@ -131,8 +143,10 @@ export default function SellerScreen() {
           "publishDate": publishDate,
           "ISBN": ISBN,
           "price": price,
+          "quantity": quantity,
           "description": description,
           "photouri": image_url,
+          "seller_id": userId,
         });
         setIsLoading(false);
         if (response) {
@@ -210,14 +224,14 @@ export default function SellerScreen() {
       <SafeAreaView style={styles.container}>
         {product
           ? 
-          <Header title="修改商品" text="修改" navigation={navigation} Change={handleEditProduct}/>
+          <Header title="修改商品" text="修改" navigation={navigation} Change={handleEditProduct} />
           :
-          <Header title="發佈新商品" text="發佈" navigation={navigation} Change={handlePostProduct}/>
+          <Header title="發佈新商品" text="發佈" navigation={navigation} Change={handlePostProduct} />
         }
         <ScrollView>
           {/* Product Form */}
           <View style={styles.form}>
-            <FormField label="書籍名稱：" placeholder="請輸入書籍名稱" value={ name } onChangeText={ setName }/>
+            <FormField label="書籍名稱：" placeholder="請輸入書籍名稱" value={ name } onChangeText={ setName } />
             <DropdownField
               label="書籍語言："
               selectedValue={language}
@@ -240,8 +254,8 @@ export default function SellerScreen() {
               onValueChange={(value) => setcondiction(value)}
               items={['全新', '二手']}
             />
-            <FormField label="作者：" placeholder="請輸入作者名稱" value={ author } onChangeText={ setAutor }/>
-            <FormField label="出版社：" placeholder="請輸入出版社名稱" value={ publisher } onChangeText={ setPublisher }/>
+            <FormField label="作者：" placeholder="請輸入作者名稱" value={ author } onChangeText={ setAutor } />
+            <FormField label="出版社：" placeholder="請輸入出版社名稱" value={ publisher } onChangeText={ setPublisher } />
             <TouchableOpacity onPress={() => setShowDatePicker(true)}>
               <FormField
                 label="出版日期："
@@ -261,12 +275,16 @@ export default function SellerScreen() {
             <FormField label="ISBN碼：" placeholder="請輸入ISBN碼" keyboardType="numeric" value={ ISBN?.toString() } onChangeText={(text) => {
               const numericValue = Number(text); // 將文字轉換為數字
               setISBN(isNaN(numericValue) ? undefined : numericValue); // 處理無效輸入
-            }}/>
+            }} />
             <FormField label="價格：" placeholder="請輸入價格" keyboardType="numeric" value={ price?.toString() } onChangeText={(text) => {
               const numericValue = Number(text); // 將文字轉換為數字
               setPrice(isNaN(numericValue) ? undefined : numericValue); // 處理無效輸入
-            }}/>
-            <FormField label="商品簡介：" placeholder="請輸入商品簡介" value= {description} onChangeText={ setDescription }/>
+            }} />
+            <FormField label="商品數量：" placeholder='請輸入數量' keyboardType='numeric' value= { quantity?.toString() } onChangeText={(text) => {
+              const numericValue = Number(text); // 將文字轉換為數字
+              setQuantity(isNaN(numericValue) ? undefined : numericValue)
+            }} />
+            <FormField label="商品簡介：" placeholder="請輸入商品簡介" value= {description} onChangeText={ setDescription } />
           </View>
           {/* Image */}
           <TouchableOpacity style={styles.imageButtonContainer} onPress={handleAddPhoto}>

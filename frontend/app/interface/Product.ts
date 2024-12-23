@@ -12,7 +12,7 @@ export interface Product {
     price: number; //價格
     description: string; //書本介紹
     photouri: any; //圖片位址
-
+    quantity: number;
     selected: boolean; //被加到購物車
     collected: boolean; //被按收藏
 }
