@@ -3,7 +3,8 @@ from controllers.order_controller import (
     create_order_controller,
     delete_order_controller,
     get_all_orders_controller,
-    get_order_by_id_controller
+    get_order_by_id_controller,
+    get_order_by_user_id_controller
 )
 
 order_bp = Blueprint("order", __name__)
@@ -33,3 +34,15 @@ def get_order_by_id_route():
     if not order_id:
         return jsonify({"code": 400, "message": "缺少必要參數 'id'", "body": {}}), 400
     return get_order_by_id_controller(order_id)
+
+
+# 用user ID查詢不同狀態訂單(代處理、已完成、待評價、已取消)
+@order_bp.route("/GetOrderByUserId", methods=["POST"])
+def get_order_by_user_id_route():
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"code": 400, "message": "請求資料為空", "body": {}}), 400
+        return get_order_by_user_id_controller(data)
+    except Exception as e:
+        return jsonify({"code": 500, "message": f"Server Error: {str(e)}", "body": {}}), 500
