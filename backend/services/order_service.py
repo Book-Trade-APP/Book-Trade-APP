@@ -25,6 +25,10 @@ class OrderService:
             product_ids = data.get("product_ids")  # 商品ID陣列
             quantities = data.get("quantities")    # 商品數量陣列
             payment_method = data.get("payment_method")
+            note = data.get("note")
+            location = data.get("location")
+            agreed_time = data.get("agreed_time")
+            total_amount = data.get("total_amount")
 
             if not user_id or not product_ids or not quantities or not payment_method:
                 return {"code": 400, "message": "缺少必要資訊", "body": {}}
@@ -40,6 +44,10 @@ class OrderService:
                 "status": "待處理",
                 "payment_method": payment_method,
                 "created_at": datetime.datetime.utcnow(),
+                "note": note,
+                "location": location,
+                "agreed_time": agreed_time,
+                "total_amount": total_amount
             }
             result = self.orders.insert_one(order_data)
 
