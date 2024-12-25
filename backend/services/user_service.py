@@ -150,27 +150,32 @@ class UserService:
                     "message": "帳戶不存在",
                     "body": {}
                 }
+            
+            
+            password = request_data.get("password","")
             userName = request_data.get('username')
             email = request_data.get('email')
-            password = request_data.get("password")
             info = request_data.get("info")
             gender = request_data.get("gender")
             birthday = request_data.get("birthday")
             phone = request_data.get("phone")
             
-            hashed_password = self.bcrypt.generate_password_hash(password).decode('utf-8')
             myquery = {"_id": ObjectId(id)}
-            newvalues = { "$set": {
+            newvalues = {}
+            if password and not self.bcrypt.check_password_hash(user["password"], password):
+                hashed_password = self.bcrypt.generate_password_hash(password).decode('utf-8')
+                newvalues["password"] = hashed_password
+            
+            newvalues = {
                 "username": userName,
                 "email": email,
-                "password": hashed_password,
                 "info": info,
                 "gender":gender,
                 "birthday":birthday,
                 "phone":phone
-            } }
+            }
             # Success
-            user_data =self.collection.update_one(myquery,newvalues)
+            user_data =self.collection.update_one(myquery,{"$set":newvalues})
             return {
                 "code": 200,
                 "message": "更新個人資料成功",
