@@ -23,4 +23,6 @@ export enum api {
     GetCartList=`${url_path}/products/GetCartByUserId`,
     //Orders
     CreateOrder=`${url_path}/orders/CreateOrder`,
+    GetOrderById=`${url_path}/orders/GetOrderById`,
+    GetOrderByUserId=`${url_path}/orders/GetOrderByUserId`,
 };

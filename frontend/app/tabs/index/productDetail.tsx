@@ -155,7 +155,7 @@ export default function ProductDetailScreen() {
   const handleBuy = async () => {
     try {
       const response = await asyncPost(api.AddToCart, { user_id: userId, product_id: productId, quantity: 1 });
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 400) {
         navigation.reset({ routes: [{ name: "Cart" }] });
       } else {
         console.error("Error buying product:", response);
