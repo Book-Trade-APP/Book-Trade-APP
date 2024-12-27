@@ -63,15 +63,17 @@ export default function ProfileScreen() {
           <Ionicons name="bookmark-outline" size={24} color="black" />
           <Text style={styles.buttonText}>已收藏</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('Pending')}>
+        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('OrderStatus', { status: "待處理" })}>
           <Ionicons name="swap-horizontal-outline" size={24} color="black" />
           <Text style={styles.buttonText}>待交易</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('Evaluate')}>
+
+        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('OrderStatus', { status: "待評價" })}>
           <Ionicons name="star-outline" size={24} color="black" />
           <Text style={styles.buttonText}>待評價</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate("Completed")}>
+
+        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('OrderStatus', { status: "已完成" })}>
           <Ionicons name="checkmark-done-outline" size={24} color="black" />
           <Text style={styles.buttonText}>已完成</Text>
         </TouchableOpacity>

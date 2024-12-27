@@ -31,9 +31,7 @@ export type ProfileStackParamList = {
     Index: undefined;
     Setting: undefined;
     Favorite: undefined;
-    Pending: undefined;
-    Completed: undefined;
-    Evaluate: undefined;
+    OrderStatus: { status: "待處理" | "待評價" | "已完成" };
     Seller: {product?: Product};
     Edit: undefined;
     Report: undefined;
