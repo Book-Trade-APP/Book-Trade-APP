@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image } from "react-native";
-import { useNavigation, NavigationProp, useRoute, RouteProp } from "@react-navigation/native";
+import { useNavigation, NavigationProp, useRoute, RouteProp, useFocusEffect } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { api } from "../../../api/api";
 import { asyncPost, asyncGet } from "../../../utils/fetch";
@@ -23,49 +23,52 @@ export default function OrderStatusScreen() {
   const route = useRoute<RouteProp<ProfileStackParamList, 'OrderStatus'>>();
   const status = route.params?.status;
   
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        setLoading(true);
-        const userId = await getUserId();
-        const response = await asyncPost(api.GetOrderByUserId, {
-          user_id: userId,
-          status,
-        });
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const userId = await getUserId();
+      const response = await asyncPost(api.GetOrderByUserId, {
+        user_id: userId,
+        status,
+      });
 
-        if (response.data.body) {
-          const ordersData = response.data.body;
-          const detailedOrders = await Promise.all(
-            ordersData.map(async (order: any) => {
-              const firstProductId = order.product_ids[0];
-              let firstProduct = null;
+      if (response.data.body) {
+        const ordersData = response.data.body;
+        const detailedOrders = await Promise.all(
+          ordersData.map(async (order: any) => {
+            const firstProductId = order.product_ids[0];
+            let firstProduct = null;
 
-              if (firstProductId) {
-                try {
-                  const res = await asyncGet(`${api.GetOneProduct}?product_id=${firstProductId}`);
-                  firstProduct = res.body || null;
-                } catch (error) {
-                  console.error(`Failed to fetch product ${firstProductId}:`, error);
-                }
+            if (firstProductId) {
+              try {
+                const res = await asyncGet(`${api.GetOneProduct}?product_id=${firstProductId}`);
+                firstProduct = res.body || null;
+              } catch (error) {
+                console.error(`Failed to fetch product ${firstProductId}:`, error);
               }
+            }
 
-              return {
-                ...order,
-                firstProduct,
-              };
-            })
-          );
+            return {
+              ...order,
+              firstProduct,
+            };
+          })
+        );
 
-          setOrders(detailedOrders);
-        }
-      } catch (error) {
-        console.error("Failed to fetch orders:", error);
-      } finally {
-        setLoading(false);
+        setOrders(detailedOrders);
       }
-    };
-    fetchOrders();
-  }, [status]);
+    } catch (error) {
+      console.error("Failed to fetch orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchOrders();
+    }, [status])
+  );
 
   const renderItem = ({ item }: { item: any }) => {
     const { firstProduct } = item;
