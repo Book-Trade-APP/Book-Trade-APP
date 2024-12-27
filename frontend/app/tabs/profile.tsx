@@ -18,7 +18,6 @@ export default function ProfileScreen() {
       const user = await asyncGet(`${api.find}?_id=${id}`);
       setUserName(user.body.username);
       setEvaluate(user.body.evaluate);
-      console.log(user)
     } catch (error) {
       console.error("Failed to fetch user information:", error);
     }
