@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image } from "react-native";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
+import { useNavigation, NavigationProp, useRoute, RouteProp } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { api } from "../../../api/api";
 import { asyncPost, asyncGet } from "../../../utils/fetch";
@@ -8,11 +8,20 @@ import { getUserId } from "../../../utils/stroage";
 import { LoadingModal } from "../../components/LoadingModal";
 import { Headers } from "../../components/NoneButtonHeader";
 import { useHideTabBar } from "../../hook/HideTabBar";
+import { ProfileStackParamList } from "../../navigation/type";
 
-export default function PendingScreen() {
+const statusTitles: Record<"待處理" | "待評價" | "已完成", string> = {
+  "待處理": "待交易",
+  "待評價": "待評價",
+  "已完成": "已完成"
+};
+
+export default function OrderStatusScreen() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const navigation = useNavigation<NavigationProp<any>>();
+  const route = useRoute<RouteProp<ProfileStackParamList, 'OrderStatus'>>();
+  const status = route.params?.status;
   
   useEffect(() => {
     const fetchOrders = async () => {
@@ -21,7 +30,7 @@ export default function PendingScreen() {
         const userId = await getUserId();
         const response = await asyncPost(api.GetOrderByUserId, {
           user_id: userId,
-          status: "待處理",
+          status,
         });
 
         if (response.data.body) {
@@ -56,10 +65,12 @@ export default function PendingScreen() {
       }
     };
     fetchOrders();
-  }, []);
+  }, [status]);
 
   const renderItem = ({ item }: { item: any }) => {
     const { firstProduct } = item;
+    const source = status === "待處理" ? "pending" : status === "待評價" ? "evaluate" : "completed";
+    
     return (
       <TouchableOpacity
         style={styles.itemContainer}
@@ -70,7 +81,7 @@ export default function PendingScreen() {
               orderId: item._id,
               products: item.product_ids,
               quantity: item.quantities,
-              source: "pending",
+              source,
             }
           })
         }
@@ -79,12 +90,11 @@ export default function PendingScreen() {
         <View style={styles.itemDetails}>
           <Text style={styles.productName}>{firstProduct.name}</Text>
           <Text style={styles.productAuthor}>{firstProduct.author}</Text>
-          <Text style={styles.orderAmount}>訂單金額：</Text>
-          <Text style={styles.orderAmount$}>${item.total_amount}</Text>
           <View style={styles.divider} />
-          <TouchableOpacity style={styles.completeButton}>
-            <Text style={styles.completeButtonText}>完成訂單</Text>
-          </TouchableOpacity>
+          <View style={styles.amountContainer}>
+            <Text style={styles.orderAmount}>訂單金額：</Text>
+            <Text style={styles.orderAmount$}>${item.total_amount}</Text>
+          </View>
         </View>
       </TouchableOpacity>
     );
@@ -95,14 +105,14 @@ export default function PendingScreen() {
   return (
     <>
       <SafeAreaView style={styles.container}>
-        <Headers title="待交易" back={() => navigation.reset({ routes: [{ name: "Profile" }]})} />
+        <Headers title={statusTitles[status]} back={() => navigation.reset({ routes: [{ name: "Profile" }]})} />
         <FlatList
           data={orders}
           keyExtractor={(item) => item._id}
           renderItem={renderItem}
           ListFooterComponent={
             orders.length === 0 && !loading ? (
-              <Text style={styles.footerText}>沒有待處理的訂單</Text>
+              <Text style={styles.footerText}>{`沒有${statusTitles[status]}的訂單`}</Text>
             ) : null
           }
         />
@@ -111,80 +121,65 @@ export default function PendingScreen() {
     </>
   );
 }
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f9f9f9",
-  },
-  itemContainer: {
-    flexDirection: "row",
-    backgroundColor: "#ffffff",
-    borderRadius: 10,
-    padding: 15,
-    marginHorizontal: 16,
-    marginVertical: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  itemImage: {
-    width: 99,
-    height: 99,
-    borderRadius: 8,
-    marginRight: 15,
-  },
-  itemDetails: {
-    flex: 1,
-    justifyContent: "space-between",
-  },
-  productName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 4,
-  },
-  productAuthor: {
-    fontSize: 14,
-    color: "#777",
-    marginBottom: 8,
-  },
-  orderAmount: {
-    fontSize: 14,
-    color: "#555",
-    position: "absolute",
-    bottom: 15,
-  },
-  orderAmount$: {
-    fontSize: 14,
-    color: "#555",
-    position: "absolute",
-    bottom: 14,
-    left: 70,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#ddd",
-    marginVertical: 8,
-  },
-  completeButton: {
-    backgroundColor: "#4CAF50",
-    borderRadius: 5,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    alignSelf: "flex-end",
-  },
-  completeButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  footerText: {
-    textAlign: "center",
-    color: "#888",
-    marginVertical: 10,
-    fontSize: 14,
-  },
-});
+    container: {
+      flex: 1,
+      backgroundColor: "#f9f9f9",
+    },
+    itemContainer: {
+      flexDirection: "row",
+      backgroundColor: "#ffffff",
+      borderRadius: 10,
+      padding: 15,
+      marginHorizontal: 16,
+      marginVertical: 8,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    itemImage: {
+      width: 99,
+      height: 99,
+      borderRadius: 8,
+      marginRight: 15,
+    },
+    itemDetails: {
+      flex: 1,
+      justifyContent: "space-between",
+    },
+    productName: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: "#333",
+    },
+    productAuthor: {
+      fontSize: 14,
+      color: "#777",
+      marginBottom: 8,
+    },
+    amountContainer: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+    },
+    orderAmount: {
+      fontSize: 14,
+      color: "#555",
+    },
+    orderAmount$: {
+      fontSize: 14,
+      fontWeight: "700",
+      color: "#2f95dc",
+    },
+    divider: {
+      height: 1,
+      backgroundColor: "#ddd",
+    },
+    footerText: {
+      textAlign: "center",
+      color: "#888",
+      marginVertical: 10,
+      fontSize: 14,
+    },
+  });
