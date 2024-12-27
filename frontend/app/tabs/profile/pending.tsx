@@ -13,6 +13,7 @@ export default function PendingScreen() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const navigation = useNavigation<NavigationProp<any>>();
+  
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -25,7 +26,6 @@ export default function PendingScreen() {
 
         if (response.data.body) {
           const ordersData = response.data.body;
-
           const detailedOrders = await Promise.all(
             ordersData.map(async (order: any) => {
               const firstProductId = order.product_ids[0];
@@ -48,8 +48,6 @@ export default function PendingScreen() {
           );
 
           setOrders(detailedOrders);
-        } else {
-          console.error("Invalid response structure:", response);
         }
       } catch (error) {
         console.error("Failed to fetch orders:", error);
@@ -82,7 +80,7 @@ export default function PendingScreen() {
           <Text style={styles.productName}>{firstProduct.name}</Text>
           <Text style={styles.productAuthor}>{firstProduct.author}</Text>
           <Text style={styles.orderAmount}>訂單金額：</Text>
-          <Text style={styles.orderAmount$}>1000</Text>
+          <Text style={styles.orderAmount$}>${item.total_amount}</Text>
           <View style={styles.divider} />
           <TouchableOpacity style={styles.completeButton}>
             <Text style={styles.completeButtonText}>完成訂單</Text>
@@ -91,6 +89,7 @@ export default function PendingScreen() {
       </TouchableOpacity>
     );
   };
+  
   useHideTabBar();
 
   return (
