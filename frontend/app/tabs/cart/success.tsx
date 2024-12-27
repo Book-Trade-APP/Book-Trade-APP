@@ -2,10 +2,16 @@ import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
-import { MainTabParamList, ProfileStackParamList } from "../../navigation/type";
+import { MainTabParamList } from "../../navigation/type";
 export default function CheckoutSuccessScreen() {
     const MainNavigation = useNavigation<NavigationProp<MainTabParamList>>();
-    const ProfileNavigation = useNavigation<NavigationProp<ProfileStackParamList>>();
+    const handleGoOrderPages = () => {
+      MainNavigation.reset({ routes: [{ name: "Home" }] });
+      MainNavigation.navigate('Profile', { 
+        screen: 'OrderStatus',
+        params: { status: "待處理" }
+      });
+    }
     return (
         <SafeAreaView style={styles.container}>
         <View style={styles.content}>
@@ -27,7 +33,7 @@ export default function CheckoutSuccessScreen() {
             </TouchableOpacity>
             <TouchableOpacity
             style={[styles.button, styles.secondaryButton]}
-            onPress={() => ProfileNavigation.reset({ routes: [{ name: "Index"}] })} // ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+            onPress={handleGoOrderPages}
             >
             <Text style={[styles.buttonText, styles.secondaryButtonText]}>查看訂單</Text>
             </TouchableOpacity>
