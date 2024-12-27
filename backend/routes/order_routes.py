@@ -4,7 +4,8 @@ from controllers.order_controller import (
     delete_order_controller,
     get_all_orders_controller,
     get_order_by_id_controller,
-    get_order_by_user_id_controller
+    get_order_by_user_id_controller,
+    update_order_status_by_id_controller
 )
 
 order_bp = Blueprint("order", __name__)
@@ -46,3 +47,8 @@ def get_order_by_user_id_route():
         return get_order_by_user_id_controller(data)
     except Exception as e:
         return jsonify({"code": 500, "message": f"Server Error: {str(e)}", "body": {}}), 500
+
+# 根據order_id更改status
+@order_bp.route("/UpdateStatusById", methods=["POST"])
+def update_order_status_by_id_route():
+    return update_order_status_by_id_controller()

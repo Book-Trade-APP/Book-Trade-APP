@@ -41,3 +41,13 @@ def get_order_by_user_id_controller(data):
     response = order_service.get_order_by_user_id(user_id, status)
     return jsonify(response), response["code"]
 
+# 根據order_id更改status
+def update_order_status_by_id_controller():
+    try:
+        order_service = OrderService(current_app.config["MongoDB"])
+        data = request.json
+        result = order_service.update_order_by_id(data)
+        return jsonify(result),result.get("code")
+    except Exception as e:
+        return jsonify({"code": 500, "message": str(e), "body": {}}), 500
+    

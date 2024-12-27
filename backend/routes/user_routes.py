@@ -1,6 +1,5 @@
 from flask import Blueprint
-from controllers.user_contorller import login_controller, register_controller, update_controller,find_user_by_id_contorller, evaluate_controller, logout
-from flask_login import login_required
+from controllers.user_contorller import login_controller, register_controller, update_controller,find_user_by_id_contorller, evaluate_controller,forget_password_controller,update_password_controller
 
 # 初始化 Blueprint
 user_bp = Blueprint("user", __name__)
@@ -31,14 +30,13 @@ def get_user_by_id():
 def evaluate_route():
     return evaluate_controller()
 
-# 登出用戶
-@user_bp.route("/logout",methods=["POST"])
-@login_required
-def logout_route():
-    return logout()
+# # 忘記密碼
+# @user_bp.route("/ForgetPassword",methods=["POST"])
+# def forget_password_route():
+#     return forget_password_controller()
 
-# 測試用api，更新指定欄位的值
-# @user_bp.route("/UpdateKey",methods=["POST"])
-# def update_user_key_route():
-#     return update_user_key_controller()
+# # 更新密碼
+# @user_bp.route("/UpdatePassword",methods=["POST"])
+# def update_password_route():
+#     return update_password_controller()
 
