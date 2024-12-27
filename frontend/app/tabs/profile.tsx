@@ -18,7 +18,6 @@ export default function ProfileScreen() {
       const user = await asyncGet(`${api.find}?_id=${id}`);
       setUserName(user.body.username);
       setEvaluate(user.body.evaluate);
-      console.log(user)
     } catch (error) {
       console.error("Failed to fetch user information:", error);
     }
@@ -68,13 +67,13 @@ export default function ProfileScreen() {
           <Ionicons name="swap-horizontal-outline" size={24} color="black" />
           <Text style={styles.buttonText}>待交易</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('Completed')}>
-          <Ionicons name="checkmark-done-outline" size={24} color="black" />
-          <Text style={styles.buttonText}>已完成</Text>
-        </TouchableOpacity>
         <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('Evaluate')}>
           <Ionicons name="star-outline" size={24} color="black" />
-          <Text style={styles.buttonText}>評價</Text>
+          <Text style={styles.buttonText}>待評價</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate("Completed")}>
+          <Ionicons name="checkmark-done-outline" size={24} color="black" />
+          <Text style={styles.buttonText}>已完成</Text>
         </TouchableOpacity>
       </View>
 
