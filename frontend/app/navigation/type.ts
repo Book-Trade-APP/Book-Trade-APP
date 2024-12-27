@@ -9,7 +9,12 @@ export type MainTabParamList = {
     Chat: undefined;
     Home: undefined;
     Notification: undefined;
-    Profile: undefined;
+    Profile: {
+        screen?: keyof ProfileStackParamList;
+        params?: {
+            status?: "待處理" | "待評價" | "已完成"
+        }
+    } | undefined;
 }
 export type AuthStackParamList = {
     Login: undefined;
