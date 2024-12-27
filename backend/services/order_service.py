@@ -122,7 +122,8 @@ class OrderService:
                 filtered_order = {
                     "_id": str(order["_id"]),
                     "product_ids": [str(pid) for pid in eval(order["product_ids"])],
-                    "quantities": order["quantities"]
+                    "quantities": order["quantities"],
+                    "total_amount": order["total_amount"]
                 }
                 filtered_orders.append(filtered_order)
             

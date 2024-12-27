@@ -147,7 +147,7 @@ export default function ShoppingCartScreen() {
     const productId = selectedProducts.map(item => item._id);
     const quantity = selectedProducts.map(item => item.quantity);
 
-    console.log({ productId, quantity });
+    console.log(`User ${userId} checkout with ${productId}`);
 
     CartNavigation.navigate('Checkout', { productId, quantity });
   };
