@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Image, StyleSheet } from "react-native";
+import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import { useHideTabBar } from "../../hook/HideTabBar";
 import { Headers } from "../../components/NoneButtonHeader";
 import { NavigationProp, RouteProp, useNavigation } from "@react-navigation/native";
@@ -79,7 +80,50 @@ export default function OrderDetailScreen({ route }: { route: RouteProp<HomeStac
         break;
     }
   };
+  const handleStatusToShowButton = () => {
+    switch(source) {
+      case "pending":
+        return (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.completeButton]} 
+              onPress={() => null}
+            >
+              <Ionicons name="checkmark-circle" size={24} color="#fff" />
+              <Text style={styles.buttonText}>完成訂單</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.deleteButton]} 
+              onPress={() => null}
+            >
+              <Ionicons name="trash" size={24} color="#fff" />
+              <Text style={styles.buttonText}>刪除訂單</Text>
+            </TouchableOpacity>
+          </View>
+        )
+      case "evaluate":
+        return (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.evaluateButton]} 
+              onPress={() => null}
+            >
+              <Ionicons name="checkmark-circle" size={24} color="#fff" />
+              <Text style={styles.buttonText}>評價</Text>
+            </TouchableOpacity>
+          </View>
+        )
+      case "completed":
+        return (
+          <View style={styles.actionButtons}>
+          <View style={[styles.actionButton, styles.completedButton]}>
+            <Text style={styles.buttonCompletedText}>訂單已完成</Text>
+          </View>
+        </View>
+        )
 
+    }
+  }
   return (
     <>
       <SafeAreaView style={styles.container}>
@@ -107,6 +151,7 @@ export default function OrderDetailScreen({ route }: { route: RouteProp<HomeStac
               <Text style={styles.detailValue}>{orderDetail?.agreed_time}</Text>
             </View>
           </View>
+          {handleStatusToShowButton()}
           <View style={styles.orderInfo}>
             <Text style={styles.footerText}>訂單編號: {orderId}</Text>
             <Text style={styles.footerText}>成立時間: {orderDetail?.created_at ? formatDate(orderDetail.created_at) : ''}</Text>
@@ -197,6 +242,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 8,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   sectionTitle: {
     fontSize: 18,
@@ -220,6 +270,44 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "right",
     color: "#666",
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 16,
+    gap: 16,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 8,
+    gap: 8,
+  },
+  completeButton: {
+    backgroundColor: '#4CAF50',
+  },
+  deleteButton: {
+    backgroundColor: '#FF5252',
+  },
+  evaluateButton: {
+    backgroundColor: '#EB6C42',
+  },
+  completedButton: {
+    borderWidth: 3,
+    borderColor: "#A7A7A7",
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  buttonCompletedText: {
+    color: '#A7A7A7',
+    fontSize: 16,
+    fontWeight: '600',
   },
   orderInfo: {
     marginBottom: 16,
