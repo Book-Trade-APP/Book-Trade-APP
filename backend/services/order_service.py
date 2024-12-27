@@ -130,4 +130,28 @@ class OrderService:
 
         except Exception as e:
             return {"code": 500, "message": f"Server Error: {str(e)}", "body": {}}
-
+    
+    # 根據order_id更改status 
+    def update_order_by_id(self, data):
+        try:
+            order_id = data.get("order_id")
+            status = data.get("status")
+            if not order_id and status:
+                return {"code":400,"message":"缺少order_id, status","body":{}}
+            
+            update_order = self.orders.update_one({"_id":ObjectId(order_id)}, {"$set":{"status":status}})
+            if update_order.matched_count == 0:
+                return {"code":400,"message":"沒有找到相符的訂單","body":{}}
+            
+            # success
+            return {
+                "code":200,
+                "message":"update successfully",
+                "body":{
+                    "matched_count": update_order.matched_count,  # 匹配到的數量
+                    "modified_count": update_order.modified_count # 修改數量               
+                }
+            }
+        except Exception as e:
+            return {"code": 500, "message": f"Server Error: {str(e)}", "body": {}}
+        

@@ -1,6 +1,5 @@
 from flask import  request, jsonify, current_app
 from services.user_service import UserService
-from flask_login import logout_user
 
 # 登入
 def login_controller():
@@ -100,12 +99,34 @@ def evaluate_controller():
             "body": {}
         }), 500
 
-# 登出    
-def logout():
-    logout_user()
-    return jsonify({
-        "code": 200,
-        "message":"Logout Success",
-        "body": {}
-    }),200
+# 忘記密碼        
+def forget_password_controller():
+    try:
+        user_service = UserService(current_app.config["MongoDB"])
+        data = request.json
+        response = user_service.user_forget_password(data)
+        return jsonify(response), response.get("code")
+    
+    except Exception as e:
+        return jsonify({
+            "code": 500,
+            "message":f"Sever Error(user_contorller): {str(e)}",
+            "body": {}
+        }), 500
+
+# 更新密碼
+def update_password_controller():
+    try:
+        user_service = UserService(current_app.config["MongoDB"])
+        data = request.json
+        response = user_service.user_update_password(data)
+        return jsonify(response), response.get("code")
+    
+    except Exception as e:
+        return jsonify({
+            "code": 500,
+            "message":f"Sever Error(user_contorller): {str(e)}",
+            "body": {}
+        }), 500
+
 

@@ -1,10 +1,6 @@
-from copy import deepcopy
 import re
 from bson import ObjectId
 from flask_bcrypt import Bcrypt
-from flask_login import login_user
-from utils.User import User
-from flask import current_app 
 
 
 class UserService: 
@@ -107,17 +103,6 @@ class UserService:
                 }
 
             # Success
-            user = User(
-                    user_id=str(user_data["_id"]),
-                    username=user_data["username"],
-                    email=user_data["email"],
-                    password=user_data["password"],
-                    info=user_data["info"],
-                    gender=user_data["gender"],
-                    birthday=user_data["birthday"],
-                    phone=user_data["phone"]
-                )
-            login_user(user)
             user_data["_id"] = str(user_data["_id"])
             return {
                 "code": 200,
@@ -150,7 +135,6 @@ class UserService:
                     "message": "帳戶不存在",
                     "body": {}
                 }
-            
             
             password = request_data.get("password","")
             userName = request_data.get('username')
@@ -246,6 +230,63 @@ class UserService:
             return {
                 "code": 200,
                 "message": "成功更新使用者評價",
+                "body": {}
+            }
+        except Exception as e:
+            return {
+                "code": 500,
+                "message": f"Server Error(user_service): {str(e)}",
+                "body": {}
+            }
+    
+    # 使用者忘記密碼
+    def user_forget_password(self, data):
+        try:
+            email = data.get("email")
+            user = self.collection.find_one({"email": email})
+            if not user:
+                return {
+                    "code": 404,
+                    "message": "找不到該用戶",
+                    "body": {}
+                }
+            return {
+                "code": 200,
+                "message": "成功找到用戶",
+                "body": {
+                    "user_id": str(user["_id"])
+                }
+            }
+        except Exception as e:
+            return {
+                "code": 500,
+                "message": f"Server Error(user_service): {str(e)}",
+                "body": {}
+            }
+            
+    # 使用者更新密碼
+    def user_update_password(self, data):
+        try:
+            id = data.get("user_id")
+            new_password = data.get("new_password")
+            if not id or not new_password:
+                return {
+                    "code": 400,
+                    "message": "請提供user_id, new_password",
+                    "body": {}
+                }
+            user = self.collection.find_one({"_id":ObjectId(id)})
+            if not user:
+                return{
+                    "code": 404,
+                    "message": "使用者不存在",
+                    "body": {}
+                }
+            hashed_password = self.bcrypt.generate_password_hash(new_password).decode('utf-8')
+            self.collection.update_one({"_id":ObjectId(id)}, {"$set":{"password":hashed_password}})
+            return {
+                "code": 200,
+                "message": "成功更新密碼",
                 "body": {}
             }
         except Exception as e:
