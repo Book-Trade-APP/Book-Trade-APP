@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   logoContainer: {
-    backgroundColor: '#1AAC50'
+    backgroundColor: '#2f95dc'
   },
   logoText: {
     textAlign: 'center',

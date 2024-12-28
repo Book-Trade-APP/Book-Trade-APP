@@ -63,30 +63,29 @@ export default function EditScreen() {
         <FlatList
           data={editItems}
           keyExtractor={(item: Product) => item._id.toString()}
-          ListFooterComponent={
-            editItems.length > 0 ? (
-              <Text style={styles.footerText}>沒有更多商品了</Text>
-            ) : null
+          contentContainerStyle={{ paddingVertical: 8 }}
+          ListEmptyComponent={
+            <Text style={styles.footerText}>沒有更多商品了</Text>
           }
           renderItem={({ item }: { item: Product }) => (
-            <View style={styles.itemContainer}>
+            <TouchableOpacity 
+              style={styles.itemContainer} 
+              onPress={() => {
+                navigation.navigate("Seller", { product: item });
+              }}
+            >
               <Image 
                 style={styles.itemImage} 
                 source={{ uri: item.photouri }}
               />
-              <TouchableOpacity 
-                style={styles.itemInfo} 
-                onPress={() => {
-                  navigation.navigate("Seller", { product: item });
-                }}
-              >
-                <Text style={styles.title} numberOfLines={1}>{item.name}</Text>
-                <Text numberOfLines={1}>{item.author}</Text>
-              </TouchableOpacity>
-              <View>
-                <Text style={styles.priceText}>{`$${item.price}`}</Text>
+              <View style={styles.itemInfo}>
+                <Text style={styles.title} numberOfLines={2}>{item.name}</Text>
+                <Text style={styles.author} numberOfLines={1}>{item.author}</Text>
               </View>
-            </View>
+              <View style={styles.priceContainer}>
+                <Text style={styles.priceText}>${item.price}</Text>
+              </View>
+            </TouchableOpacity>
           )}
           refreshing={isLoading}
           onRefresh={getSellerProducts}
@@ -108,34 +107,72 @@ const styles = StyleSheet.create({
   itemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#e0e0e0',
-    borderRadius: 10,
-    padding: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 12,
     marginHorizontal: 16,
-    marginVertical: 5,
+    marginVertical: 6,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   itemImage: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
-    borderRadius: 5,
+    width: 100,
+    height: 100,
+    marginRight: 12,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
   },
   itemInfo: {
     flex: 1,
+    paddingVertical: 4,
+    justifyContent: 'space-between',
+    height: 80,
   },
   title: {
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+    lineHeight: 22,
+  },
+  author: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  priceContainer: {
+    minWidth: 70,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    paddingLeft: 8,
   },
   priceText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    width: 50, // 固定寬度，防止數字撐開
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FF4757',
+    textAlign: 'right',
   },
   footerText: {
     textAlign: 'center',
     color: '#888',
-    marginVertical: 10,
     fontSize: 14,
+    fontWeight: '500',
   },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 32,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#999',
+    marginTop: 8,
+  }
 });

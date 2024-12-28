@@ -35,6 +35,8 @@ export default function FavoriteScreen() {
         const favoriteIds: string[] = response.data.body;
         await findProductDetails(favoriteIds);
         setIsLoading(false)
+      } else if (response.status === 404){
+        setIsLoading(false)
       }
     } catch (error) {
       console.error('Error fetching favorites:', error);
@@ -81,6 +83,9 @@ export default function FavoriteScreen() {
           data={favoriteList}
           contentContainerStyle={styles.list}
           keyExtractor={(item: Product, index) => item.id || index.toString()}
+          ListEmptyComponent={
+            <Text style={styles.footerText}>沒有更多商品了</Text>
+          }
           renderItem={({ item }: { item: Product }) => (
             <TouchableOpacity 
               style={styles.itemContainer} 
@@ -94,7 +99,7 @@ export default function FavoriteScreen() {
               <Image style={styles.itemImage} source={{ uri: item.photouri }} />
               <View style={styles.itemInfo}>
                 <Text style={styles.title} numberOfLines={2}>{item.name}</Text>
-                <Text style={styles.author} numberOfLines={2}>{item.author}</Text>
+                <Text style={styles.author} numberOfLines={1}>{item.author}</Text>
               </View>
               <View style={styles.priceContainer}>
                 <Text style={styles.priceText}>${item.price}</Text>
@@ -139,7 +144,6 @@ const styles = StyleSheet.create({
   footerText: {
     textAlign: 'center',
     color: '#888',
-    marginVertical: 16,
     fontSize: 14,
     fontWeight: '500',
   },
