@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useHideTabBar } from "../../hook/HideTabBar";
 import { Headers } from "../../components/NoneButtonHeader";
 import { NavigationProp, RouteProp, useNavigation } from "@react-navigation/native";
 import { HomeStackParamList } from "../../navigation/type";
-import { asyncGet } from "../../../utils/fetch";
+import { asyncDelete, asyncGet, asyncPost } from "../../../utils/fetch";
 import { api } from "../../../api/api";
 import { Product } from "../../interface/Product";
 import { LoadingModal } from "../../components/LoadingModal";
@@ -20,7 +20,24 @@ export default function OrderDetailScreen({ route }: { route: RouteProp<HomeStac
   const [orderDetail, setOrderDetail] = useState<OrderDetail>();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isRatingModalVisible, setIsRatingModalVisible] = useState(false);
+  const [rating, setRating] = useState<number>(0);
+  const [evaluateSeller, setEvaluateSeller] = useState<string>("");
   const { orderId, products: productIds, quantity, source } = route.params;
+
+  const handleRating = async() => {
+    try {
+      const send_eavluate_resposne = await asyncPost(api.evaluate, {
+        'user_id': evaluateSeller,
+        'evaluate': rating,
+      })
+      if (send_eavluate_resposne.status === 200) {
+        await handleStatusToCompleted();
+      }
+    } catch (error) {
+      console.log("failed to send order rating");
+    }
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,6 +58,7 @@ export default function OrderDetailScreen({ route }: { route: RouteProp<HomeStac
           .filter(response => response.code === 200)
           .map(response => response.body);
         setProducts(validProducts);
+        setEvaluateSeller(validProducts.map((item) => item.seller_id)[0]);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -50,23 +68,116 @@ export default function OrderDetailScreen({ route }: { route: RouteProp<HomeStac
 
     fetchData();
   }, [orderId, productIds]);
-
-  const renderProducts = () => (
+  const ProductItem = React.memo(({ item, quantity }: { item: Product; quantity: number }) => (
+    <View style={styles.card}>
+      <View style={styles.row}>
+        <Image 
+          style={styles.itemImage} 
+          source={{ uri: item.photouri }}
+        />
+        <View style={styles.itemInfo}>
+          <Text style={styles.itemTitle} numberOfLines={2}>{item.name}</Text>
+          <Text style={styles.itemAuthor} numberOfLines={1}>{item.author}</Text>
+          <Text style={styles.itemPrice}>${item.price}</Text>
+        </View>
+      </View>
+      <Text style={styles.quantityLabel}>x{quantity}</Text>
+    </View>
+  ));
+  
+  const renderProducts = useCallback(() => (
     products.map((item, index) => (
-      <View key={item._id} style={styles.card}>
-        <View style={styles.row}>
-          <Image style={styles.itemImage} source={{ uri: item.photouri }} />
-          <View style={styles.itemInfo}>
-            <Text style={styles.itemTitle}>{item.name}</Text>
-            <Text style={styles.itemAuthor}>{item.author}</Text>
-            <Text style={styles.itemPrice}>${item.price}</Text>
+      <ProductItem 
+        key={item._id} 
+        item={item} 
+        quantity={quantity[index]} 
+      />
+    ))
+  ), [products, quantity]);
+  const RatingModal = () => (
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={isRatingModalVisible}
+      onRequestClose={() => setIsRatingModalVisible(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>為這筆訂單評分</Text>
+          <View style={styles.starsContainer}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <TouchableOpacity
+                key={star}
+                onPress={() => setRating(star)}
+              >
+                <Ionicons
+                  name={star <= rating ? "star" : "star-outline"}
+                  size={40}
+                  color="#FFD700"
+                  style={styles.star}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+          <Text style={styles.ratingText}>
+            {rating === 0 ? "請選擇評分" : `${rating} 顆星`}
+          </Text>
+          <View style={styles.modalButtons}>
+            <TouchableOpacity 
+              style={[styles.modalButton, styles.cancelButton]} 
+              onPress={() => [setIsRatingModalVisible(false), setRating(0)]}
+            >
+              <Text style={styles.modalButtonText}>取消</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.modalButton, styles.submitButton]} 
+              onPress={handleRating}
+              disabled={rating === 0}
+            >
+              <Text style={styles.modalButtonText}>確認</Text>
+            </TouchableOpacity>
           </View>
         </View>
-        <Text style={styles.quantityLabel}>x{quantity[index]}</Text>
       </View>
-    ))
+    </Modal>
   );
-
+  const handleStatusToCompleted = async () => {
+    try {
+      const response = await asyncPost(api.OrderStatusUpdate, {
+        "order_id": orderId,
+        "status": "已完成",
+      })
+      if (response.status === 200) {
+        setIsRatingModalVisible(false);
+        handleGoBack();
+      }
+    } catch (error) {
+      console.log("falied to change order status to completed");
+    }
+  }
+  const handleStatusToEvaluate = async () => { //status to evaluate
+    try {
+      const response = await asyncPost(api.OrderStatusUpdate, {
+        "order_id": orderId,
+        "status": "待評價"
+      })
+      if (response.status === 200) {
+        handleGoBack();
+      }
+    } catch (error) {
+      console.log("failed to change order status to evaluate");
+    }
+  }
+  const handelDeleteOrder = async () => {
+    try {
+      const response = await asyncDelete(`${api.DeleteOrder}?id=${orderId}`)
+      if (response.status === 200) {
+        handleGoBack();
+      }
+    } catch (error) {
+      console.log("failed to delete order");
+    }
+  }
   const handleGoBack = () => {
     switch(source) {
       case "pending":
@@ -87,17 +198,17 @@ export default function OrderDetailScreen({ route }: { route: RouteProp<HomeStac
           <View style={styles.actionButtons}>
             <TouchableOpacity 
               style={[styles.actionButton, styles.completeButton]} 
-              onPress={() => null}
+              onPress={handleStatusToEvaluate}
             >
               <Ionicons name="checkmark-circle" size={24} color="#fff" />
               <Text style={styles.buttonText}>完成訂單</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.actionButton, styles.deleteButton]} 
-              onPress={() => null}
+              onPress={handelDeleteOrder}
             >
               <Ionicons name="trash" size={24} color="#fff" />
-              <Text style={styles.buttonText}>刪除訂單</Text>
+              <Text style={styles.buttonText}>取消訂單</Text>
             </TouchableOpacity>
           </View>
         )
@@ -106,9 +217,9 @@ export default function OrderDetailScreen({ route }: { route: RouteProp<HomeStac
           <View style={styles.actionButtons}>
             <TouchableOpacity 
               style={[styles.actionButton, styles.evaluateButton]} 
-              onPress={() => null}
+              onPress={() => setIsRatingModalVisible(true)}
             >
-              <Ionicons name="checkmark-circle" size={24} color="#fff" />
+              <Ionicons name="star" size={24} color="#fff" />
               <Text style={styles.buttonText}>評價</Text>
             </TouchableOpacity>
           </View>
@@ -157,6 +268,7 @@ export default function OrderDetailScreen({ route }: { route: RouteProp<HomeStac
             <Text style={styles.footerText}>成立時間: {orderDetail?.created_at ? formatDate(orderDetail.created_at) : ''}</Text>
           </View>
         </ScrollView>
+        <RatingModal />
       </SafeAreaView>
       <LoadingModal isLoading={isLoading} message="正在載入訂單..." />
     </>
@@ -317,5 +429,64 @@ const styles = StyleSheet.create({
     color: "#666",
     marginTop: 8,
     fontSize: 14,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    width: '80%',
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 20,
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  star: {
+    marginHorizontal: 4,
+  },
+  ratingText: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 12,
+  },
+  modalButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#B5B5B5',
+  },
+  submitButton: {
+    backgroundColor: '#EB6C42',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
   },
 });
