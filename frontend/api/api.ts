@@ -22,6 +22,7 @@ export enum api {
     DeleteFromFavorites=`${url_path}/products/DeleteFromFavorites`,
     GetFavoriteList=`${url_path}/products/GetFavoritesByUserId`,
     GetCartList=`${url_path}/products/GetCartByUserId`,
+    GetSellerProducts=`${url_path}/products/GetProductBySellerId`,
     //Orders
     CreateOrder=`${url_path}/orders/CreateOrder`,
     DeleteOrder=`${url_path}/orders/DeleteOrder`,
