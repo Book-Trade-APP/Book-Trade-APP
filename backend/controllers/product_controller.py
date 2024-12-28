@@ -127,3 +127,15 @@ def get_cart_by_user_id_controller():
     except Exception as e:
         message=f"Sever Error(product_controller.py: {str(e)}"
         return ResponseHandler(message=message).response()
+    
+# seller_id找賣家的所有商品
+def get_product_by_seller_id_controller():
+    product_service = ProductService(current_app.config["MongoDB"])
+    try:
+        data = request.json
+        response = product_service.get_product_by_seller_id(data)
+        return response
+
+    except Exception as e:
+        message=f"Sever Error(product_controller.py: {str(e)}"
+        return ResponseHandler(message=message).response()
