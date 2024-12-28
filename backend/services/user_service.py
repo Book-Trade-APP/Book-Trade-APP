@@ -286,11 +286,11 @@ class UserService:
     def user_update_password(self, data):
         try:
             id = data.get("user_id")
-            new_password = data.get("new_password")
+            new_password = data.get("password")
             if not id or not new_password:
                 return {
                     "code": 400,
-                    "message": "請提供user_id, new_password",
+                    "message": "請提供user_id, password",
                     "body": {}
                 }
             user = self.collection.find_one({"_id":ObjectId(id)})

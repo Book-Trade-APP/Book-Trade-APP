@@ -35,8 +35,8 @@ def evaluate_route():
 def forget_password_route():
     return forget_password_controller()
 
-# # 更新密碼
-# @user_bp.route("/UpdatePassword",methods=["POST"])
-# def update_password_route():
-#     return update_password_controller()
+# 更新密碼
+@user_bp.route("/UpdatePassword",methods=["POST"])
+def update_password_route():
+    return update_password_controller()
 
