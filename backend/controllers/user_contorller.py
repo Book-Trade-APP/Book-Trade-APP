@@ -52,7 +52,7 @@ def register_controller():
 def update_controller():
     try:
         user_service = UserService(current_app.config["MongoDB"])
-        validation = {"_id", "username", "info", "gender", "birthday", "phone", "email", "password"}
+        validation = {"_id", "username", "info", "gender", "birthday", "phone", "email","password", "headshot"}
         data = request.json
         if not data or not set(data.keys()) == validation:
             return jsonify({
