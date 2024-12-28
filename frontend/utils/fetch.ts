@@ -93,6 +93,7 @@ export async function uploadImage(product_name: string, imageUri: string) {
         }
 
         const responseData = await upload_response.json();
+        // console.log(responseData.data.deletehash); 如果之後要做刪除使用這個
         return responseData.data.link;
 
     } catch (error) {
