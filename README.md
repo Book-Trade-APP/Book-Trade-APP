@@ -815,3 +815,274 @@ ctrl + shift + p
     "message": "成功取得訂單"
 }
 ```
+
+### 發送通知給特定使用者
+說明：
+`[POST]http://127.0.0.1:8000/notifications/send_to_user`
+
+輸入：
+
+```
+{
+    "user_id" : "67667a4e363b851f265a10b6",
+    "title" : "個人通知",
+    "message" : "這是一條私人通知"
+}
+```
+
+回傳：
+
+```
+{
+    "body": {
+        "_id": "6770381f8dcd193435f805ce",
+        "created_at": "Sat, 28 Dec 2024 17:40:47 GMT",
+        "is_read": false,
+        "message": "這是一條私人通知",
+        "title": "個人通知",
+        "user_id": "67667a4e363b851f265a10b6"
+    },
+    "code": 200,
+    "message": "通知已發送給用戶"
+}
+```
+
+### 傳送一條通知至全部人
+說明：
+`[POST]http://127.0.0.1:8000/notifications/send_to_all`
+
+輸入：
+
+```
+{
+    "title" : "重大通知",
+    "message" : "我們有通知系統了!"
+}
+```
+
+回傳：
+
+```
+{
+    "body": {
+        "notification_ids": [
+            "677039698dcd193435f805cf",
+            "677039698dcd193435f805d0",
+            "677039698dcd193435f805d1",
+            "677039698dcd193435f805d2",
+            "677039698dcd193435f805d3",
+            "677039698dcd193435f805d4",
+            "677039698dcd193435f805d5",
+            "677039698dcd193435f805d6"
+        ]
+    },
+    "code": 200,
+    "message": "已成功發送通知給 8 名用戶"
+}
+```
+
+### 取得特定用戶的所有通知
+說明：
+`[GET]http://127.0.0.1:8000/notifications/get_user_notifications?_id=`
+
+輸入：
+
+```
+_id = 67667a4e363b851f265a10b6
+```
+
+輸出：
+
+```
+{
+    "body": [
+        {
+            "_id": "677039698dcd193435f805cf",
+            "created_at": "Sat, 28 Dec 2024 17:46:17 GMT",
+            "is_read": false,
+            "message": "我們有通知系統了!",
+            "title": "重大通知",
+            "user_id": "67667a4e363b851f265a10b6"
+        },
+        {
+            "_id": "6770381f8dcd193435f805ce",
+            "created_at": "Sat, 28 Dec 2024 17:40:47 GMT",
+            "is_read": false,
+            "message": "這是一條私人通知",
+            "title": "個人通知",
+            "user_id": "67667a4e363b851f265a10b6"
+        }
+    ],
+    "code": 200,
+    "message": "成功獲取通知"
+}
+```
+
+### 取得特定用戶特定通知
+說明：
+`[POST]http://127.0.0.1:8000/notifications/get_user_notification_detail`
+
+輸入：
+
+```
+{
+    "user_id" : "67667a4e363b851f265a10b6",
+    "notification_id" : "6770381f8dcd193435f805ce"
+}
+```
+
+輸出：
+
+```
+{
+    "body": {
+        "_id": "6770381f8dcd193435f805ce",
+        "created_at": "Sat, 28 Dec 2024 17:40:47 GMT",
+        "is_read": false,
+        "message": "這是一條私人通知",
+        "title": "個人通知",
+        "user_id": "67667a4e363b851f265a10b6"
+    },
+    "code": 200,
+    "message": "成功獲取通知"
+}
+```
+
+### 設定為已讀
+說明：
+`[POST]http://127.0.0.1:8000/notifications/mark_as_read`
+
+輸入：
+
+```
+{
+    "notification_id" : "6770381f8dcd193435f805ce"
+}
+```
+
+回傳：
+
+```
+{
+    "body": {},
+    "code": 200,
+    "message": "通知已標記為已讀"
+}
+```
+
+### 刪除通知
+說明：
+`[POST]http://127.0.0.1:8000/notifications/delete_notification`
+
+有多種方法
+
+1.刪除該用戶的某條通知
+
+2.刪除該用戶的所有該標題通知
+
+3.刪除該用戶的所有通知
+
+4.刪除所有人的該標題通知
+
+輸入：
+
+1.
+```
+{
+    "user_id" : "67667a4e363b851f265a10b6",
+    "notification_id" : "6770381f8dcd193435f805ce"
+}
+```
+
+2.
+```
+{
+    "user_id" : "67667a4e363b851f265a10b6",
+    "title": "個人通知"
+}
+```
+
+3.
+```
+{
+    "user_id" : "67667a4e363b851f265a10b6"
+}
+```
+
+4.
+```
+{
+    "title" : "重大通知"
+}
+```
+
+輸出：
+
+1.
+```
+{
+    "body": {
+        "deleted_count": 1
+    },
+    "code": 200,
+    "message": "成功刪除通知"
+}
+```
+
+2.
+```
+{
+    "body": {
+        "deleted_count": 1
+    },
+    "code": 200,
+    "message": "成功刪除通知"
+}
+```
+
+3.
+```
+{
+    "body": {
+        "deleted_count": 4
+    },
+    "code": 200,
+    "message": "成功刪除通知"
+}
+```
+
+4.
+```
+{
+    "body": {
+        "deleted_count": 14
+    },
+    "code": 200,
+    "message": "成功刪除通知"
+}
+```
+
+### 取得特定用戶特定通知狀態
+說明：
+`[POST]http://127.0.0.1:8000/notifications/get_user_read_state`
+
+輸入：
+
+```
+{
+    "user_id" : "67667a4e363b851f265a10b6",
+    "notification_id" : "67703bc78dcd193435f805db"
+}
+```
+
+輸出：
+
+```
+{
+    "body": {
+        "is_read": false
+    },
+    "code": 200,
+    "message": "成功獲取通知狀態"
+}
+```
