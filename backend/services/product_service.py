@@ -431,3 +431,26 @@ class ProductService:
         except Exception as e:
             message=f"Sever Error(product_service.py: {str(e)}"
             return ResponseHandler(message=message).response()
+    
+    # seller_id找賣家的所有商品
+    def get_product_by_seller_id(self,request_data):
+        try:
+            if not request_data:
+                return ResponseHandler(400,"沒有取得任何request資料").response()
+                
+            seller_id = request_data["seller_id"]
+            if not seller_id:
+                return ResponseHandler(400,"需要提供seller_id").response()
+                
+            seller = self.db["users"].find_one({"_id": ObjectId(seller_id)})
+            if not seller:
+                return ResponseHandler(404,"沒有該賣家").response()
+            
+            # Success
+            products = self.db["products"].find({"seller_id":seller_id},{"_id": 1})
+            result = list(map(lambda d: str(d["_id"]),list(products)))
+            return ResponseHandler(200,"成功取得該賣家的所有product_id資料",result).response()
+            
+        except Exception as e:
+            message=f"Sever Error(product_service.py: {str(e)}"
+            return ResponseHandler(message=message).response()

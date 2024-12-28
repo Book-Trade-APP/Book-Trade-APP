@@ -24,14 +24,6 @@ class Config:
         f"@{MONGO_HOST}/?{MONGO_OPTIONS}"
     )
     
-    # flask-email 設定
-    MAIL_SERVE = os.getenv("MAIL_SERVE")
-    MAIL_PORT = os.getenv("MAIL_PORT")
-    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS")
-    MAIL_USERNAME=os.getenv("MAIL_USERNAME")
-    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD")
-    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER")
-    
 # 資料庫連接函數
 def init_db():
     client = MongoClient(Config.MONGO_URI)

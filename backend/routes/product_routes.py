@@ -52,3 +52,8 @@ def get_favorites_by_user_id():
 @product_bp.route("/GetCartByUserId",methods=["POST"])
 def get_cart_by_user_id():
     return get_cart_by_user_id_controller()
+
+# seller_id找賣家的所有商品
+@product_bp.route("/GetProductBySellerId",methods=["POST"])
+def get_product_by_seller_id_route():
+    return get_product_by_seller_id_controller()

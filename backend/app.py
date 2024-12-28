@@ -1,6 +1,5 @@
 from flask import Flask
 from flask_cors import CORS
-from flask_mail import Mail
 from config import Config, init_db
 from routes.product_routes import product_bp
 from routes.user_routes import user_bp
@@ -15,9 +14,6 @@ app.config.from_object(Config)
 
 # 初始化 MongoDB 連接，存入 app.config
 app.config["MongoDB"] = init_db()
-
-# flask-email
-mail = Mail(app)
 
 # blueprint
 app.register_blueprint(product_bp, url_prefix="/products")
