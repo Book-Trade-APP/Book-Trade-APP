@@ -89,13 +89,13 @@ export default function ProfileScreen() {
       {/* Options Section */}
       <View style={styles.optionsContainer}>
         <TouchableOpacity style={styles.optionRow} onPress={() => {navigation.navigate('Seller')}}>
-          <Ionicons name="lock-closed-outline" size={24} color="black" style={styles.optionIcon} />
-          <Text style={styles.optionText}>我是賣家</Text>
+          <Ionicons name="cloud-upload-outline" size={24} color="black" style={styles.optionIcon} />
+          <Text style={styles.optionText}>刊登新商品</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.optionRow} onPress={() => navigation.navigate('Edit')}>
           <Ionicons name="create-outline" size={24} color="black" style={styles.optionIcon} />
-          <Text style={styles.optionText}>編輯商品</Text>
+          <Text style={styles.optionText}>修改已發佈商品</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.optionRow} onPress={() => navigation.navigate('Report')}>
