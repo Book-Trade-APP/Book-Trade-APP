@@ -19,6 +19,7 @@ app.config["MongoDB"] = init_db()
 app.register_blueprint(product_bp, url_prefix="/products")
 app.register_blueprint(user_bp, url_prefix="/users")
 app.register_blueprint(order_bp, url_prefix="/orders")
+app.register_blueprint(order_bp, url_prefix="/notifications")
 # app.register_blueprint(test_bp, url_prefix="/test")
 
 if __name__ == "__main__":
