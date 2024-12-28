@@ -22,13 +22,14 @@ export default function OrderDetailScreen({ route }: { route: RouteProp<HomeStac
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRatingModalVisible, setIsRatingModalVisible] = useState(false);
   const [rating, setRating] = useState<number>(0);
-  const [evaluateSeller, setEvaluateSeller] = useState<string>("");
+  const [Seller, setSeller] = useState<string>("");
+  const [sellerUsername, setSellerUsername] = useState<string>("");
   const { orderId, products: productIds, quantity, source } = route.params;
 
   const handleRating = async() => {
     try {
       const send_eavluate_resposne = await asyncPost(api.evaluate, {
-        'user_id': evaluateSeller,
+        'user_id': Seller,
         'evaluate': rating,
       })
       if (send_eavluate_resposne.status === 200) {
@@ -38,34 +39,43 @@ export default function OrderDetailScreen({ route }: { route: RouteProp<HomeStac
       console.log("failed to send order rating");
     }
   }
+  const handleGetSellerUserName = async () => {
+    try {
+      const response = await asyncGet(`${api.find}?_id=${Seller}`);
+      setSellerUsername(response.body.username);
+    } catch (error) {
+      console.log("failed to find seller username");
+    }
+  }
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const [orderResponse, productsResponse] = await Promise.all([
+        asyncGet(`${api.GetOrderById}?id=${orderId}`),
+        Promise.all(productIds.map(id => 
+          asyncGet(`${api.GetOneProduct}?product_id=${id}`)
+        ))
+      ]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const [orderResponse, productsResponse] = await Promise.all([
-          asyncGet(`${api.GetOrderById}?id=${orderId}`),
-          Promise.all(productIds.map(id => 
-            asyncGet(`${api.GetOneProduct}?product_id=${id}`)
-          ))
-        ]);
-
-        if (orderResponse.code === 200) {
-          setOrderDetail(orderResponse.body);
-        }
-
-        const validProducts = productsResponse
-          .filter(response => response.code === 200)
-          .map(response => response.body);
-        setProducts(validProducts);
-        setEvaluateSeller(validProducts.map((item) => item.seller_id)[0]);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setIsLoading(false);
+      if (orderResponse.code === 200) {
+        setOrderDetail(orderResponse.body);
       }
-    };
 
+      const validProducts = productsResponse
+        .filter(response => response.code === 200)
+        .map(response => response.body);
+      setProducts(validProducts);
+      setSeller(validProducts.map((item) => item.seller_id)[0]);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    handleGetSellerUserName();
+  })
+  useEffect(() => {
     fetchData();
   }, [orderId, productIds]);
   const ProductItem = React.memo(({ item, quantity }: { item: Product; quantity: number }) => (
@@ -103,7 +113,7 @@ export default function OrderDetailScreen({ route }: { route: RouteProp<HomeStac
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>為這筆訂單評分</Text>
+          <Text style={styles.modalTitle}>{sellerUsername}</Text>
           <View style={styles.starsContainer}>
             {[1, 2, 3, 4, 5].map((star) => (
               <TouchableOpacity
@@ -120,7 +130,7 @@ export default function OrderDetailScreen({ route }: { route: RouteProp<HomeStac
             ))}
           </View>
           <Text style={styles.ratingText}>
-            {rating === 0 ? "請選擇評分" : `${rating} 顆星`}
+            {rating === 0 ? "為賣家評分" : `${rating} 顆星`}
           </Text>
           <View style={styles.modalButtons}>
             <TouchableOpacity 
@@ -451,6 +461,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '600',
+    textAlign: 'center',
     marginBottom: 20,
   },
   starsContainer: {
