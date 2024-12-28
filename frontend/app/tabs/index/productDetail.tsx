@@ -218,8 +218,14 @@ export default function ProductDetailScreen() {
         </View>
         <View style={styles.productInfoContainer}>
           <Text style={styles.productInfoTitle}>商品資訊</Text>
-          <Text style={styles.detailText}>{`作者：${product.author}`}</Text>
-          <Text style={styles.detailText}>{`出版社：${product.publisher}`}</Text>
+          <View style={styles.textContainer}>
+            <Text style={styles.detailText}>作者：</Text>
+            <Text style={[styles.detailText, styles.textWithWidth]}>{product.author}</Text>
+          </View>
+          <View style={styles.textContainer}>
+            <Text style={styles.detailText}>出版社：</Text>
+            <Text style={[styles.detailText, styles.textWithWidth]}>{product.publisher}</Text>
+          </View>
           <Text style={styles.detailText}>{`出版日期：${product.publishDate}`}</Text>
           <Text style={styles.detailText}>{`ISBN：${product.ISBN}`}</Text>
         </View>
@@ -277,6 +283,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
+    maxWidth: 350,
   },
   price: {
     color: "red",
@@ -287,10 +294,15 @@ const styles = StyleSheet.create({
   quantity: {
     color: "#888"
   },
+  textContainer: {
+    flexDirection: "row",
+  },
   detailText: {
     fontSize: 14,
     marginBottom: 5,
-    height: 25,
+  },
+  textWithWidth: {
+    maxWidth: 340,
   },
   ratingContainer: {
     flexDirection: "row",

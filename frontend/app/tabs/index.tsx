@@ -70,8 +70,8 @@ export default function HomeScreen() {
         style={styles.productImage}
       />
       <View style={styles.detailContainer}>
-        <Text style={styles.productTitle}>{item.name}</Text>
-        <Text style={styles.author}>{item.author}</Text>
+        <Text style={styles.productTitle} numberOfLines={1}>{item.name}</Text>
+        <Text style={styles.author} numberOfLines={1}>{item.author}</Text>
         <Text style={styles.productPrice}>${item.price}</Text>
       </View>
     </TouchableOpacity>
@@ -168,11 +168,13 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   productTitle: {
+    maxWidth: 260,
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 4,
   },
   author: {
+    maxWidth: 260,
     fontSize: 12,
     paddingBottom: 10,
     color: '#777'

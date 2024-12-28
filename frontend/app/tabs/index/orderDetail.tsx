@@ -321,10 +321,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   itemTitle: {
+    maxWidth: 200,
     fontSize: 16,
     fontWeight: "600",
   },
   itemAuthor: {
+    maxWidth: 200,
     fontSize: 14,
     color: "#666",
     marginTop: 4,
@@ -388,7 +390,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   detailValue: {
-    width: 150,
+    width: 220,
     fontSize: 16,
     textAlign: "right",
     color: "#666",

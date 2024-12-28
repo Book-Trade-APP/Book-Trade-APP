@@ -178,8 +178,8 @@ export default function ShoppingCartScreen() {
                 } as any);
               }}
             >
-              <Text style={styles.title}>{item.name}</Text>
-              <Text>{item.author}</Text>
+              <Text style={styles.title} numberOfLines={1}>{item.name}</Text>
+              <Text numberOfLines={1}>{item.author}</Text>
             </TouchableOpacity>
             <View>
               <View style={styles.quantityContainer}>
@@ -196,7 +196,7 @@ export default function ShoppingCartScreen() {
                 >
                   <Text style={styles.quantityButtonText}>+</Text>
                 </TouchableOpacity>
-                <Text style={styles.priceText}>{`$${item.price}`}</Text>
+                <Text style={styles.priceText} numberOfLines={1}>{`$${item.price}`}</Text>
               </View>
             </View>
           </View>

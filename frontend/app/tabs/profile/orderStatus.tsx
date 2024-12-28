@@ -154,12 +154,10 @@ export default function OrderStatusScreen() {
         keyExtractor={(item) => item._id}
         renderItem={memoizedRenderItem}
         ListEmptyComponent={ListEmptyComponent}
-        // 添加性能優化
         removeClippedSubviews={true}
         maxToRenderPerBatch={10}
         windowSize={10}
         initialNumToRender={5}
-        // 添加下拉刷新
         onRefresh={fetchOrders}
         refreshing={loading}
       />
@@ -195,11 +193,13 @@ const styles = StyleSheet.create({
       justifyContent: "space-between",
     },
     productName: {
+      maxWidth: 220,
       fontSize: 16,
       fontWeight: "600",
       color: "#333",
     },
     productAuthor: {
+      maxWidth: 220,
       fontSize: 14,
       color: "#777",
       marginBottom: 8,
