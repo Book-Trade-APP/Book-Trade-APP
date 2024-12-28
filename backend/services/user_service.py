@@ -1,6 +1,9 @@
 import re
+import random
+import string
 from bson import ObjectId
 from flask_bcrypt import Bcrypt
+from utils.send_email import send_email
 
 
 class UserService: 
@@ -11,11 +14,15 @@ class UserService:
         
     # 檢查重要資訊是否有空值，有空=>True   
     def _check_all_items(self, d: dict) -> bool:
-        validation = ["_id","username","email","password"]
+        validation = ["_id","username","email"]
         for i in validation:
             if not d[i]:
                 return True
         return False
+    
+    # 隨機生成臨時密碼
+    def _generate_temp_password(self):
+        return ''.join(random.choices(string.ascii_letters + string.digits, k=12))
 
     # 註冊邏輯
     def user_register(self, email, username, password):
@@ -124,7 +131,7 @@ class UserService:
             if self._check_all_items(request_data):
                 return{
                     "code": 400,
-                    "message":"名稱、密碼、email不能包含空值",
+                    "message":"_id, username, password, email不能包含空值",
                     "body": {}
                 }
             id = request_data.get("_id")
@@ -143,6 +150,7 @@ class UserService:
             gender = request_data.get("gender")
             birthday = request_data.get("birthday")
             phone = request_data.get("phone")
+            headshot = request_data.get("headshot")
             
             myquery = {"_id": ObjectId(id)}
             newvalues = {}
@@ -156,7 +164,8 @@ class UserService:
                 "info": info,
                 "gender":gender,
                 "birthday":birthday,
-                "phone":phone
+                "phone":phone,
+                "headshot":headshot
             }
             # Success
             user_data =self.collection.update_one(myquery,{"$set":newvalues})
@@ -238,7 +247,8 @@ class UserService:
                 "message": f"Server Error(user_service): {str(e)}",
                 "body": {}
             }
-    
+            
+    # todo: update jwt token
     # 使用者忘記密碼
     def user_forget_password(self, data):
         try:
@@ -250,13 +260,21 @@ class UserService:
                     "message": "找不到該用戶",
                     "body": {}
                 }
+
+            # 生成暫時密碼，暫時更新他的密碼
+            tmp_password = self._generate_temp_password()
+            hashed_password = self.bcrypt.generate_password_hash(tmp_password).decode('utf-8')
+            self.collection.update_one({"_id": user["_id"]},{"$set":{"password": hashed_password}})
+            subject = '【二手書交易平台】'
+            content = f'您好，這是您的暫時密碼：{tmp_password}\n請在登入後立即變更您的密碼！'
+            # 發送email重設密碼
+            send_email(to_email=email,subject=subject,plain_text_content=content)
             return {
                 "code": 200,
-                "message": "成功找到用戶",
-                "body": {
-                    "user_id": str(user["_id"])
-                }
+                "message": "成功寄送忘記密碼email",
+                "body": {}
             }
+            
         except Exception as e:
             return {
                 "code": 500,
@@ -268,11 +286,11 @@ class UserService:
     def user_update_password(self, data):
         try:
             id = data.get("user_id")
-            new_password = data.get("new_password")
+            new_password = data.get("password")
             if not id or not new_password:
                 return {
                     "code": 400,
-                    "message": "請提供user_id, new_password",
+                    "message": "請提供user_id, password",
                     "body": {}
                 }
             user = self.collection.find_one({"_id":ObjectId(id)})
