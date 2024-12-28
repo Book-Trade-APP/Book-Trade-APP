@@ -30,10 +30,10 @@ def get_user_by_id():
 def evaluate_route():
     return evaluate_controller()
 
-# # 忘記密碼
-# @user_bp.route("/ForgetPassword",methods=["POST"])
-# def forget_password_route():
-#     return forget_password_controller()
+# 忘記密碼
+@user_bp.route("/ForgetPassword",methods=["POST"])
+def forget_password_route():
+    return forget_password_controller()
 
 # # 更新密碼
 # @user_bp.route("/UpdatePassword",methods=["POST"])
