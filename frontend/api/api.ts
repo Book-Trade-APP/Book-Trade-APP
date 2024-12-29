@@ -6,8 +6,9 @@ const url_path = `http://${IP}:${PORT}`;
 export enum api {
     //根據"電腦"上的ip進行fetch 手機的預設網址也會是localhost，當使用localhost會無法找到電腦後端
     //user
-    login = `${url_path}/users/login`,
-    register = `${url_path}/users/register`,
+    login=`${url_path}/users/login`,
+    register=`${url_path}/users/register`,
+    forget=`${url_path}/users/ForgetPassword`,
     update=`${url_path}/users/update`,
     find=`${url_path}/users/get_user_by_id`,
     evaluate=`${url_path}/users/evaluate`,
