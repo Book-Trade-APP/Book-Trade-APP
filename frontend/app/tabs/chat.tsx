@@ -4,6 +4,7 @@ import { api } from '../../api/api';
 
 export default function ChatScreen({ navigation }) {
     const [chats, setChats] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
     const userId = "676e4d0a258fc1ff9af741c4"; // 測試用有效用戶 ID
 
     useEffect(() => {
@@ -19,6 +20,12 @@ export default function ChatScreen({ navigation }) {
         } catch (error) {
             console.error("Failed to fetch chats", error);
         }
+    };
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        await fetchChats();
+        setRefreshing(false);
     };
 
     const renderChatItem = ({ item }) => (
@@ -41,13 +48,6 @@ export default function ChatScreen({ navigation }) {
         </TouchableOpacity>
     );
 
-    if (chats.length === 0) {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.emptyMessage}>尚無聊天記錄</Text>
-            </View>
-        );
-    }
 
     return (
         <View style={styles.container}>
@@ -55,6 +55,11 @@ export default function ChatScreen({ navigation }) {
                 data={chats}
                 renderItem={renderChatItem}
                 keyExtractor={(item, index) => item.chat_id || index.toString()}
+                ListEmptyComponent={
+                    <Text style={styles.emptyMessage}>尚無聊天記錄</Text>
+                }
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
             />
         </View>
     );
