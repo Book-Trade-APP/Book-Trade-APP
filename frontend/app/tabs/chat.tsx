@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../../api/api';
+import { getUserId } from '../../utils/stroage';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function ChatScreen({ navigation }) {
+    const [userId, setUserId] = useState<string>('');
     const [chats, setChats] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
-    const userId = "676e4d0a258fc1ff9af741c4"; // 測試用有效用戶 ID
 
     useEffect(() => {
         fetchChats();
@@ -13,6 +16,9 @@ export default function ChatScreen({ navigation }) {
 
     const fetchChats = async () => {
         try {
+            const userId = await getUserId();
+            setUserId(userId);
+
             const response = await fetch(`${api.GetChatsByUserId}${userId}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
@@ -34,12 +40,18 @@ export default function ChatScreen({ navigation }) {
             onPress={() =>
                 navigation.navigate('ChatDetail', {
                     chatId: item.chat_id,
-                    username: item.username,
+                    userId: userId,
+                    receiver_id: item.receiver_id,
+                    receiver_username: item.username,
                     avatar: item.avatar,
                 })
             }
         >
-            <Image source={{ uri: item.avatar }} style={styles.avatar} />
+            {item.avatar ? (
+                <Image source={{ uri: item.avatar }} style={styles.avatar} />
+            ) : (
+                <Ionicons name="person-circle-outline" size={50} color="#ccc" style={styles.avatarPlaceholder} />
+            )}
             <View style={styles.chatInfo}>
                 <Text style={styles.username}>{item.username}</Text>
                 <Text style={styles.lastMessage}>{item.last_message}</Text>
@@ -50,7 +62,8 @@ export default function ChatScreen({ navigation }) {
 
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
+            <Text style={styles.header}>聊天</Text>
             <FlatList
                 data={chats}
                 renderItem={renderChatItem}
@@ -61,14 +74,23 @@ export default function ChatScreen({ navigation }) {
                 refreshing={refreshing}
                 onRefresh={handleRefresh}
             />
-        </View>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fff', padding: 10 },
-    chatItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
+    container: { flex: 1, backgroundColor: '#fff' },
+    header: {
+        fontSize: 24,
+        fontWeight: '600',
+        paddingLeft: 16,
+        paddingTop: 16,
+        marginBottom: 16,
+        color: '#333',
+    },
+    chatItem: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 10, marginBottom: 15 },
     avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 10 },
+    avatarPlaceholder: { marginRight: 10 },
     chatInfo: { flex: 1 },
     username: { fontSize: 16, fontWeight: 'bold' },
     lastMessage: { fontSize: 14, color: '#666' },

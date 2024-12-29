@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../../../api/api';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function ChatDetail({ route }) {
-    const { chatId, username, avatar } = route.params;
+    const { chatId, userId, receiver_id, receiver_username, avatar } = route.params;
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const flatListRef = useRef(null);
@@ -29,7 +31,6 @@ export default function ChatDetail({ route }) {
             const response = await fetch(`${api.GetMessagesByChatId}${chatId}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
-            console.log('Fetched messages:', data); // 日誌
             setMessages(data);
         } catch (error) {
             console.error("Failed to fetch messages", error);
@@ -44,14 +45,18 @@ export default function ChatDetail({ route }) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     chat_id: chatId,
-                    sender_id: '676e4d0a258fc1ff9af741c4',  // 替換為動態用戶 ID
-                    receiver_id: '676eb01e2bf5f3b89e82e787', // 替換為對方用戶 ID
+                    sender_id: userId,
+                    receiver_id: receiver_id,
                     content: newMessage,
                 }),
             });
 
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const sentMessage = await response.json();
+            const json = await response.json();
+            const sentMessage = json["inserted_message"]
+            console.log("json:", json);
+            console.log("sentMessage:", sentMessage);
+
             setMessages((prevMessages) => [...prevMessages, sentMessage]);
             setNewMessage('');
         } catch (error) {
@@ -60,18 +65,35 @@ export default function ChatDetail({ route }) {
     };
 
 
-    const renderMessageItem = ({ item }) => (
-        <View style={[styles.messageItem, item.isMine ? styles.myMessage : styles.theirMessage]}>
-            <Text style={styles.messageContent}>{item.content}</Text>
-            <Text style={styles.messageTime}>{new Date(item.time).toLocaleTimeString()}</Text>
-        </View>
-    );
+    const renderMessageItem = ({ item }) => {
+        const isMine = item.sender_id === userId;
+        const formatTime = (timestamp) => {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        };
+
+        return (
+            <View style={[styles.messageItem, isMine ? styles.myMessage : styles.theirMessage]}>
+                <Text style={styles.messageContent}>{item.content}</Text>
+                <Text style={styles.messageTime}>{formatTime(item.timestamp)}</Text>
+            </View>
+        );
+    };
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <Image source={{ uri: avatar }} style={styles.avatar} />
-                <Text style={styles.username}>{username}</Text>
+                {avatar ? (
+                    <Image source={{ uri: avatar }} style={styles.avatar} />
+                ) : (
+                    <Ionicons
+                        name="person-circle-outline"
+                        size={40}
+                        color="#ccc"
+                        style={styles.avatarPlaceholder}
+                    />
+                )}
+                <Text style={styles.receiver_username}>{receiver_username}</Text>
             </View>
             <FlatList
                 ref={flatListRef}
@@ -92,7 +114,7 @@ export default function ChatDetail({ route }) {
                     <Text style={styles.sendButtonText}>發送</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+        </SafeAreaView>
     );
 }
 
@@ -100,7 +122,8 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#fff' },
     header: { flexDirection: 'row', alignItems: 'center', padding: 10, backgroundColor: '#f5f5f5' },
     avatar: { width: 40, height: 40, borderRadius: 20, marginRight: 10 },
-    username: { fontSize: 18, fontWeight: 'bold' },
+    avatarPlaceholder: { marginRight: 10 },
+    receiver_username: { fontSize: 18, fontWeight: 'bold' },
     messageList: { flex: 1, padding: 10 },
     messageItem: { padding: 10, borderRadius: 8, marginBottom: 10 },
     myMessage: { alignSelf: 'flex-end', backgroundColor: '#dcf8c6' },
