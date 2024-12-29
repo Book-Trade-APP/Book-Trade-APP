@@ -286,11 +286,12 @@ class UserService:
     def user_update_password(self, data):
         try:
             id = data.get("user_id")
-            new_password = data.get("password")
-            if not id or not new_password:
+            password = data.get("password")
+            new_password = data.get("new_password")
+            if not (id and new_password and password):
                 return {
                     "code": 400,
-                    "message": "請提供user_id, password",
+                    "message": "請提供user_id, password, new password",
                     "body": {}
                 }
             user = self.collection.find_one({"_id":ObjectId(id)})
@@ -300,6 +301,21 @@ class UserService:
                     "message": "使用者不存在",
                     "body": {}
                 }
+                
+            if not self.bcrypt.check_password_hash(user["password"], password):
+                return {
+                    "code": 400,
+                    "message": "密碼驗證錯誤，請重新輸入",
+                    "body": {}
+                }
+                
+            if new_password == password:
+                return {
+                    "code":400,
+                    "message":"新、舊密碼相同，請重新輸入",
+                    "body":{}
+                }
+                
             hashed_password = self.bcrypt.generate_password_hash(new_password).decode('utf-8')
             self.collection.update_one({"_id":ObjectId(id)}, {"$set":{"password":hashed_password}})
             return {
