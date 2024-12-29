@@ -34,4 +34,8 @@ export enum api {
     // chat
     GetChatsByUserId = `${url_path}/api/chats/`,  // 根據用戶 ID 獲取聊天列表
     SendMessage = `${url_path}/api/messages/`,   // 發送消息
+    //notification
+    GetUserAllNotification=`${url_path}/notifications/get_user_notifications`,
+    UserSendNotification=`${url_path}/notifications/send_to_user`,
+    MakeRead=`${url_path}/notifications/mark_as_read`
 };
