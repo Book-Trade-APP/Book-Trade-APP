@@ -9,7 +9,6 @@ def create_chat_controller():
 
 def get_chats_controller(user_id):
     chats = get_user_chats(user_id)
-    print(f"chats: {chats}")
     for chat in chats:
         chat["_id"] = str(chat["_id"])
         chat["participants"] = [str(p) for p in chat["participants"]]

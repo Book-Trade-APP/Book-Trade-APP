@@ -33,6 +33,7 @@ export enum api {
     OrderStatusUpdate=`${url_path}/orders/UpdateStatusById`,
     // chat
     GetChatsByUserId = `${url_path}/api/chats/`,  // 根據用戶 ID 獲取聊天列表
+    GetMessagesByChatId = `${url_path}/api/messages/`,
     SendMessage = `${url_path}/api/messages/`,   // 發送消息
     //notification
     GetUserAllNotification=`${url_path}/notifications/get_user_notifications`,
