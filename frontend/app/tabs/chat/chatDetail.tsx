@@ -11,20 +11,8 @@ export default function ChatDetail({ route }) {
     const flatListRef = useRef(null);
 
     useEffect(() => {
-        if (!chatId) {
-            console.error("Invalid chatId");
-            return;
-        }
-        console.log('chatId:', chatId); // 日誌
         fetchMessages();
     }, []);
-
-    useEffect(() => {
-        console.log('Updated messages state:', messages); // 日誌
-        if (messages.length > 0) {
-            flatListRef.current.scrollToEnd({ animated: true });
-        }
-    }, [messages]);
 
     const fetchMessages = async () => {
         try {
@@ -101,6 +89,7 @@ export default function ChatDetail({ route }) {
                 renderItem={renderMessageItem}
                 keyExtractor={(item, index) => index.toString()}
                 style={styles.messageList}
+                onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
             />
             <View style={styles.inputContainer}>
                 <TextInput
