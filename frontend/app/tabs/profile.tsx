@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
@@ -6,18 +6,20 @@ import { clearUserData } from '../../utils/stroage';
 import { api } from '../../api/api';
 import { asyncGet } from '../../utils/fetch';
 import { getUserId } from '../../utils/stroage';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import React from 'react';
 export default function ProfileScreen() {
   const navigation = useNavigation<NavigationProp<any>>();
   const [userName, setUserName] = useState<string | null>();
   const [evaluate, setEvaluate] = useState<number>(0.0);
+  const [photouri, setPhotoUri] = useState<string>("");
   const fetchUserInformation = async () => {
     try {
       const id = await getUserId();
       const user = await asyncGet(`${api.find}?_id=${id}`);
       setUserName(user.body.username);
       setEvaluate(user.body.evaluate);
+      setPhotoUri(user.body.headshot);
     } catch (error) {
       console.error("Failed to fetch user information:", error);
     }
@@ -46,7 +48,12 @@ export default function ProfileScreen() {
       {/* Header Section */}
       <View style={styles.headerContainer}>
         <View style={styles.profileContainer}>
-          <Ionicons name="person-circle-outline" size={50} color="black" />
+          {photouri
+          ?
+            <Image source={{uri: photouri}} style={styles.image}/>
+          : 
+            <Ionicons name="person-circle-outline" size={80} color="black" />
+          }
           <View style={styles.profileInfo}>
             <Text style={styles.userId}>{userName ? userName : "Loading..."}</Text>
             <Text style={styles.rating}>{evaluate ? `⭐ ${evaluate}` : "Loading..."}</Text>
@@ -63,15 +70,17 @@ export default function ProfileScreen() {
           <Ionicons name="bookmark-outline" size={24} color="black" />
           <Text style={styles.buttonText}>已收藏</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('Pending')}>
+        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('OrderStatus', { status: "待處理" })}>
           <Ionicons name="swap-horizontal-outline" size={24} color="black" />
           <Text style={styles.buttonText}>待交易</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('Evaluate')}>
+
+        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('OrderStatus', { status: "待評價" })}>
           <Ionicons name="star-outline" size={24} color="black" />
           <Text style={styles.buttonText}>待評價</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate("Completed")}>
+
+        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('OrderStatus', { status: "已完成" })}>
           <Ionicons name="checkmark-done-outline" size={24} color="black" />
           <Text style={styles.buttonText}>已完成</Text>
         </TouchableOpacity>
@@ -80,13 +89,13 @@ export default function ProfileScreen() {
       {/* Options Section */}
       <View style={styles.optionsContainer}>
         <TouchableOpacity style={styles.optionRow} onPress={() => {navigation.navigate('Seller')}}>
-          <Ionicons name="lock-closed-outline" size={24} color="black" style={styles.optionIcon} />
-          <Text style={styles.optionText}>我是賣家</Text>
+          <Ionicons name="cloud-upload-outline" size={24} color="black" style={styles.optionIcon} />
+          <Text style={styles.optionText}>刊登新商品</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.optionRow} onPress={() => navigation.navigate('Edit')}>
           <Ionicons name="create-outline" size={24} color="black" style={styles.optionIcon} />
-          <Text style={styles.optionText}>編輯商品</Text>
+          <Text style={styles.optionText}>修改已發佈商品</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.optionRow} onPress={() => navigation.navigate('Report')}>
@@ -110,7 +119,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   logoContainer: {
-    backgroundColor: '#1AAC50'
+    backgroundColor: '#2f95dc'
   },
   logoText: {
     textAlign: 'center',
@@ -130,6 +139,11 @@ const styles = StyleSheet.create({
   profileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  image: {
+    width: 80,
+    height: 80,
+    borderRadius: 16,
   },
   profileInfo: {
     marginLeft: 8,

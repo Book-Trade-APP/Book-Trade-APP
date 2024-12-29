@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, TextInput, AlertButton } from 'react-native';
 import { Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,9 +7,10 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useHideTabBar } from '../../hook/HideTabBar';
+import * as ImagePicker from "expo-image-picker";
 import { LoadingModal } from '../../components/LoadingModal';
 import { getUserId } from '../../../utils/stroage';
-import { asyncGet, asyncPost } from '../../../utils/fetch';
+import { asyncGet, asyncPost, uploadImage } from '../../../utils/fetch';
 import { api } from '../../../api/api';
 
 
@@ -19,6 +20,8 @@ export default function SettingScreen() {
   const [selectedField, setSelectedField] = useState<{ label: string; key: string } | null>(null);
   const [modalValue, setModalValue] = useState<string | Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [userPhotoUri, setUserPhotoUri] = useState<string | null>(null);
+  const [oldPhotoUri, setOldPhotoUri] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userData, setUserData] = useState({
     _id: "",
@@ -28,7 +31,7 @@ export default function SettingScreen() {
     birthday: "",
     phone: "",
     email: "",
-    password: ""
+    password: "",
   });
 
   const fields = [
@@ -53,15 +56,60 @@ export default function SettingScreen() {
           birthday: user.body.birthday,
           phone: user.body.phone,
           email: user.body.email,
-          password: user.body.password
+          password: user.body.password,
         });
+        setUserPhotoUri(user.body.headshot);
+        setOldPhotoUri(user.body.headshot);
       } catch (error) {
         console.error("Failed to fetch user information:", error);
       }
     };
     fetchUserInformation();
   }, []);
-
+    const handleAddPhoto = async () => {
+      const options: AlertButton[] = [
+        {
+          text: '拍攝照片',
+          onPress: async () => {
+            const { status } = await ImagePicker.requestCameraPermissionsAsync();
+            if (status === 'granted') {
+              const result = await ImagePicker.launchCameraAsync({
+                mediaTypes: "images",
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 1,
+              });
+              if (!result.canceled) {
+                setUserPhotoUri(result.assets[0].uri);
+              }
+            } else {
+              Alert.alert('權限不足', '請允許相機權限以拍攝照片');
+            }
+          },
+        },
+        {
+          text: '從相簿選取',
+          onPress: async () => {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status === 'granted') {
+              const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: "images",
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 1,
+              });
+              if (!result.canceled) {
+                setUserPhotoUri(result.assets[0].uri);
+              }
+            } else {
+              Alert.alert('權限不足', '請允許相簿權限以選取照片');
+            }
+          },
+        },
+        { text: '取消', style: 'cancel' },
+      ];
+      Alert.alert('新增照片', '請選擇照片來源', options);
+    };
   const handleFieldPress = (field: typeof fields[number]) => {
     setSelectedField(field);
     if (field.key === 'birthday') {
@@ -101,15 +149,19 @@ export default function SettingScreen() {
   const handleSaveAll = async () => {
     try {
       setIsLoading(true);
+      const image_url = oldPhotoUri === userPhotoUri
+      ? userPhotoUri
+      : await uploadImage(userData.userName, userPhotoUri as string);
       const response = await asyncPost(api.update, {
         "_id": userData._id,
         "username": userData.userName,
         "info": userData.info,
-        "gender": userData.gender,
+        "gender": userData.gender, 
         "birthday": userData.birthday,
         "phone": userData.phone,
         "email": userData.email,
-        "password": userData.password
+        "password": userData.password,
+        "headshot": image_url
       });
       if (response.status === 200) {
         setIsLoading(false);
@@ -140,11 +192,15 @@ export default function SettingScreen() {
         </View>
 
         <View style={styles.profileSection}>
-          <TouchableOpacity style={styles.avatarButton}>
+          <TouchableOpacity style={styles.avatarButton} onPress={handleAddPhoto}>
+            {userPhotoUri ?
             <Image
               style={styles.avatar}
-              source={require("../../../assets/Chiikawa.jpg")}
+              source={{uri: userPhotoUri}}
             />
+            :
+            <Ionicons name="person-circle-outline" size={98} />
+            }
             <Text style={styles.editText}>編輯</Text>
           </TouchableOpacity>
         </View>
@@ -207,11 +263,11 @@ export default function SettingScreen() {
                 />
               )}
               <View style={styles.modalButtonContainer}>
+              <TouchableOpacity style={styles.modalButton} onPress={closeModal}>
+                  <Text style={styles.modalButtonText}>取消</Text>
+                </TouchableOpacity>
                 <TouchableOpacity style={styles.modalButton} onPress={handleSave}>
                   <Text style={styles.modalButtonText}>儲存</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.modalButton} onPress={closeModal}>
-                  <Text style={styles.modalButtonText}>取消</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -256,9 +312,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 100,
+    height: 100,
+    borderRadius: 10,
     backgroundColor: "#f0f0f0",
   },
   editText: {

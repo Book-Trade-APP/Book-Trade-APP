@@ -208,14 +208,24 @@ export default function ProductDetailScreen() {
           :
           <Ionicons name="person-circle-outline" size={32} />
           }
-          <Text style={styles.reviewText}>{sellerUserName}</Text>
-          <Ionicons name="star" size={20} color="#FFD700" />
-          <Text style={styles.ratingText}>{sellerEvaluate}</Text>
+          <View style={styles.userInfoContainer}>
+            <Text style={styles.reviewText}>{sellerUserName}</Text>
+            <View style={{flexDirection: "row"}}>
+              <Ionicons name="star" size={20} color="#FFD700" />
+              <Text style={styles.ratingText}>{sellerEvaluate}</Text>
+            </View>
+          </View>
         </View>
         <View style={styles.productInfoContainer}>
           <Text style={styles.productInfoTitle}>商品資訊</Text>
-          <Text style={styles.detailText}>{`作者：${product.author}`}</Text>
-          <Text style={styles.detailText}>{`出版社：${product.publisher}`}</Text>
+          <View style={styles.textContainer}>
+            <Text style={styles.detailText}>作者：</Text>
+            <Text style={[styles.detailText, styles.textWithWidth]}>{product.author}</Text>
+          </View>
+          <View style={styles.textContainer}>
+            <Text style={styles.detailText}>出版社：</Text>
+            <Text style={[styles.detailText, styles.textWithWidth]}>{product.publisher}</Text>
+          </View>
           <Text style={styles.detailText}>{`出版日期：${product.publishDate}`}</Text>
           <Text style={styles.detailText}>{`ISBN：${product.ISBN}`}</Text>
         </View>
@@ -273,6 +283,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
+    maxWidth: 350,
   },
   price: {
     color: "red",
@@ -283,32 +294,60 @@ const styles = StyleSheet.create({
   quantity: {
     color: "#888"
   },
+  textContainer: {
+    flexDirection: "row",
+  },
   detailText: {
     fontSize: 14,
     marginBottom: 5,
-    height: 25,
+  },
+  textWithWidth: {
+    maxWidth: 340,
   },
   ratingContainer: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 12,
     backgroundColor: "#fff",
     marginBottom: 10,
   },
   sellerImage: {
-    width: 28, 
-    height: 28, 
-    borderRadius: 14
+    width: 48, 
+    height: 48, 
+    borderRadius: 12,
+    backgroundColor: '#f0f0f0',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  userInfoContainer: {
+    flex: 1,
+    marginLeft: 12,
+    justifyContent: 'center',
+  },
+  userInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginRight: 8,
   },
   reviewText: {
-    marginLeft: 5,
-    marginRight: 10,
-    fontSize: 14,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
   },
   ratingText: {
-    fontSize: 14,
-    marginLeft: 5,
+    fontSize: 15,
+    marginLeft: 4,
+    color: '#666',
+    fontWeight: '500',
   },
   productInfoContainer: {
     backgroundColor: "#fff",

@@ -38,6 +38,27 @@ export async function asyncPost(api: string, body: {} | FormData) {
         return { status:500, data: null}; 
     }
 }
+/**
+ * 異步執行 Delete 請求
+ * @param api 要呼叫的api url
+ * @param body 
+ * @returns json 結果
+ */
+export async function asyncDelete(api: string) {
+   try {
+       const res: Response = await fetch(api, {
+           method: 'DELETE',
+           headers: {
+               'Content-Type': 'application/json',
+           }
+       });
+       const data = await res.json();
+       return { status: res.status, data };
+   } catch (error) {
+       console.error("API 調用失敗:", error);
+       return { status:500, data: null}; 
+   }
+}
 
 export async function uploadImage(product_name: string, imageUri: string) {
     //imgur資料 改用外部提取
@@ -72,6 +93,7 @@ export async function uploadImage(product_name: string, imageUri: string) {
         }
 
         const responseData = await upload_response.json();
+        // console.log(responseData.data.deletehash); 如果之後要做刪除使用這個
         return responseData.data.link;
 
     } catch (error) {

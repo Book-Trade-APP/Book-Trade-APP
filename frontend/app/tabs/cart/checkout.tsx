@@ -309,8 +309,8 @@ export default function CheckoutScreen({ route }: { route: RouteProp<CartStackPa
           <View style={styles.row}>
             <Image style={styles.itemImage} source={{ uri: product.photouri }} />
             <View style={styles.itemInfo}>
-              <Text style={styles.itemTitle}>{product.name}</Text>
-              <Text style={styles.itemAuthor}>{product.author}</Text>
+              <Text style={styles.itemTitle} numberOfLines={2}>{product.name}</Text>
+              <Text style={styles.itemAuthor} numberOfLines={2}>{product.author}</Text>
               <Text style={styles.itemPrice}>${product.price}</Text>
             </View>
           </View>
@@ -483,8 +483,10 @@ const styles = StyleSheet.create({
   itemTitle: {
     fontSize: 16,
     fontWeight: "600",
+    maxWidth: 200,
   },
   itemAuthor: {
+    maxWidth: 200,
     fontSize: 14,
     color: "#666",
     marginTop: 4,
@@ -541,7 +543,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   detailValue: {
-    width: 150,
+    width: 220,
     fontSize: 16,
     textAlign: "right",
     color: "#666",

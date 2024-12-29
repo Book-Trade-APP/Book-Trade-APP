@@ -29,9 +29,11 @@ export default function SellerScreen() {
   const [quantity, setQuantity] = useState<number>();
   const [description, setDescription] = useState('');
   const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [oldPhotoUri, setOldPhotoUri] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false); //提交動畫是否載入
+  const [editLoading, setEditLoading] = useState(false);
 
-  const route = useRoute<RouteProp<ProfileStackParamList>>();
+  const route = useRoute<RouteProp<ProfileStackParamList, 'Seller'>>();
   const { product } = route.params || {};
 
   const validateInputs = () => {
@@ -119,12 +121,13 @@ export default function SellerScreen() {
       setcondiction(product.condiction || '');
       setAutor(product.author || '');
       setPublisher(product.publisher || '');
-      setPublishDate(product.publishDate || undefined);
+      setPublishDate(product.publishDate);
       setISBN(product.ISBN);
       setPrice(product.price);
       setQuantity(product.quantity);
       setDescription(product.description || '');
-      //setPhotoUri(product.photouri || null); 現在不能執行 因為假資料利用require取得照片位置 無法與Image-Picker所產生的照片 File:///...相容
+      setPhotoUri(product.photouri);
+      setOldPhotoUri(product.photouri);
     }
   }, [product]);
   const handlePostProduct = async() => {
@@ -159,9 +162,47 @@ export default function SellerScreen() {
       }
     }
   }
-  const handleEditProduct = async() => {
+  const handleEditProduct = async () => {
+    if (!validateInputs()) return;
     
-  }
+    setEditLoading(true);
+    
+    try {
+      // Only upload new image if photo has changed
+      const finalPhotoUri = oldPhotoUri === photoUri
+        ? photoUri
+        : await uploadImage(name, photoUri as string);
+  
+      const productData = {
+        _id: product?._id,
+        name,
+        language,
+        category,
+        condiction,
+        author,
+        publisher,
+        publishDate,
+        ISBN,
+        price,
+        quantity,
+        description,
+        photouri: finalPhotoUri,
+      };
+  
+      const response = await asyncPost(api.UpdateProduct, productData);
+  
+      if (response.status === 200) {
+        Alert.alert("成功", "商品資料修改成功");
+        navigation.goBack();
+      } else {
+        throw new Error("Update failed");
+      }
+    } catch (error) {
+      console.log("failed to edit product");
+    } finally {
+      setEditLoading(false);
+    }
+  };
   const handleDateChange = (event: any, selectedDate?: Date) => {
     setShowDatePicker(false); // 關閉日期選擇器
     if (selectedDate) {
@@ -301,6 +342,10 @@ export default function SellerScreen() {
       <LoadingModal 
           isLoading={isLoading} 
           message="正在上傳商品..." 
+      />
+      <LoadingModal 
+          isLoading={editLoading} 
+          message="正在修改商品資訊..." 
       />
     </>
   );

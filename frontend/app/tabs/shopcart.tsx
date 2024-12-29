@@ -158,8 +158,8 @@ export default function ShoppingCartScreen() {
       <FlatList
         data={cartList}
         keyExtractor={(item: Product, index) => item._id || index.toString()}
-        ListFooterComponent={
-          <Text style={styles.footerText}>沒有更多商品了</Text>
+        ListEmptyComponent={
+          <Text style={styles.footerText}>購物車空空的</Text>
         }
         renderItem={({ item }: { item: Product }) => (
           <View style={styles.itemContainer}>
@@ -169,19 +169,13 @@ export default function ShoppingCartScreen() {
               onClick={() => handleToggleSelection(item._id)}
             />
             <Image style={styles.itemImage} source={{ uri: item.photouri }} />
-            <TouchableOpacity
-              style={styles.itemInfo}
-              onPress={() => {
-                MainNavigation.navigate('Home' as keyof MainTabParamList, {
-                  screen: 'Product',
-                  params: { productId: item._id, source: 'Cart' },
-                } as any);
-              }}
-            >
-              <Text style={styles.title}>{item.name}</Text>
-              <Text>{item.author}</Text>
-            </TouchableOpacity>
-            <View>
+            <View style={styles.itemInfo}>
+              <View style={styles.infoTopContainer}>
+                <View style={styles.textContainer}>
+                  <Text style={styles.title} numberOfLines={1}>{item.name}</Text>
+                  <Text style={styles.author} numberOfLines={1}>{item.author}</Text>
+                </View>
+              </View>
               <View style={styles.quantityContainer}>
                 <TouchableOpacity
                   style={styles.quantityButton}
@@ -196,7 +190,7 @@ export default function ShoppingCartScreen() {
                 >
                   <Text style={styles.quantityButtonText}>+</Text>
                 </TouchableOpacity>
-                <Text style={styles.priceText}>{`$${item.price}`}</Text>
+                <Text style={styles.priceText}>${item.price}</Text>
               </View>
             </View>
           </View>
@@ -234,93 +228,148 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: '600',
     paddingLeft: 16,
     paddingTop: 16,
     marginBottom: 16,
+    color: '#333',
   },
   itemContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#e0e0e0',
-    borderRadius: 10,
-    padding: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 12,
     marginHorizontal: 16,
-    marginVertical: 5,
+    marginVertical: 6,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   checkbox: {
-    marginRight: 5,
+    marginRight: 8,
+    alignSelf: 'flex-start',
+    marginTop: 4,
   },
   itemImage: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
-    borderRadius: 5,
+    width: 60,
+    height: 60,
+    marginRight: 12,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
   },
   itemInfo: {
     flex: 1,
   },
+  infoTopContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
+  textContainer: {
+    flex: 1,
+    marginRight: 8,
+  },
   title: {
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  author: {
+    fontSize: 14,
+    color: '#666',
+  },
+  priceAndQuantityContainer: {
+    alignItems: 'flex-end',
   },
   priceText: {
     fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'right',
-    width: 60,
+    fontWeight: '700',
+    color: '#FF4757',
+    marginBottom: 8,
   },
   quantityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5,
+    justifyContent: 'flex-end',
+    width: '100%',
   },
   quantityButton: {
-    padding: 5,
-    borderRadius: 5,
-    marginHorizontal: 5,
+    padding: 6,
+    borderRadius: 6,
+    backgroundColor: '#f0f0f0',
+    marginHorizontal: 8,
   },
   quantityButtonText: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
   },
   quantityText: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    minWidth: 30,
+    textAlign: 'center',
   },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#d3d3d3',
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 'auto',
+    backgroundColor: '#ffffff',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   totalPrice: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
   },
   checkoutButton: {
-    backgroundColor: '#aaa',
-    padding: 8,
-    borderRadius: 5,
+    backgroundColor: '#ddd',
+    padding: 12,
+    borderRadius: 8,
+    minWidth: 120,
   },
   activeCheckoutButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#2f95dc',
   },
   checkoutText: {
     color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   checkboxText: {
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginLeft: 4,
   },
   selectAllContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
   },
   footerText: {
     textAlign: 'center',
     color: '#888',
-    marginVertical: 10,
     fontSize: 14,
+    fontWeight: '500',
+    marginVertical: 12,
   },
 });

@@ -35,6 +35,8 @@ export default function FavoriteScreen() {
         const favoriteIds: string[] = response.data.body;
         await findProductDetails(favoriteIds);
         setIsLoading(false)
+      } else if (response.status === 404){
+        setIsLoading(false)
       }
     } catch (error) {
       console.error('Error fetching favorites:', error);
@@ -78,30 +80,31 @@ export default function FavoriteScreen() {
       <SafeAreaView style={styles.container}>
         <Headers title="收藏庫" back={handleGoBack} />
         <FlatList
-          data={favoriteList} // 收藏商品详情列表
-          keyExtractor={(item: Product, index) => item.id || index.toString()} // 使用商品 ID 或索引作为 key
-          ListFooterComponent={
-            <Text style={styles.footerText}>沒有其他收藏商品了</Text>
+          data={favoriteList}
+          contentContainerStyle={styles.list}
+          keyExtractor={(item: Product, index) => item.id || index.toString()}
+          ListEmptyComponent={
+            <Text style={styles.footerText}>沒有更多商品了</Text>
           }
           renderItem={({ item }: { item: Product }) => (
-            <View style={styles.itemContainer}>
+            <TouchableOpacity 
+              style={styles.itemContainer} 
+              onPress={() => {
+                navigation.navigate('Home' as keyof MainTabParamList, {
+                  screen: 'Product',
+                  params: { productId: item._id, source: 'Favorite' }
+                } as any);
+              }}
+            >
               <Image style={styles.itemImage} source={{ uri: item.photouri }} />
-              <TouchableOpacity 
-                style={styles.itemInfo} 
-                onPress={() => {
-                  navigation.navigate('Home' as keyof MainTabParamList, {
-                    screen: 'Product',
-                    params: { productId: item._id, source: 'Favorite' }
-                  } as any);
-                }}
-              >
-                <Text style={styles.title}>{item.name}</Text>
-                <Text>{item.author}</Text>
-              </TouchableOpacity>
-              <View>
-                <Text style={styles.priceText}>{`$${item.price}`}</Text>
+              <View style={styles.itemInfo}>
+                <Text style={styles.title} numberOfLines={2}>{item.name}</Text>
+                <Text style={styles.author} numberOfLines={1}>{item.author}</Text>
               </View>
-            </View>
+              <View style={styles.priceContainer}>
+                <Text style={styles.priceText}>${item.price}</Text>
+              </View>
+            </TouchableOpacity>
           )}
         />
       </SafeAreaView>
@@ -119,39 +122,64 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   list: {
-    marginTop: 15,
+    paddingTop: 12,
   },
   itemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#e0e0e0',
-    borderRadius: 10,
-    padding: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 12,
     marginHorizontal: 16,
-    marginVertical: 5,
+    marginVertical: 6,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   footerText: {
     textAlign: 'center',
     color: '#888',
-    marginVertical: 10,
     fontSize: 14,
+    fontWeight: '500',
   },
   itemImage: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
-    borderRadius: 5,
+    width: 100,
+    height: 100,
+    marginRight: 12,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
   },
   itemInfo: {
     flex: 1,
+    justifyContent: 'space-between',
+    height: 80,
   },
   title: {
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    lineHeight: 18,
+  },
+  author: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  priceContainer: {
+    minWidth: 70,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    paddingLeft: 8,
   },
   priceText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    width: 50,
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FF4757',
+    textAlign: 'right',
   },
 });

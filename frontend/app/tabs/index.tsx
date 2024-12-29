@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, FlatList, Image, Dimensions, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,17 +11,20 @@ const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<HomeStackParamList>>();
+  const [loading, setLoading] = useState<boolean>(true);
   const [searchText, setSearchText] = useState('');
   const [products, setProducts] = useState([]); // 存放所有商品
   const [filteredProducts, setFilteredProducts] = useState([]); // 搜索後的商品
 
   const fetchProducts = async () => {
     try {
+      setLoading(true);
       const response = await fetch(api.GetAllProducts);
       const data = await response.json();
       if (data.code === 200) {
         setProducts(data.body);
         setFilteredProducts(data.body); // 初始值與所有商品相同
+        setLoading(false);
       } else {
         Alert.alert('錯誤', data.message || '無法獲取商品數據');
       }
@@ -67,8 +70,8 @@ export default function HomeScreen() {
         style={styles.productImage}
       />
       <View style={styles.detailContainer}>
-        <Text style={styles.productTitle}>{item.name}</Text>
-        <Text style={styles.author}>{item.author}</Text>
+        <Text style={styles.productTitle} numberOfLines={1}>{item.name}</Text>
+        <Text style={styles.author} numberOfLines={1}>{item.author}</Text>
         <Text style={styles.productPrice}>${item.price}</Text>
       </View>
     </TouchableOpacity>
@@ -103,6 +106,8 @@ export default function HomeScreen() {
           ListFooterComponent={
             <Text style={styles.footerText}>沒有更多商品了</Text>
           }
+          onRefresh={fetchProducts}
+          refreshing={loading}
         />
       </SafeAreaView>
     </>
@@ -163,11 +168,13 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   productTitle: {
+    maxWidth: 260,
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 4,
   },
   author: {
+    maxWidth: 260,
     fontSize: 12,
     paddingBottom: 10,
     color: '#777'
