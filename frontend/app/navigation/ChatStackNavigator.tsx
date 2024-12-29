@@ -1,11 +1,15 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import { ChatStackParamList } from './type';
 import ChatScreen from '../tabs/chat';
-const ChatStack = createStackNavigator<ChatStackParamList>(); // purchase
+import ChatDetail from '../tabs/chat/chatDetail';
+
+const ChatStack = createStackNavigator<ChatStackParamList>();
+
 export function ChatStackNavigator() {
     return (
-      <ChatStack.Navigator screenOptions={{ headerShown: false }}>
-        <ChatStack.Screen name="Index" component={ChatScreen} />
-      </ChatStack.Navigator>
+        <ChatStack.Navigator screenOptions={{ headerShown: false }}>
+            <ChatStack.Screen name="ChatList" component={ChatScreen} />
+            <ChatStack.Screen name="ChatDetail" component={ChatDetail} />
+        </ChatStack.Navigator>
     );
 }

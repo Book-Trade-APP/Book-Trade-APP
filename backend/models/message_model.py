@@ -2,13 +2,13 @@ from bson import ObjectId
 from config import init_db
 from datetime import datetime
 
-db = init_db()  # 使用 config 中的 init_db 來初始化資料庫連接
+db = init_db()
 
 def create_message(chat_id, sender_id, receiver_id, content):
     message = {
-        "chat_id": chat_id,
-        "sender_id": sender_id,
-        "receiver_id": receiver_id,
+        "chat_id": ObjectId(chat_id),
+        "sender_id": ObjectId(sender_id),
+        "receiver_id": ObjectId(receiver_id),
         "content": content,
         "timestamp": datetime.utcnow(),
         "is_read": False
@@ -17,3 +17,6 @@ def create_message(chat_id, sender_id, receiver_id, content):
 
 def get_messages(chat_id):
     return list(db.messages.find({"chat_id": ObjectId(chat_id)}).sort("timestamp", 1))
+
+def get_message(message_id):
+    return db.messages.find_one({"_id": ObjectId(message_id)})

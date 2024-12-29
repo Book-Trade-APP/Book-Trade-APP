@@ -1,118 +1,110 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Button, TextInput } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../../api/api';
+import { getUserId } from '../../utils/stroage';
+import { Ionicons } from '@expo/vector-icons';
 
-export default function ChatScreen() {
-  const [chats, setChats] = useState([]);
-  const [message, setMessage] = useState('');
-  const [chatId, setChatId] = useState('');
-  const [userId, setUserId] = useState('676e4d0a258fc1ff9af741c4');  // 假設的用戶 ID
+export default function ChatScreen({ navigation }) {
+    const [userId, setUserId] = useState<string>('');
+    const [chats, setChats] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    fetchChats();  // 加載聊天列表
-  }, []);
+    useEffect(() => {
+        fetchChats();
+    }, []);
 
-  // 獲取聊天列表
-  const fetchChats = async () => {
-    try {
-      const response = await fetch(`${api.GetChatsByUserId}${userId}`);
-      const data = await response.json();
-      console.log('Chats fetched:', data);
-      setChats(data);
-    } catch (error) {
-      console.error('Error fetching chats:', error);
-    }
-  };
+    const fetchChats = async () => {
+        try {
+            const userId = await getUserId();
+            setUserId(userId);
 
-  // 發送消息
-  const sendMessage = async () => {
-    if (!message || !chatId) return;
-
-    const messageData = {
-      chat_id: chatId,
-      sender_id: userId,
-      receiver_id: '676eb01e2bf5f3b89e82e787',  // 假設的接收者 ID
-      content: message,
+            const response = await fetch(`${api.GetChatsByUserId}${userId}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            setChats(data);
+        } catch (error) {
+            console.error("Failed to fetch chats", error);
+        }
     };
 
-    try {
-      const response = await fetch(api.SendMessage, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(messageData),
-      });
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        await fetchChats();
+        setRefreshing(false);
+    };
 
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Message sent:', result);
-        setMessage('');  // 清空輸入框
-        fetchChats();  // 刷新聊天列表
-      } else {
-        console.error('Failed to send message');
-      }
-    } catch (error) {
-      console.error('Error sending message:', error);
-    }
-  };
+    const handleMessageSent = ({ chatId, lastMessage, lastMessageTime }) => {
+        setChats((prevChats) =>
+            prevChats.map((chat) =>
+                chat.chat_id === chatId
+                    ? { ...chat, last_message: lastMessage, last_message_time: lastMessageTime }
+                    : chat
+            )
+        );
+    };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>聊聊</Text>
-
-      <View>
-        <Text style={styles.chatTitle}>聊天列表</Text>
-        {chats.length > 0 ? (
-          chats.map((chat) => (
-            <View key={chat._id} style={styles.chatItem}>
-              <Text>Chat with: {chat.participants.join(', ')}</Text>
-              <Button title="Select Chat" onPress={() => setChatId(chat._id)} />
+    const renderChatItem = ({ item }) => (
+        <TouchableOpacity
+            style={styles.chatItem}
+            onPress={() =>
+                navigation.navigate('ChatDetail', {
+                    chatId: item.chat_id,
+                    userId: userId,
+                    receiver_id: item.receiver_id,
+                    receiver_username: item.username,
+                    avatar: item.avatar,
+                    onMessageSent: handleMessageSent,
+                })
+            }
+        >
+            {item.avatar ? (
+                <Image source={{ uri: item.avatar }} style={styles.avatar} />
+            ) : (
+                <Ionicons name="person-circle-outline" size={50} color="#ccc" style={styles.avatarPlaceholder} />
+            )}
+            <View style={styles.chatInfo}>
+                <Text style={styles.username}>{item.username}</Text>
+                <Text style={styles.lastMessage}>{item.last_message}</Text>
             </View>
-          ))
-        ) : (
-          <Text>No chats available</Text>
-        )}
-      </View>
+            <Text style={styles.chatTime}>{new Date(item.last_message_time).toLocaleDateString()}</Text>
+        </TouchableOpacity>
+    );
 
-      <View style={styles.messageContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Type a message"
-          value={message}
-          onChangeText={setMessage}
-        />
-        <Button title="Send Message" onPress={sendMessage} />
-      </View>
-    </View>
-  );
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <Text style={styles.header}>聊天</Text>
+            <FlatList
+                data={chats}
+                renderItem={renderChatItem}
+                keyExtractor={(item, index) => item.chat_id || index.toString()}
+                ListEmptyComponent={
+                    <Text style={styles.emptyMessage}>尚無聊天記錄</Text>
+                }
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+            />
+        </SafeAreaView>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  chatTitle: {
-    fontSize: 20,
-    marginVertical: 10,
-  },
-  chatItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  messageContainer: {
-    marginTop: 20,
-  },
-  input: {
-    borderWidth: 1,
-    padding: 10,
-    marginBottom: 10,
-  },
+    container: { flex: 1, backgroundColor: '#fff' },
+    header: {
+        fontSize: 24,
+        fontWeight: '600',
+        paddingLeft: 16,
+        paddingTop: 16,
+        marginBottom: 16,
+        color: '#333',
+    },
+    chatItem: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 10, marginBottom: 15 },
+    avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 10 },
+    avatarPlaceholder: { marginRight: 10 },
+    chatInfo: { flex: 1 },
+    username: { fontSize: 16, fontWeight: 'bold' },
+    lastMessage: { fontSize: 14, color: '#666' },
+    chatTime: { fontSize: 12, color: '#999' },
+    emptyMessage: { textAlign: 'center', marginTop: 20, fontSize: 16, color: '#888' },
 });
