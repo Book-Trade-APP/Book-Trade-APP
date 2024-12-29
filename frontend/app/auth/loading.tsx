@@ -15,8 +15,7 @@ export default function LoadingScreen() {
       }, []);
     return(
         <View style={styles.container}>
-            <Image source={require('../../assets/Chiikawa.jpg')} style={styles.logo} />
-            <Text style={styles.title}>二手書交易平台</Text>
+            <Image source={require('../../assets/Book-trade-icon.jpg')} style={styles.logo} />
             {isLoading && (
                 <ActivityIndicator size="large" color="#0000ff" />
             )}
@@ -26,13 +25,13 @@ export default function LoadingScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
     },
     logo: {
-        width: 100,
-        height: 100,
+        width: 200,
+        height: 200,
         marginBottom: 20,
     },
     title: {
