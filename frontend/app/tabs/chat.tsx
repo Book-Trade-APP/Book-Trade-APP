@@ -34,6 +34,16 @@ export default function ChatScreen({ navigation }) {
         setRefreshing(false);
     };
 
+    const handleMessageSent = ({ chatId, lastMessage, lastMessageTime }) => {
+        setChats((prevChats) =>
+            prevChats.map((chat) =>
+                chat.chat_id === chatId
+                    ? { ...chat, last_message: lastMessage, last_message_time: lastMessageTime }
+                    : chat
+            )
+        );
+    };
+
     const renderChatItem = ({ item }) => (
         <TouchableOpacity
             style={styles.chatItem}
@@ -44,6 +54,7 @@ export default function ChatScreen({ navigation }) {
                     receiver_id: item.receiver_id,
                     receiver_username: item.username,
                     avatar: item.avatar,
+                    onMessageSent: handleMessageSent,
                 })
             }
         >

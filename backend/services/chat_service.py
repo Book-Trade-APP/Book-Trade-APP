@@ -1,5 +1,5 @@
 from datetime import datetime
-from models.chat_model import create_chat, get_chats
+from models.chat_model import create_chat, get_chats, update_chat
 from bson import ObjectId
 from services.user_service import UserService
 from flask import current_app
@@ -33,12 +33,5 @@ def get_user_chats(user_id):
             print(f"無法找到用戶 {other_user_id}，錯誤訊息: {user_result['message']}")
     return processed_chats
 
-def update_last_message(chat_id, last_message, last_message_time):
-    chat_collection = db.chats
-    chat_collection.update_one(
-        {"_id": ObjectId(chat_id)},
-        {"$set": {
-            "last_message": last_message,
-            "last_message_time": last_message_time
-        }}
-    )
+def update_chat_last_message(chat_id, last_message, last_message_time):
+    return update_chat(chat_id, last_message, last_message_time)

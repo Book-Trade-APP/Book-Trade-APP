@@ -1,6 +1,6 @@
 from flask import request, jsonify
 from services.message_service import send_new_message, get_chat_messages, get_chat_message
-from services.chat_service import update_last_message
+from services.chat_service import update_chat_last_message
 
 def send_message_controller():
     data = request.get_json()
@@ -11,12 +11,16 @@ def send_message_controller():
 
     message = send_new_message(chat_id, sender_id, receiver_id, content)
     message_id = str(message.inserted_id)
-# TODO: 更新 message
-#     update_last_message(chat_id, message.content, message.timestamp)
+    inserted_message = get_chat_message(message_id)
+    update_chat_last_message(
+        inserted_message["chat_id"],
+        inserted_message["content"],
+        inserted_message["timestamp"]
+    )
     return jsonify({
         "message": "Message sent successfully!",
         "message_id": message_id,
-        "inserted_message": get_chat_message(message_id)
+        "inserted_message": inserted_message
     }), 201
 
 def get_messages_controller(chat_id):

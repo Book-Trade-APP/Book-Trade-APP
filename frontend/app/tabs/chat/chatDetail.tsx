@@ -46,6 +46,13 @@ export default function ChatDetail({ route }) {
             console.log("sentMessage:", sentMessage);
 
             setMessages((prevMessages) => [...prevMessages, sentMessage]);
+
+            route.params.onMessageSent({
+                chatId,
+                lastMessage: sentMessage["content"],
+                lastMessageTime: sentMessage["timestamp"]
+            })
+
             setNewMessage('');
         } catch (error) {
             console.error("Failed to send message", error);
