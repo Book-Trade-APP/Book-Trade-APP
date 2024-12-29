@@ -30,9 +30,9 @@ export default function SellerScreen() {
   const [description, setDescription] = useState('');
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [oldPhotoUri, setOldPhotoUri] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false); //提交動畫是否載入
-  const [editLoading, setEditLoading] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false); // 送出新商品的動畫
+  const [editLoading, setEditLoading] = useState(false); // 修改舊商品的動畫
+  const [productLoading, setProductLoading] = useState(false); //讀取舊商品的資訊的動畫 
   const route = useRoute<RouteProp<ProfileStackParamList, 'Seller'>>();
   const { product } = route.params || {};
 
@@ -115,6 +115,7 @@ export default function SellerScreen() {
   // 初始化商品資料
   useEffect(() => {
     if (product) {
+      setProductLoading(true)
       setName(product.name || '');
       setLanguage(product.language || '');
       setCategory(product.category || '');
@@ -129,6 +130,7 @@ export default function SellerScreen() {
       setPhotoUri(product.photouri);
       setOldPhotoUri(product.photouri);
     }
+    setProductLoading(false);
   }, [product]);
   const handlePostProduct = async() => {
     if (validateInputs()) {
@@ -346,6 +348,10 @@ export default function SellerScreen() {
       <LoadingModal 
           isLoading={editLoading} 
           message="正在修改商品資訊..." 
+      />
+      <LoadingModal 
+          isLoading={productLoading} 
+          message="正在讀取商品資訊..." 
       />
     </>
   );

@@ -1,9 +1,8 @@
 from bson import ObjectId
 from config import init_db
 from datetime import datetime
-from flask import jsonify
 
-db = init_db()  # 使用 config 中的 init_db 來初始化資料庫連接
+db = init_db()
 
 def create_chat(participants):
     chat = {
@@ -16,3 +15,12 @@ def create_chat(participants):
 def get_chats(user_id):
     chats = list(db.chats.find({"participants": ObjectId(user_id)}).sort("last_message_time", -1))
     return chats
+
+def update_chat(chat_id, last_message, last_message_time):
+    return db.chats.update_one(
+        {"_id": ObjectId(chat_id)},
+        {"$set": {
+            "last_message": last_message,
+            "last_message_time": last_message_time
+        }}
+    )

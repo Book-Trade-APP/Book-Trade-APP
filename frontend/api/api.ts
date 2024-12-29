@@ -12,6 +12,7 @@ export enum api {
     update=`${url_path}/users/update`,
     find=`${url_path}/users/get_user_by_id`,
     evaluate=`${url_path}/users/evaluate`,
+    updatePassword=`${url_path}/users/UpdatePassword`,
     //product
     AddProducts=`${url_path}/products/AddProducts`,
     GetOneProduct=`${url_path}/products/GetOneProduct`,
@@ -32,5 +33,10 @@ export enum api {
     OrderStatusUpdate=`${url_path}/orders/UpdateStatusById`,
     // chat
     GetChatsByUserId = `${url_path}/api/chats/`,  // 根據用戶 ID 獲取聊天列表
+    GetMessagesByChatId = `${url_path}/api/messages/`,
     SendMessage = `${url_path}/api/messages/`,   // 發送消息
+    //notification
+    GetUserAllNotification=`${url_path}/notifications/get_user_notifications`,
+    UserSendNotification=`${url_path}/notifications/send_to_user`,
+    MakeRead=`${url_path}/notifications/mark_as_read`
 };

@@ -23,6 +23,7 @@ export default function SettingScreen() {
   const [userPhotoUri, setUserPhotoUri] = useState<string | null>(null);
   const [oldPhotoUri, setOldPhotoUri] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [passwordErrorText, setPasswordErrorText] = useState<string>("");
   const [userData, setUserData] = useState({
     _id: "",
     userName: "",
@@ -33,7 +34,13 @@ export default function SettingScreen() {
     email: "",
     password: "",
   });
-
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  
   const fields = [
     { label: "名稱", key: "userName" },
     { label: "簡介", key: "info" },
@@ -145,6 +152,57 @@ export default function SettingScreen() {
   const closeModal = () => {
     setModalVisible(false);
   };
+  const handlePasswordChange = () => {
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      setPasswordErrorText('請填寫所有密碼欄位');
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordErrorText('新密碼與確認密碼不符');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setPasswordErrorText('新密碼長度需至少6個字元');
+      return;
+    }
+
+    if (passwordData.newPassword === passwordData.currentPassword) {
+      setPasswordErrorText('新密碼與舊密碼相同');
+      return;
+    }
+
+    handleUpdatePassword();
+  };
+
+  const handleUpdatePassword = async () => {
+    try {
+      setIsLoading(true);
+      const response = await asyncPost(api.updatePassword, {
+        "user_id": userData._id,
+        "password": passwordData.currentPassword,
+        "new_password": passwordData.newPassword
+      });
+
+      if (response.status === 200) {
+        Alert.alert('成功', '密碼已更新');
+        setShowPasswordModal(false);
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        });
+      } else {
+        setPasswordErrorText('輸入的舊密碼錯誤');
+      }
+    } catch (error) {
+      console.error("Failed to update password:", error);
+      Alert.alert('錯誤', '更新密碼時發生錯誤');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSaveAll = async () => {
     try {
@@ -220,6 +278,72 @@ export default function SettingScreen() {
               </Text>
             </TouchableOpacity>
           ))}
+          <TouchableOpacity
+            style={styles.infoRow}
+            onPress={() => setShowPasswordModal(true)}
+          >
+            <Text style={styles.infoLabel}>密碼</Text>
+            <Text style={styles.infoAction}>修改</Text>
+          </TouchableOpacity>
+          <Modal
+          visible={showPasswordModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowPasswordModal(false)}
+        >
+          <View style={styles.modalBackground}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalText}>修改密碼</Text>
+              
+              <TextInput
+                style={styles.modalTextInput}
+                value={passwordData.currentPassword}
+                onChangeText={(text) => setPasswordData(prev => ({ ...prev, currentPassword: text }))}
+                placeholder="目前密碼"
+                secureTextEntry
+              />
+              
+              <TextInput
+                style={styles.modalTextInput}
+                value={passwordData.newPassword}
+                onChangeText={(text) => setPasswordData(prev => ({ ...prev, newPassword: text }))}
+                placeholder="新密碼"
+                secureTextEntry
+              />
+              
+              <TextInput
+                style={styles.modalTextInput}
+                value={passwordData.confirmPassword}
+                onChangeText={(text) => setPasswordData(prev => ({ ...prev, confirmPassword: text }))}
+                placeholder="確認新密碼"
+                secureTextEntry
+              />
+              <Text style={styles.errorText}>{passwordErrorText}</Text>
+              <View style={styles.modalButtonContainer}>
+                <TouchableOpacity 
+                  style={styles.modalButton} 
+                  onPress={() => {
+                    setShowPasswordModal(false);
+                    setPasswordData({
+                      currentPassword: '',
+                      newPassword: '',
+                      confirmPassword: '',
+                    });
+                  }}
+                >
+                  <Text style={styles.modalButtonText}>取消</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={styles.modalButton}
+                  onPress={handlePasswordChange}
+                >
+                  <Text style={styles.modalButtonText}>確認</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
         </View>
 
         {showDatePicker && (
@@ -363,6 +487,12 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  errorText: {
+    width: 200,
+    textAlign: 'center',
+    color: 'red',
     marginBottom: 12,
   },
   pickerContainer: {
