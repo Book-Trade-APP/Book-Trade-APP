@@ -8,7 +8,7 @@ const ChatStack = createStackNavigator<ChatStackParamList>();
 export function ChatStackNavigator() {
     return (
         <ChatStack.Navigator screenOptions={{ headerShown: false }}>
-            <ChatStack.Screen name="ChatList" component={ChatScreen} />
+            <ChatStack.Screen name="Index" component={ChatScreen} />
             <ChatStack.Screen name="ChatDetail" component={ChatDetail} />
         </ChatStack.Navigator>
     );
