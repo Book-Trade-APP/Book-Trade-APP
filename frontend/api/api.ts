@@ -30,5 +30,8 @@ export enum api {
     DeleteOrder=`${url_path}/orders/DeleteOrder`,
     GetOrderById=`${url_path}/orders/GetOrderById`,
     GetOrderByUserId=`${url_path}/orders/GetOrderByUserId`,
-    OrderStatusUpdate=`${url_path}/orders/UpdateStatusById`
+    OrderStatusUpdate=`${url_path}/orders/UpdateStatusById`,
+    // chat
+    GetChatsByUserId = `${url_path}/api/chats/`,  // 根據用戶 ID 獲取聊天列表
+    SendMessage = `${url_path}/api/messages/`,   // 發送消息
 };
