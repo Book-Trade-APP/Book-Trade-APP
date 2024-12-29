@@ -206,13 +206,13 @@ export default function ProductDetailScreen() {
           ?
           <Image style={styles.sellerImage} source={{ uri: sellerHeadShot }} />
           :
-          <Ionicons name="person-circle-outline" size={32} />
+          <Ionicons name="person-circle-outline" size={48} />
           }
           <View style={styles.userInfoContainer}>
             <Text style={styles.reviewText}>{sellerUserName}</Text>
             <View style={{flexDirection: "row"}}>
               <Ionicons name="star" size={20} color="#FFD700" />
-              <Text style={styles.ratingText}>{sellerEvaluate}</Text>
+              <Text style={styles.ratingText}>{Number(sellerEvaluate).toFixed(1)}</Text>
             </View>
           </View>
         </View>
