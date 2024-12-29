@@ -1,5 +1,5 @@
 //todo: 改成env
-const IP = "192.168.0.231";
+const IP = "192.168.122.9";
 const PORT = "8000";
 const url_path = `http://${IP}:${PORT}`;
 
