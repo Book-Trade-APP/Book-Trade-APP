@@ -12,6 +12,7 @@ export enum api {
     update=`${url_path}/users/update`,
     find=`${url_path}/users/get_user_by_id`,
     evaluate=`${url_path}/users/evaluate`,
+    updatePassword=`${url_path}/users/UpdatePassword`,
     //product
     AddProducts=`${url_path}/products/AddProducts`,
     GetOneProduct=`${url_path}/products/GetOneProduct`,
