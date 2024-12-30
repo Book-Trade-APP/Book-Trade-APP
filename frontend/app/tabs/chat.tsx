@@ -49,7 +49,7 @@ export default function ChatScreen({ navigation }) {
             style={styles.chatItem}
             onPress={() =>
                 navigation.navigate('ChatDetail', {
-                    chatId: item.chat_id,
+                    chat_id: item.chat_id,
                     userId: userId,
                     receiver_id: item.receiver_id,
                     receiver_username: item.username,
