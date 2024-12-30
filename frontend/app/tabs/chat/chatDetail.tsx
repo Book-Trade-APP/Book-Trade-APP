@@ -11,8 +11,11 @@ export default function ChatDetail({ route }) {
     const flatListRef = useRef(null);
 
     useEffect(() => {
+        if (chatId === undefined || chatId === null) {
+            return;
+        }
         fetchMessages();
-    }, []);
+    }, [chatId]);
 
     const fetchMessages = async () => {
         try {
