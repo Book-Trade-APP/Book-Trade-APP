@@ -16,3 +16,13 @@ export interface Product {
     selected: boolean; //被加到購物車
     collected: boolean; //被按收藏
 }
+
+export interface GroupedProducts {
+    sellerId: string;
+    sellerUsername: string;
+    products: Product[];
+    quantities: number[];
+    note: string;
+    location: string;
+    agreedTime: string;
+}
