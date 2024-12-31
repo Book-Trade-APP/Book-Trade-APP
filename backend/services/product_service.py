@@ -8,7 +8,10 @@ class ProductService:
 
     # 檢查dict value 是否有空值    
     def _check_all_items(self, d: dict) -> bool:
-        return any(not v for v in d.values())
+        for v in d.values():
+            if v == None:
+                return True
+        return False
     
     # 提取並轉換 _id 值的方法
     def _convert_objectid_to_str(self, data):
