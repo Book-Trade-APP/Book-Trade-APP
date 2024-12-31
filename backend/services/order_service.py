@@ -109,31 +109,34 @@ class OrderService:
 
         except Exception as e:
             return {"code": 500, "message": f"Server Error: {str(e)}", "body": {}}
-        
-        
-        
-    #5. 用user_id查詢不同狀態訂單(待確認、待處理、已完成、待評價、已取消)
-    def get_order_by_user_id(self, user_id, status):
+
+    # 5. 獲取買/賣家的訂單    
+    def get_orders_by_Userid(self, buyer_id, seller_id,status):
         try:
-            orders = list(self.orders.find({"user_id": (user_id), "status": status}))
+            # 查詢符合條件的訂單
+            if not seller_id:
+                orders = list(self.orders.find({"buyer_id": buyer_id, "status": status}))
+            elif not buyer_id:
+                orders = list(self.orders.find({"seller_id": seller_id, "status": status}))
             if not orders:
                 return {"code": 404, "message": "找不到該訂單", "body": {}}
-            
+
+            # 過濾返回的字段
             filtered_orders = []
             for order in orders:
                 filtered_order = {
                     "_id": str(order["_id"]),
                     "product_ids": [str(pid) for pid in eval(order["product_ids"])],
                     "quantities": order["quantities"],
-                    "total_amount": order["total_amount"]
+                    "total_amount": order.get("total_amount", 0)
                 }
                 filtered_orders.append(filtered_order)
-            
+
             return {"code": 200, "message": "成功取得訂單", "body": filtered_orders}
 
         except Exception as e:
             return {"code": 500, "message": f"Server Error: {str(e)}", "body": {}}
-    
+        
     # 根據order_id更改status 
     def update_order_by_id(self, data):
         try:
