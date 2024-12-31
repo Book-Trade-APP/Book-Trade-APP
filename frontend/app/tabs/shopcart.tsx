@@ -171,10 +171,18 @@ export default function ShoppingCartScreen() {
             <Image style={styles.itemImage} source={{ uri: item.photouri }} />
             <View style={styles.itemInfo}>
               <View style={styles.infoTopContainer}>
-                <View style={styles.textContainer}>
+                <TouchableOpacity
+                  style={styles.textContainer}
+                  onPress={() => {
+                    MainNavigation.navigate('Home' as keyof MainTabParamList, {
+                      screen: 'Product',
+                      params: { productId: item._id, source: 'Cart' },
+                    } as any);
+                  }}
+                >
                   <Text style={styles.title} numberOfLines={1}>{item.name}</Text>
                   <Text style={styles.author} numberOfLines={1}>{item.author}</Text>
-                </View>
+                </TouchableOpacity>
               </View>
               <View style={styles.quantityContainer}>
                 <TouchableOpacity
