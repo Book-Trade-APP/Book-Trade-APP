@@ -30,15 +30,20 @@ def get_order_by_id_controller(order_id):
     response = order_service.get_order_by_id(order_id)
     return jsonify(response), response["code"]
 
-# 5. 用user_id查詢不同狀態訂單(代處理、已完成、待評價、已取消)
-def get_order_by_user_id_controller(data):
-    order_service = OrderService(current_app.config["MongoDB"])
-    user_id = data.get("user_id")
-    status = data.get("status")
-    if not user_id or not status:
-        return {"code": 400, "message": "缺少必要參數 'user_id' 或 'status'", "body": {}}, 400
+# 5. 獲取買/賣家的訂單
+def get_orders_by_Userid_controller():
+    db = current_app.config["MongoDB"]
+    order_service = OrderService(db)
+    data = request.json
 
-    response = order_service.get_order_by_user_id(user_id, status)
+    buyer_id = data.get("buyer_id")
+    seller_id = data.get("seller_id")
+    status = data.get("status")
+
+    if not (buyer_id or seller_id) or not status:
+        return jsonify({"code": 400, "message": "缺少必要的 buyer_id 或 status 或 seller_id"}), 400
+
+    response = order_service.get_orders_by_Userid(buyer_id, seller_id, status)
     return jsonify(response), response["code"]
 
 # 根據order_id更改status
