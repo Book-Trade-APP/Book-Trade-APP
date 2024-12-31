@@ -38,12 +38,13 @@ def get_orders_by_Userid_controller():
 
     buyer_id = data.get("buyer_id")
     seller_id = data.get("seller_id")
-    status = data.get("status")
+    buyer_status = data.get("buyer_status")
+    seller_status = data.get("seller_status")
 
-    if not (buyer_id or seller_id) or not status:
-        return jsonify({"code": 400, "message": "缺少必要的 buyer_id 或 status 或 seller_id"}), 400
+    if not (buyer_id or seller_id) or not (buyer_status or seller_status):
+        return jsonify({"code": 400, "message": "缺少必要的 buyer_id 或 buyer_status 或 seller_id 或 seller_status"}), 400
 
-    response = order_service.get_orders_by_Userid(buyer_id, seller_id, status)
+    response = order_service.get_orders_by_Userid(buyer_id, seller_id, buyer_status, seller_status)
     return jsonify(response), response["code"]
 
 # 根據order_id更改status
