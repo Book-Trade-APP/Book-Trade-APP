@@ -1,4 +1,5 @@
 import re
+import os
 import random
 import string
 from bson import ObjectId
@@ -264,11 +265,12 @@ class UserService:
             # 生成暫時密碼，暫時更新他的密碼
             tmp_password = self._generate_temp_password()
             hashed_password = self.bcrypt.generate_password_hash(tmp_password).decode('utf-8')
+            from_email = os.getenv("OFFICIAL_EMAIL")
             self.collection.update_one({"_id": user["_id"]},{"$set":{"password": hashed_password}})
             subject = '【二手書交易平台】'
             content = f'您好，這是您的暫時密碼：{tmp_password}\n請在登入後立即變更您的密碼！'
             # 發送email重設密碼
-            send_email(to_email=email,subject=subject,plain_text_content=content)
+            send_email(from_email=from_email, to_email=email, subject=subject, plain_text_content=content)
             return {
                 "code": 200,
                 "message": "成功寄送忘記密碼email",
@@ -322,6 +324,31 @@ class UserService:
                 "code": 200,
                 "message": "成功更新密碼",
                 "body": {}
+            }
+        except Exception as e:
+            return {
+                "code": 500,
+                "message": f"Server Error(user_service): {str(e)}",
+                "body": {}
+            }
+    # 寄信api
+    def user_send_email(self, data):
+        try:
+            subject = data.get("subject", None)
+            from_email = os.getenv("OFFICIAL_EMAIL")
+            plain_text_content = data.get("content")
+            to_email = os.getenv("ADMIN_EMAIL")
+            if not plain_text_content:
+                return {
+                    "code":400,
+                    "message":"需要提供plain_text_content",
+                    "body":{}
+                }
+            send_email(from_email=from_email,subject=subject,to_email=to_email,plain_text_content=plain_text_content)
+            return {
+                "code":200,
+                "message":"成功寄送郵件",
+                "body":{}
             }
         except Exception as e:
             return {
