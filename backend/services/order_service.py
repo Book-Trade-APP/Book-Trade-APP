@@ -21,7 +21,8 @@ class OrderService:
     # 1. 創建訂單
     def create_order(self, data):
         try:
-            user_id = data.get("user_id")
+            buyer_id = data.get("buyer_id")
+            seller_id = data.get("seller_id")
             product_ids = data.get("product_ids")  # 商品ID陣列
             quantities = data.get("quantities")    # 商品數量陣列
             payment_method = data.get("payment_method")
@@ -30,7 +31,7 @@ class OrderService:
             agreed_time = data.get("agreed_time")
             total_amount = data.get("total_amount")
 
-            if not user_id or not product_ids or not quantities or not payment_method:
+            if not buyer_id or not seller_id or not product_ids or not quantities or not payment_method:
                 return {"code": 400, "message": "缺少必要資訊", "body": {}}
 
             if len(product_ids) != len(quantities):
@@ -38,10 +39,11 @@ class OrderService:
 
             # 創建訂單
             order_data = {
-                "user_id": str(ObjectId(user_id)),
+                "buyer_id": str(ObjectId(buyer_id)),
+                "seller_id": str(ObjectId(seller_id)),
                 "product_ids": str([ObjectId(pid) for pid in product_ids]),
                 "quantities": quantities,
-                "status": "待處理",
+                "status": "待確認",
                 "payment_method": payment_method,
                 "created_at": datetime.datetime.utcnow(),
                 "note": note,
@@ -110,7 +112,7 @@ class OrderService:
         
         
         
-    #5. 用user_id查詢不同狀態訂單(待處理、已完成、待評價、已取消)
+    #5. 用user_id查詢不同狀態訂單(待確認、待處理、已完成、待評價、已取消)
     def get_order_by_user_id(self, user_id, status):
         try:
             orders = list(self.orders.find({"user_id": (user_id), "status": status}))
