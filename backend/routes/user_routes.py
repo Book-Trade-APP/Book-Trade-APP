@@ -1,5 +1,5 @@
 from flask import Blueprint
-from controllers.user_contorller import login_controller, register_controller, update_controller,find_user_by_id_contorller, evaluate_controller,forget_password_controller,update_password_controller
+from controllers.user_contorller import login_controller, register_controller, update_controller,find_user_by_id_contorller, evaluate_controller,forget_password_controller,update_password_controller, user_send_email_controller
 
 # 初始化 Blueprint
 user_bp = Blueprint("user", __name__)
@@ -40,3 +40,7 @@ def forget_password_route():
 def update_password_route():
     return update_password_controller()
 
+# 寄信api
+@user_bp.route("/SendEmail",methods=["POST"])
+def user_send_email_route():
+    return user_send_email_controller()
