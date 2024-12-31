@@ -4,7 +4,7 @@ from controllers.order_controller import (
     delete_order_controller,
     get_all_orders_controller,
     get_order_by_id_controller,
-    get_order_by_user_id_controller,
+    get_orders_by_Userid_controller,
     update_order_status_by_id_controller
 )
 
@@ -37,16 +37,10 @@ def get_order_by_id_route():
     return get_order_by_id_controller(order_id)
 
 
-# 用user ID查詢不同狀態訂單(代處理、已完成、待評價、已取消)
-@order_bp.route("/GetOrderByUserId", methods=["POST"])
-def get_order_by_user_id_route():
-    try:
-        data = request.json
-        if not data:
-            return jsonify({"code": 400, "message": "請求資料為空", "body": {}}), 400
-        return get_order_by_user_id_controller(data)
-    except Exception as e:
-        return jsonify({"code": 500, "message": f"Server Error: {str(e)}", "body": {}}), 500
+# 獲取買/賣家的訂單
+@order_bp.route("/get_orders_by_Userid", methods=["POST"])
+def get_orders_by_Userid_route():
+    return get_orders_by_Userid_controller()
 
 # 根據order_id更改status
 @order_bp.route("/UpdateStatusById", methods=["POST"])

@@ -164,7 +164,26 @@ export default function ProductDetailScreen() {
       console.error("Error during purchase:", error);
     }
   };
-
+  const handleChat = async () => {
+    userId;//使用者的id
+    sellerId; //賣家的id
+    sellerHeadShot; //賣家avatar
+    // 導航到聊天室
+    // navigation.navigate('Chat', {
+    //   screen: 'ChatDetail',
+    //   params: {
+    //     chatId: chatId,
+    //     userId: userId,
+    //     receiver_id: sellerId,
+    //     receiver_username: sellerUserName,
+    //     avatar: sellerHeadShot,
+    //     onMessageSent: (data) => {
+    //       // 處理消息發送後的回調
+    //       console.log('Message sent:', data);
+    //     }
+    //   }
+    // });
+  }
   const handleGoBack = () => {
     if (source === "Cart") {
       navigation.reset({ routes: [{ name: "Cart" }] });
@@ -215,6 +234,9 @@ export default function ProductDetailScreen() {
               <Text style={styles.ratingText}>{Number(sellerEvaluate).toFixed(1)}</Text>
             </View>
           </View>
+          <TouchableOpacity onPress={handleChat}>
+            <Ionicons style={styles.chatIcon}name="chatbubble-ellipses-outline" size={28} />
+          </TouchableOpacity>
         </View>
         <View style={styles.productInfoContainer}>
           <Text style={styles.productInfoTitle}>商品資訊</Text>
@@ -278,6 +300,9 @@ const styles = StyleSheet.create({
   },
   bookmarks: {
     marginTop: 4,
+  },
+  chatIcon: {
+    marginRight: 6,
   },
   title: {
     fontSize: 18,
