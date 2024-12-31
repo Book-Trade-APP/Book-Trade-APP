@@ -129,4 +129,17 @@ def update_password_controller():
             "body": {}
         }), 500
 
+# 寄信api
+def user_send_email_controller():
+    try:
+        user_service = UserService(current_app.config["MongoDB"])
+        data = request.json
+        response = user_service.user_send_email(data)
+        return jsonify(response), response.get("code")
+    except Exception as e:
+            return jsonify({
+                "code": 500,
+                "message":f"Sever Error(user_contorller): {str(e)}",
+                "body": {}
+            }), 500
 
