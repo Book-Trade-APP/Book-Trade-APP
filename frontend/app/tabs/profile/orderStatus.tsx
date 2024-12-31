@@ -9,12 +9,22 @@ import { Headers } from "../../components/NoneButtonHeader";
 import { useHideTabBar } from "../../hook/HideTabBar";
 import { ProfileStackParamList } from "../../navigation/type";
 
-const STATUS_TITLES: Record<"待處理" | "待評價" | "已完成", string> = {
+const STATUS_TITLES: Record<"待確認" | "待處理" | "待評價" | "已完成", string> = {
+  "待確認": "待確認",
   "待處理": "待交易",
   "待評價": "待評價",
   "已完成": "已完成"
 };
+
+const ROLE_TABS = {
+  BUYER: "buyer",
+  SELLER: "seller"
+} as const;
+
+type RoleTab = typeof ROLE_TABS[keyof typeof ROLE_TABS];
+
 const productCache = new Map();
+
 const OrderItem = React.memo(({ item, onPress, source }: any) => {
   const { firstProduct } = item;
   
@@ -41,10 +51,12 @@ const OrderItem = React.memo(({ item, onPress, source }: any) => {
     </TouchableOpacity>
   );
 });
+
 export default function OrderStatusScreen() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeRole, setActiveRole] = useState<RoleTab>(ROLE_TABS.BUYER);
   const navigation = useNavigation<NavigationProp<any>>();
   const route = useRoute<RouteProp<ProfileStackParamList, 'OrderStatus'>>();
   const status = route.params?.status;
@@ -73,17 +85,20 @@ export default function OrderStatusScreen() {
       
       const userId = await getUserId();
       if (!userId) throw new Error("User ID not found");
-
-      const response = await asyncPost(api.GetOrderByUserId, {
-        user_id: userId,
-        status,
-      });
-
+  
+      // 建立請求體，根據角色使用不同的 id field
+      const requestBody = {
+        [activeRole === ROLE_TABS.BUYER ? 'buyer_id' : 'seller_id']: userId,
+        [activeRole === ROLE_TABS.BUYER ? 'buyer_status' : 'seller_status']: status,
+      };
+  
+      const response = await asyncPost(api.GetOrderByUserId, requestBody);
+  
       if (!response.data?.body || JSON.stringify(response.data.body) === "{}") {
         setOrders([]);
         return;
       }
-
+  
       const ordersData = response.data.body;
       const detailedOrders = await Promise.all(
         ordersData.map(async (order: any) => ({
@@ -91,7 +106,7 @@ export default function OrderStatusScreen() {
           firstProduct: await fetchProduct(order.product_ids[0])
         }))
       );
-
+  
       setOrders(detailedOrders.filter(order => order.firstProduct));
     } catch (error) {
       console.error("Failed to fetch orders:", error);
@@ -99,15 +114,13 @@ export default function OrderStatusScreen() {
     } finally {
       setLoading(false);
     }
-  }, [status, fetchProduct]);
+  }, [status, fetchProduct, activeRole]);
 
   useFocusEffect(
     useCallback(() => {
       fetchOrders();
       
-      // 清理函數
       return () => {
-        // 如果緩存太大，可以在這裡清理
         if (productCache.size > 100) {
           productCache.clear();
         }
@@ -118,12 +131,18 @@ export default function OrderStatusScreen() {
   const handleOrderPress = useCallback((orderId: string, products: string[], quantity: number[], source: string) => {
     navigation.navigate("Home", {
       screen: "Order",
-      params: { orderId, products, quantity, source }
+      params: { 
+        orderId, 
+        products, 
+        quantity, 
+        source,
+        userRole: activeRole
+      }
     });
-  }, [navigation]);
+  }, [navigation, activeRole]);
 
   const memoizedRenderItem = useCallback(({ item }: { item: any }) => {
-    const source = status === "待處理" ? "pending" : status === "待評價" ? "evaluate" : "completed";
+    const source = status === "待確認" ? "confirm" : status === "待處理" ? "pending" : status === "待評價" ? "evaluate" : "completed";
     return (
       <OrderItem
         item={item}
@@ -133,13 +152,36 @@ export default function OrderStatusScreen() {
     );
   }, [status, handleOrderPress]);
 
+  const renderRoleTabs = () => (
+    <View style={styles.tabContainer}>
+      <TouchableOpacity 
+        style={[styles.tab, activeRole === ROLE_TABS.BUYER && styles.activeTab]}
+        onPress={() => setActiveRole(ROLE_TABS.BUYER)}
+      >
+        <Text style={[styles.tabText, activeRole === ROLE_TABS.BUYER && styles.activeTabText]}>
+          我是買家
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity 
+        style={[styles.tab, activeRole === ROLE_TABS.SELLER && styles.activeTab]}
+        onPress={() => setActiveRole(ROLE_TABS.SELLER)}
+      >
+        <Text style={[styles.tabText, activeRole === ROLE_TABS.SELLER && styles.activeTabText]}>
+          我是賣家
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   const ListEmptyComponent = useMemo(() => (
     !loading && !error ? (
-      <Text style={styles.footerText}>{`沒有${STATUS_TITLES[status]}的訂單`}</Text>
+      <Text style={styles.footerText}>
+        {`沒有${STATUS_TITLES[status]}的${activeRole === ROLE_TABS.BUYER ? '購買' : '銷售'}訂單`}
+      </Text>
     ) : error ? (
       <Text>{error}</Text>
     ) : null
-  ), [loading, error, status]);
+  ), [loading, error, status, activeRole]);
 
   useHideTabBar();
 
@@ -149,6 +191,7 @@ export default function OrderStatusScreen() {
         title={STATUS_TITLES[status]} 
         back={() => navigation.reset({ routes: [{ name: "Profile" }]})} 
       />
+      {renderRoleTabs()}
       <FlatList
         data={orders}
         keyExtractor={(item) => item._id}
@@ -164,67 +207,91 @@ export default function OrderStatusScreen() {
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: "#f9f9f9",
-    },
-    itemContainer: {
-      flexDirection: "row",
-      backgroundColor: "#ffffff",
-      borderRadius: 10,
-      padding: 15,
-      marginHorizontal: 16,
-      marginVertical: 8,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 3,
-    },
-    itemImage: {
-      width: 99,
-      height: 99,
-      borderRadius: 8,
-      marginRight: 15,
-    },
-    itemDetails: {
-      flex: 1,
-      justifyContent: "space-between",
-    },
-    productName: {
-      maxWidth: 220,
-      fontSize: 16,
-      fontWeight: "600",
-      color: "#333",
-    },
-    productAuthor: {
-      maxWidth: 220,
-      fontSize: 14,
-      color: "#777",
-      marginBottom: 8,
-    },
-    amountContainer: {
-      flexDirection: "row",
-      justifyContent: "flex-end",
-    },
-    orderAmount: {
-      fontSize: 14,
-      color: "#555",
-    },
-    orderAmount$: {
-      fontSize: 14,
-      fontWeight: "700",
-      color: "#2f95dc",
-    },
-    divider: {
-      height: 1,
-      backgroundColor: "#ddd",
-    },
-    footerText: {
-      textAlign: "center",
-      color: "#888",
-      marginVertical: 10,
-      fontSize: 14,
-    },
-  });
+  container: {
+    flex: 1,
+    backgroundColor: "#f9f9f9",
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    marginVertical: 8,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  activeTab: {
+    borderBottomColor: '#2f95dc',
+  },
+  tabText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  activeTabText: {
+    color: '#2f95dc',
+    fontWeight: 'bold',
+  },
+  itemContainer: {
+    flexDirection: "row",
+    backgroundColor: "#ffffff",
+    borderRadius: 10,
+    padding: 15,
+    marginHorizontal: 16,
+    marginVertical: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  itemImage: {
+    width: 99,
+    height: 99,
+    borderRadius: 8,
+    marginRight: 15,
+  },
+  itemDetails: {
+    flex: 1,
+    justifyContent: "space-between",
+  },
+  productName: {
+    maxWidth: 220,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+  },
+  productAuthor: {
+    maxWidth: 220,
+    fontSize: 14,
+    color: "#777",
+    marginBottom: 8,
+  },
+  amountContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+  },
+  orderAmount: {
+    fontSize: 14,
+    color: "#555",
+  },
+  orderAmount$: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#2f95dc",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#ddd",
+  },
+  footerText: {
+    textAlign: "center",
+    color: "#888",
+    marginVertical: 10,
+    fontSize: 14,
+  },
+});

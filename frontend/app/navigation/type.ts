@@ -25,7 +25,7 @@ export type AuthStackParamList = {
 export type HomeStackParamList = {
     Index: undefined;
     Product: { productId: string, source: String};
-    Order: { orderId: string; products: Product[], quantity: number[], source: String};
+    Order: { orderId: string; products: Product[], quantity: number[], source: String, userRole: string};
 }
 export type CartStackParamList = {
     Index: undefined;
@@ -36,7 +36,7 @@ export type ProfileStackParamList = {
     Index: undefined;
     Setting: undefined;
     Favorite: undefined;
-    OrderStatus: { status: "待處理" | "待評價" | "已完成" };
+    OrderStatus: { status: "待確認" | "待處理" | "待評價" | "已完成" };
     Seller: {product?: Product};
     Edit: undefined;
     Report: undefined;
