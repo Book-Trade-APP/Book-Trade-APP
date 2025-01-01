@@ -82,7 +82,7 @@ export default function FavoriteScreen() {
         <FlatList
           data={favoriteList}
           contentContainerStyle={styles.list}
-          keyExtractor={(item: Product, index) => item.id || index.toString()}
+          keyExtractor={(item: Product, index) => item._id || index.toString()}
           ListEmptyComponent={
             <Text style={styles.footerText}>沒有更多商品了</Text>
           }
