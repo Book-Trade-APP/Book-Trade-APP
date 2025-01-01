@@ -44,7 +44,7 @@ export type ProfileStackParamList = {
 export type ChatStackParamList = {
     Index: undefined;
     ChatDetail: {
-      chatId: string;
+      chat_id?: string;
       userId: string;
       receiver_id: string;
       receiver_username: string;

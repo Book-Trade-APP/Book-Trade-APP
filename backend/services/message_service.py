@@ -1,4 +1,4 @@
-from models.message_model import create_message, get_messages, get_message
+from models.message_model import create_message, get_messages_by_chat_id, get_message
 from bson import ObjectId
 from services.user_service import UserService
 from flask import current_app
@@ -7,8 +7,8 @@ def send_new_message(chat_id, sender_id, receiver_id, content):
     message = create_message(chat_id, sender_id, receiver_id, content)
     return message
 
-def get_chat_messages(chat_id):
-    messages = get_messages(chat_id)
+def get_chat_messages_by_chat_id(chat_id):
+    messages = get_messages_by_chat_id(chat_id)
     enriched_messages = []
     for message in messages:
         enriched_messages.append(enriched_message(message))

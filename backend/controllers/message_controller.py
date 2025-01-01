@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from services.message_service import send_new_message, get_chat_messages, get_chat_message
+from services.message_service import send_new_message, get_chat_messages_by_chat_id, get_chat_message
 from services.chat_service import update_chat_last_message
 
 def send_message_controller():
@@ -23,6 +23,6 @@ def send_message_controller():
         "inserted_message": inserted_message
     }), 201
 
-def get_messages_controller(chat_id):
-    messages = get_chat_messages(chat_id)
+def get_messages_by_chat_id_controller(chat_id):
+    messages = get_chat_messages_by_chat_id(chat_id)
     return jsonify(messages), 200
