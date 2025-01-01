@@ -4,10 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../../api/api';
 import { getUserId } from '../../utils/stroage';
 import { Ionicons } from '@expo/vector-icons';
+import { Message } from '../interface/Message';
 
-export default function ChatScreen({ navigation }) {
+export default function ChatScreen({ navigation }: { navigation: any }) {
     const [userId, setUserId] = useState<string>('');
-    const [chats, setChats] = useState([]);
+    const [chats, setChats] = useState<Message[]>([]);
     const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
@@ -17,7 +18,7 @@ export default function ChatScreen({ navigation }) {
     const fetchChats = async () => {
         try {
             const userId = await getUserId();
-            setUserId(userId);
+            setUserId(userId as string);
 
             const response = await fetch(`${api.GetChatsByUserId}${userId}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -34,7 +35,7 @@ export default function ChatScreen({ navigation }) {
         setRefreshing(false);
     };
 
-    const handleMessageSent = ({ chatId, lastMessage, lastMessageTime }) => {
+    const handleMessageSent = ({ chatId, lastMessage, lastMessageTime }: { chatId: string, lastMessage: string, lastMessageTime: string}) => {
         setChats((prevChats) =>
             prevChats.map((chat) =>
                 chat.chat_id === chatId
@@ -44,7 +45,7 @@ export default function ChatScreen({ navigation }) {
         );
     };
 
-    const renderChatItem = ({ item }) => (
+    const renderChatItem = ({ item }: { item: Message }) => (
         <TouchableOpacity
             style={styles.chatItem}
             onPress={() =>
