@@ -261,7 +261,6 @@ class UserService:
                     "message": "找不到該用戶",
                     "body": {}
                 }
-
             # 生成暫時密碼，暫時更新他的密碼
             tmp_password = self._generate_temp_password()
             hashed_password = self.bcrypt.generate_password_hash(tmp_password).decode('utf-8')
@@ -274,7 +273,7 @@ class UserService:
             return {
                 "code": 200,
                 "message": "成功寄送忘記密碼email",
-                "body": {}
+                "body": str(user["_id"])
             }
             
         except Exception as e:
