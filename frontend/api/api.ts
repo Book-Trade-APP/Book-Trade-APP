@@ -32,9 +32,11 @@ export enum api {
     GetOrderByUserId=`${url_path}/orders/GetOrderByUserId`,
     OrderStatusUpdate=`${url_path}/orders/UpdateStatusById`,
     // chat
-    GetChatsByUserId = `${url_path}/api/chats/`,  // 根據用戶 ID 獲取聊天列表
-    GetMessagesByChatId = `${url_path}/api/messages/`,
-    SendMessage = `${url_path}/api/messages/`,   // 發送消息
+    CreateChat = `${url_path}/chats/create_chat`,
+    GetChatsByUserId = `${url_path}/chats/get_chats_by_user_id/`,
+    GetChatIdByParticipantIds = `${url_path}/chats/get_chat_id_by_participant_ids`,
+    GetMessagesByChatId = `${url_path}/chats/get_messages_by_chat_id/`,
+    SendMessage = `${url_path}/chats/send_message/`,
     //notification
     GetUserAllNotification=`${url_path}/notifications/get_user_notifications`,
     UserSendNotification=`${url_path}/notifications/send_to_user`,

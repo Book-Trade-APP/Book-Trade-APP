@@ -5,14 +5,60 @@ import { api } from '../../../api/api';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function ChatDetail({ route }) {
-    const { chatId, userId, receiver_id, receiver_username, avatar } = route.params;
+    const { chat_id: initialChatId, userId, receiver_id, receiver_username, avatar } = route.params;
+    const [chatId, setChatId] = useState(initialChatId);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const flatListRef = useRef(null);
 
     useEffect(() => {
-        fetchMessages();
-    }, []);
+        if (initialChatId !== chatId) {
+            setChatId(initialChatId);
+        }
+    }, [route.params.chat_id]);
+
+    useEffect(() => {
+        const initializeChat = async () => {
+            if (!chatId) {
+                const newChatId = await findOrCreateChat();
+                if (newChatId) {
+                    setChatId(newChatId);
+                }
+                return;
+            }
+            fetchMessages();
+        };
+        initializeChat();
+    }, [chatId]);
+
+    const findOrCreateChat = async () => {
+        try {
+            // 第一步：嘗試查詢是否存在聊天
+            const queryResponse = await fetch(
+                `${api.GetChatIdByParticipantIds}/${userId},${receiver_id}`
+            );
+
+            if (queryResponse.ok) {
+                const data = await queryResponse.json();
+                const existing_chat_id = data["body"];
+                return existing_chat_id;  // 返回已存在的 chatId
+            }
+
+            // 如果聊天不存在，創建新的聊天
+            const createResponse = await fetch(`${api.CreateChat}/${userId},${receiver_id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: {},
+            });
+
+            if (!createResponse.ok) throw new Error(`HTTP error! status: ${createResponse.status}`);
+            const createdChatId = await createResponse.json();
+            return createdChatId; // 返回新創建的 chatId
+        } catch (error) {
+            console.error('Error in findOrCreateChat:', error);
+            return null;
+        }
+    };
 
     const fetchMessages = async () => {
         try {
@@ -42,7 +88,6 @@ export default function ChatDetail({ route }) {
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const json = await response.json();
             const sentMessage = json["inserted_message"]
-            console.log("json:", json);
             console.log("sentMessage:", sentMessage);
 
             setMessages((prevMessages) => [...prevMessages, sentMessage]);

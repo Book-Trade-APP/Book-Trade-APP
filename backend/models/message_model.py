@@ -15,7 +15,7 @@ def create_message(chat_id, sender_id, receiver_id, content):
     }
     return db.messages.insert_one(message)
 
-def get_messages(chat_id):
+def get_messages_by_chat_id(chat_id):
     return list(db.messages.find({"chat_id": ObjectId(chat_id)}).sort("timestamp", 1))
 
 def get_message(message_id):

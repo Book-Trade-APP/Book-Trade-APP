@@ -169,20 +169,19 @@ export default function ProductDetailScreen() {
     sellerId; //賣家的id
     sellerHeadShot; //賣家avatar
     // 導航到聊天室
-    // navigation.navigate('Chat', {
-    //   screen: 'ChatDetail',
-    //   params: {
-    //     chatId: chatId,
-    //     userId: userId,
-    //     receiver_id: sellerId,
-    //     receiver_username: sellerUserName,
-    //     avatar: sellerHeadShot,
-    //     onMessageSent: (data) => {
-    //       // 處理消息發送後的回調
-    //       console.log('Message sent:', data);
-    //     }
-    //   }
-    // });
+    navigation.navigate('Chat', {
+      screen: 'ChatDetail',
+      params: {
+        userId: userId,
+        receiver_id: sellerId,
+        receiver_username: sellerUserName,
+        avatar: sellerHeadShot,
+//         onMessageSent: (data) => {
+//           // 處理消息發送後的回調
+//           console.log('Message sent:', data);
+//         }
+      }
+    });
   }
   const handleGoBack = () => {
     if (source === "Cart") {
