@@ -13,16 +13,7 @@ import { api } from "../../../api/api";
 import { getUserId } from "../../../utils/stroage";
 import React from "react";
 import { LoadingModal } from "../../components/LoadingModal";
-
-interface GroupedProducts {
-  sellerId: string;
-  sellerUsername: string;
-  products: Product[];
-  quantities: number[];
-  note: string;
-  location: string;
-  agreedTime: string;
-}
+import { GroupedProducts } from "../../interface/Product";
 
 export default function CheckoutScreen({ route }: { route: RouteProp<CartStackParamList, "Checkout"> }) {
   const CartNavigation = useNavigation<NavigationProp<CartStackParamList>>();
@@ -41,15 +32,18 @@ export default function CheckoutScreen({ route }: { route: RouteProp<CartStackPa
   const [isNoteModalVisible, setIsNoteModalVisible] = useState(false);
   const [isLocationModalVisible, setIsLocationModalVisible] = useState(false);
   const [tempInput, setTempInput] = useState("");
-
+  const [userName, setUserName] = useState<string>("");
+  const [sellerId, setSellerId] = useState<string>("");
   const totalAmount = groupedProducts.reduce((total, group) => {
     return total + group.products.reduce((groupTotal, product, index) => {
       return groupTotal + product.price * group.quantities[index];
     }, 0);
   }, 0);
-  const fetchUserId = async () => {
+  const fetchUserIdAndName = async () => {
     const user_id = await getUserId();
     setUserId(user_id as string);
+    const user = await asyncGet(`${api.find}?_id=${user_id}`);
+    setUserName(user.body.username);
   }
   const fetchSelectedProducts = async () => {
     setIsLoading(true);
@@ -62,9 +56,10 @@ export default function CheckoutScreen({ route }: { route: RouteProp<CartStackPa
         
         if (response.code === 200) {
           const product = response.body;
+          setSellerId(product.seller_id);
           const sellerResponse = await asyncGet(`${api.find}?_id=${product.seller_id}`);
           const sellerUsername = sellerResponse.code === 200 ? sellerResponse.body.username : "Unknown Seller";
-          
+
           if (!productsMap.has(product.seller_id)) {
             productsMap.set(product.seller_id, {
               sellerId: product.seller_id,
@@ -92,7 +87,7 @@ export default function CheckoutScreen({ route }: { route: RouteProp<CartStackPa
   };
 
   useEffect(() => {
-    fetchUserId();
+    fetchUserIdAndName();
     fetchSelectedProducts();
   }, []);
 
@@ -165,13 +160,24 @@ export default function CheckoutScreen({ route }: { route: RouteProp<CartStackPa
       }
     }
    };
-
+  const sendNotificationToSeller = async() => {
+    try {
+      await asyncPost(api.UserSendNotification, {
+        "user_id": sellerId,
+        "title": "有新的待確認訂單",
+        "message": `您有一筆來自${userName}的待確認訂單`
+      })
+    } catch (error) {
+      console.log("failed to send notification to seller");
+    }
+  }
   const handleSendCheckout = async () => {
     setIsLoading(true);
     try {
       // 驗證訂單
       const orders = groupedProducts.map(group => ({
-        user_id: userId,
+        buyer_id: userId,
+        seller_id: sellerId,
         product_ids: group.products.map(p => p._id),
         quantities: group.quantities,
         payment_method: selectedPayment,
@@ -207,7 +213,7 @@ export default function CheckoutScreen({ route }: { route: RouteProp<CartStackPa
           await new Promise(resolve => setTimeout(resolve, 50));
         }
       }
-  
+      await sendNotificationToSeller();
       CartNavigation.navigate("Success");
     } catch (error) {
       console.error("結帳失敗:", error);

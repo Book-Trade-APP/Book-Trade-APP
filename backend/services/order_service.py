@@ -43,7 +43,8 @@ class OrderService:
                 "seller_id": str(ObjectId(seller_id)),
                 "product_ids": str([ObjectId(pid) for pid in product_ids]),
                 "quantities": quantities,
-                "status": "待確認",
+                "buyer_status": "待確認",
+                "seller_status": "待確認",
                 "payment_method": payment_method,
                 "created_at": datetime.datetime.utcnow(),
                 "note": note,
@@ -111,13 +112,13 @@ class OrderService:
             return {"code": 500, "message": f"Server Error: {str(e)}", "body": {}}
 
     # 5. 獲取買/賣家的訂單    
-    def get_orders_by_Userid(self, buyer_id, seller_id,status):
+    def get_orders_by_Userid(self, buyer_id, seller_id, buyer_status, seller_status):
         try:
             # 查詢符合條件的訂單
             if not seller_id:
-                orders = list(self.orders.find({"buyer_id": buyer_id, "status": status}))
+                orders = list(self.orders.find({"buyer_id": buyer_id, "buyer_status": buyer_status}))
             elif not buyer_id:
-                orders = list(self.orders.find({"seller_id": seller_id, "status": status}))
+                orders = list(self.orders.find({"seller_id": seller_id, "seller_status": seller_status}))
             if not orders:
                 return {"code": 404, "message": "找不到該訂單", "body": {}}
 
@@ -141,11 +142,12 @@ class OrderService:
     def update_order_by_id(self, data):
         try:
             order_id = data.get("order_id")
-            status = data.get("status")
-            if not order_id and status:
-                return {"code":400,"message":"缺少order_id, status","body":{}}
+            buyer_status = data.get("buyer_status")
+            seller_status = data.get("seller_status")
+            if not (order_id and buyer_status and seller_status):
+                return {"code":400,"message":"缺少order_id, buyer_status, seller_status","body":{}}
             
-            update_order = self.orders.update_one({"_id":ObjectId(order_id)}, {"$set":{"status":status}})
+            update_order = self.orders.update_one({"_id":ObjectId(order_id)}, {"$set":{"buyer_status":buyer_status, "seller_status":seller_status}})
             if update_order.matched_count == 0:
                 return {"code":400,"message":"沒有找到相符的訂單","body":{}}
             

@@ -1,5 +1,5 @@
 //todo: 改成env
-const IP = "192.168.122.9";
+
 const PORT = "8000";
 const url_path = `http://${IP}:${PORT}`;
 
@@ -29,7 +29,7 @@ export enum api {
     CreateOrder=`${url_path}/orders/CreateOrder`,
     DeleteOrder=`${url_path}/orders/DeleteOrder`,
     GetOrderById=`${url_path}/orders/GetOrderById`,
-    GetOrderByUserId=`${url_path}/orders/GetOrderByUserId`,
+    GetOrderByUserId=`${url_path}/orders/get_orders_by_Userid`,
     OrderStatusUpdate=`${url_path}/orders/UpdateStatusById`,
     // chat
     CreateChat = `${url_path}/chats/create_chat`,

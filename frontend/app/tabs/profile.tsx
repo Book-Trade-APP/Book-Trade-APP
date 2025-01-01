@@ -56,7 +56,7 @@ export default function ProfileScreen() {
           }
           <View style={styles.profileInfo}>
             <Text style={styles.userId}>{userName ? userName : "Loading..."}</Text>
-            <Text style={styles.rating}>{evaluate ? `⭐ ${evaluate}` : "Loading..."}</Text>
+            <Text style={styles.rating}>{evaluate ? `⭐ ${evaluate}` : "⭐您尚未擁有評價"}</Text>
           </View>
         </View>
         <TouchableOpacity style={styles.headerIcons} onPress={() => navigation.navigate('Setting')}>
@@ -66,28 +66,32 @@ export default function ProfileScreen() {
 
       {/* Buttons Section */}
       <View style={styles.buttonsRow}>
-        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('Favorite')}>
-          <Ionicons name="bookmark-outline" size={24} color="black" />
-          <Text style={styles.buttonText}>已收藏</Text>
+        <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('OrderStatus', {status: "待確認"})}>
+          <Ionicons name="time-outline" size={28} color="black" />
+          <Text style={styles.buttonText}>待確認</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('OrderStatus', { status: "待處理" })}>
-          <Ionicons name="swap-horizontal-outline" size={24} color="black" />
+          <Ionicons name="swap-horizontal-outline" size={28} color="black" />
           <Text style={styles.buttonText}>待交易</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('OrderStatus', { status: "待評價" })}>
-          <Ionicons name="star-outline" size={24} color="black" />
+          <Ionicons name="star-outline" size={28} color="black" />
           <Text style={styles.buttonText}>待評價</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.buttonWrapper} onPress={() => navigation.navigate('OrderStatus', { status: "已完成" })}>
-          <Ionicons name="checkmark-done-outline" size={24} color="black" />
+          <Ionicons name="checkmark-done-outline" size={28} color="black" />
           <Text style={styles.buttonText}>已完成</Text>
         </TouchableOpacity>
       </View>
 
       {/* Options Section */}
       <View style={styles.optionsContainer}>
+      <TouchableOpacity style={styles.optionRow} onPress={() => {navigation.navigate('Favorite')}}>
+          <Ionicons name="bookmark-outline" size={24} color="black" style={styles.optionIcon} />
+          <Text style={styles.optionText}>收藏庫</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.optionRow} onPress={() => {navigation.navigate('Seller')}}>
           <Ionicons name="cloud-upload-outline" size={24} color="black" style={styles.optionIcon} />
           <Text style={styles.optionText}>刊登新商品</Text>
