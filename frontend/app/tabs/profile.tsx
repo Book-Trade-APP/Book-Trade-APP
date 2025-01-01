@@ -12,6 +12,7 @@ export default function ProfileScreen() {
   const navigation = useNavigation<NavigationProp<any>>();
   const [userName, setUserName] = useState<string | null>();
   const [evaluate, setEvaluate] = useState<number>(0.0);
+  const [transaction, setTransaction] = useState<number>();
   const [photouri, setPhotoUri] = useState<string>("");
   const fetchUserInformation = async () => {
     try {
@@ -19,6 +20,7 @@ export default function ProfileScreen() {
       const user = await asyncGet(`${api.find}?_id=${id}`);
       setUserName(user.body.username);
       setEvaluate(user.body.evaluate);
+      setTransaction(user.body.transaction_number);
       setPhotoUri(user.body.headshot);
     } catch (error) {
       console.error("Failed to fetch user information:", error);
@@ -56,7 +58,7 @@ export default function ProfileScreen() {
           }
           <View style={styles.profileInfo}>
             <Text style={styles.userId}>{userName ? userName : "Loading..."}</Text>
-            <Text style={styles.rating}>{evaluate ? `⭐ ${evaluate}` : "⭐您尚未擁有評價"}</Text>
+            <Text style={styles.rating}>{evaluate ? `⭐ ${evaluate} (${transaction})` : "⭐您尚未擁有評價"}</Text>
           </View>
         </View>
         <TouchableOpacity style={styles.headerIcons} onPress={() => navigation.navigate('Setting')}>
