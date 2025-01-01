@@ -164,7 +164,7 @@ export default function CheckoutScreen({ route }: { route: RouteProp<CartStackPa
     try {
       await asyncPost(api.UserSendNotification, {
         "user_id": sellerId,
-        "title": "有新的待確認訂單",
+        "title": "新的待確認訂單",
         "message": `您有一筆來自${userName}的待確認訂單`
       })
     } catch (error) {
