@@ -52,7 +52,7 @@ export default function OrderDetailScreen({ route }: { route: RouteProp<HomeStac
       if (response.status === 200) {
         setIsSellerRatingModalVisible(false);
         await BuyerStatusToCompleted();
-        await SendNotification(seller, "新評價", "您收到了一個新的評價");
+        await SendNotification(seller, "收到新評價", `您收到了來自${buyerUsername}的${sellerRating}星評價`);
       }
     } catch (error) {
       console.log("Failed to send seller rating");
@@ -68,7 +68,7 @@ export default function OrderDetailScreen({ route }: { route: RouteProp<HomeStac
       if (response.status === 200) {
         setIsBuyerRatingModalVisible(false);
         await SellerStatusToCompleted();
-        await SendNotification(buyer, "新評價", "您收到了一個新的評價");
+        await SendNotification(buyer, "新評價", `您收到了來自${sellerUsername}的${buyerRating}星評價`);
       }
     } catch (error) {
       console.log("Failed to send buyer rating");
@@ -429,6 +429,20 @@ export default function OrderDetailScreen({ route }: { route: RouteProp<HomeStac
           </View>
           <View style={styles.detailsContainer}>
             <Text style={styles.sectionTitle}>詳細資料</Text>
+            <View style={styles.labelContainer}>
+              {userRole === "seller"
+              ?
+              <>
+                <Text style={styles.detailLabel}>買家</Text>
+                <Text style={styles.detailValue}>{buyerUsername}</Text>
+              </>
+              :
+              <>
+                <Text style={styles.detailLabel}>賣家</Text>
+                <Text style={styles.detailValue}>{sellerUsername}</Text>
+              </>
+              }
+            </View>
             <View style={styles.labelContainer}>
               <Text style={styles.detailLabel}>備註</Text>
               <Text style={styles.detailValue}>{orderDetail?.note || "無任何備註"}</Text>
