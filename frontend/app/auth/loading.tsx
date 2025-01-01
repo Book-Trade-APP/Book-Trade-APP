@@ -11,7 +11,7 @@ export default function LoadingScreen() {
         setTimeout(() => {
             navigation.navigate('Login');
             setIsLoading(false);
-        }, 2000);
+        }, 1500);
       }, []);
     return(
         <View style={styles.container}>

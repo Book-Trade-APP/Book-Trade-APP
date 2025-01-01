@@ -112,7 +112,7 @@ export default function ShoppingCartScreen() {
             const newQuantity = item.quantity + delta;
 
             if (newQuantity > maxQuantity) {
-              Alert.alert('錯誤', '商品數量沒有那麼多');
+              Alert.alert('錯誤', '商品數量不足');
               return item;
             }
 

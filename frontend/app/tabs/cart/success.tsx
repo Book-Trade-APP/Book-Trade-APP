@@ -9,7 +9,7 @@ export default function CheckoutSuccessScreen() {
       MainNavigation.reset({ routes: [{ name: "Home" }] });
       MainNavigation.navigate('Profile', { 
         screen: 'OrderStatus',
-        params: { status: "待處理" }
+        params: { status: "待確認" }
       });
     }
     return (
@@ -17,11 +17,11 @@ export default function CheckoutSuccessScreen() {
         <View style={styles.content}>
             {/* 結帳成功圖示 */}
             <Image
-            source={{ uri: "https://cdn-icons-png.flaticon.com/512/190/190411.png" }}
+            source={{ uri: "https://cdn-icons-png.flaticon.com/512/2644/2644923.png " }}
             style={styles.successIcon}
             />
             {/* 成功訊息 */}
-            <Text style={styles.successText}>結帳成功！</Text>
+            <Text style={styles.successText}>結帳成功</Text>
             <Text style={styles.subText}>感謝您的購買，我們將盡快處理您的訂單。</Text>
 
             {/* 按鈕 */}
@@ -61,7 +61,7 @@ container: {
   successText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#4CAF50",
+    color: "#2f95dc",
     marginBottom: 10,
   },
   subText: {
@@ -71,7 +71,7 @@ container: {
     marginBottom: 30,
   },
   button: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#2f95dc",
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -86,10 +86,10 @@ container: {
   },
   secondaryButton: {
     backgroundColor: "#fff",
-    borderColor: "#4CAF50",
+    borderColor: "#2f95dc",
     borderWidth: 1,
   },
   secondaryButtonText: {
-    color: "#4CAF50",
+    color: "#2f95dc",
   },
 });
