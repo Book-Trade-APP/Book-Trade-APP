@@ -6,13 +6,23 @@ export type RootStackParamList = {
 };
 export type MainTabParamList = {
     Cart: undefined;
-    Chat: undefined;
+    Chat: {
+        screen?: keyof ChatStackParamList;
+        params?: {
+            chat_id?: string;
+            userId: string;
+            receiver_id: string;
+            receiver_username: string;
+            avatar: string;
+            onMessageSent?: (data: { chatId: string; lastMessage: string; lastMessageTime: string }) => void;
+        }
+    }
     Home: undefined;
     Notification: undefined;
     Profile: {
         screen?: keyof ProfileStackParamList;
         params?: {
-            status?: "待處理" | "待評價" | "已完成"
+            status?: "待確認"| "待處理" | "待評價" | "已完成"
         }
     } | undefined;
 }
@@ -29,7 +39,7 @@ export type HomeStackParamList = {
 }
 export type CartStackParamList = {
     Index: undefined;
-    Checkout: {productId: string[], quantity: number[]}
+    Checkout: { productId: string[], quantity: number[] }
     Success: undefined;
 }
 export type ProfileStackParamList = {
@@ -44,10 +54,11 @@ export type ProfileStackParamList = {
 export type ChatStackParamList = {
     Index: undefined;
     ChatDetail: {
-      chat_id?: string;
-      userId: string;
-      receiver_id: string;
-      receiver_username: string;
-      avatar: string;
+        chat_id?: string;
+        userId: string;
+        receiver_id: string;
+        receiver_username: string;
+        avatar: string;
+        onMessageSent: (data: { chatId: string; lastMessage: string; lastMessageTime: string }) => void;
     };
-  }
+}
