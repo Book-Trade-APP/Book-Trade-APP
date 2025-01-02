@@ -1,11 +1,13 @@
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ImageBackground, Image} from 'react-native';
+import { Text, View, TextInput, TouchableOpacity, ImageBackground, } from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
-import { api } from '../../api/api';
-import { asyncPost } from '../../utils/fetch';
+import React, { useState } from 'react';
+import { api } from '@/api/api';
+import { asyncPost } from '@/utils/fetch';
 import { AuthStackParamList, RootStackParamList } from '../navigation/type';
-import { saveUserId } from '../../utils/stroage';
+import { saveUserId } from '@/utils/stroage';
 import { LoadingModal } from '../components/LoadingModal';
+import { styles } from '../tabs/styles/login';
+
 export default function LoginScreen() {
   const AuthNavigation = useNavigation<NavigationProp<AuthStackParamList>>();
   const RootNavigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -41,7 +43,7 @@ export default function LoginScreen() {
   return (
     <>
       <ImageBackground 
-        source={require('../../assets/Auth-Background.png')}
+        source={require('@/assets/Auth-Background.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
       >
@@ -82,77 +84,3 @@ export default function LoginScreen() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'rgb(255, 255, 255)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 32,
-    borderRadius: 24,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    width: '85%',
-    elevation: 5,
-  },
-  backgroundImage: {
-    flex: 1,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logo: {
-    width: 100,
-    height: 100,
-    marginBottom: 40,
-  },
-  logoText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 40,
-  },
-  errorText: {
-    width: 200,
-    textAlign: 'center',
-    color: 'red',
-    marginBottom: 12,
-  },
-  form: {
-    width: '80%',
-    alignItems: 'center',
-  },
-  input: {
-    width: 200,
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginVertical: 10,
-  },
-  loginButton: {
-    backgroundColor: '#2f95dc',
-    width: 200,
-    height: 50,
-    borderRadius: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 10,
-  },
-  loginButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  signupLink: {
-    color: '#2f95dc',
-    marginTop: 10,
-  },
-  Button: {
-    justifyContent: 'center',
-  },
-  bottom: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-});

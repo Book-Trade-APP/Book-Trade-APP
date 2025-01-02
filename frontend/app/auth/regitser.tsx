@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ImageBackground } from "react-native";
+import { Text, View, TextInput, TouchableOpacity, Alert, ImageBackground } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
-import { api } from "../../api/api";
-import { asyncPost } from "../../utils/fetch";
+import { api } from "@/api/api";
+import { asyncPost } from "@/utils/fetch";
 import { AuthStackParamList } from "../navigation/type";
 import { LoadingModal } from "../components/LoadingModal";
+import { styles } from "../tabs/styles/register";
+
 export default function RegisterScreen() {
   const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
 
@@ -53,7 +55,7 @@ export default function RegisterScreen() {
   return (
     <>
       <ImageBackground 
-        source={require('../../assets/Auth-Background.png')}
+        source={require('@/assets/Auth-Background.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
       >
@@ -108,69 +110,3 @@ export default function RegisterScreen() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'rgb(255, 255, 255)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 32,
-    borderRadius: 24,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    width: '85%',
-    elevation: 5,
-  },
-  backgroundImage: {
-    flex: 1,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logo: {
-    marginBottom: 40,
-  },
-  logoText: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  input: {
-    width: 200,
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginVertical: 10,
-  },
-  errorText: {
-    width: 200,
-    textAlign: 'center',
-    color: 'red',
-    marginBottom: 12,
-  },
-  registerButton: {
-    backgroundColor: "#2f95dc",
-    width: 200,
-    height: 50,
-    borderRadius: 5,
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 10,
-  },
-  registerButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  button: {
-    justifyContent: 'center',
-  },
-  login: {
-    color: '#2f95dc',
-    marginTop: 10,
-  },
-  loginContainer: {
-    alignItems: 'center',
-  }
-});

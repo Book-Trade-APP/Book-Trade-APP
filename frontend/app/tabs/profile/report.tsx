@@ -1,13 +1,14 @@
-import { View, StyleSheet, Text, TextInput, Alert, TouchableOpacity } from 'react-native';
-import { useHideTabBar } from '../../hook/HideTabBar';
+import { View, Text, TextInput, Alert, TouchableOpacity } from 'react-native';
+import { useHideTabBar } from '@/app/hook/HideTabBar';
 import { useNavigation } from '@react-navigation/native';
-import { Headers } from '../../components/NoneButtonHeader';
+import { Headers } from '@/app/components/NoneButtonHeader';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState } from 'react';
-import { asyncPost } from '../../../utils/fetch';
-import { api } from '../../../api/api';
-import { LoadingModal } from '../../components/LoadingModal';
-import React from 'react';
+import React, { useState } from 'react';
+import { asyncPost } from '@/utils/fetch';
+import { api } from '@/api/api';
+import { LoadingModal } from '@/app/components/LoadingModal';
+import { styles } from '../styles/report';
+
 export default function ReportScreen() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -55,88 +56,3 @@ export default function ReportScreen() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  field: {
-    flex: 1,
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 50,
-  },
-  title: {
-    color: "#000",
-    paddingBottom: 30,
-    fontWeight: 600,
-    fontSize: 22
-  },
-  label: {
-    textAlign: "right",
-    fontFamily: 'bold',
-    fontSize: 20,
-    padding: 10,
-  },
-  input_title: {
-    borderWidth: 1,
-    width: 300,
-    height: 50,
-    borderColor: "#d1d1d1",
-    borderRadius: 8, 
-    paddingHorizontal: 16, 
-    paddingVertical: 12, 
-    marginBottom: 20,
-    fontSize: 16, 
-    backgroundColor: "#ffffff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  input_content: {
-    borderWidth: 1,
-    borderColor: "#d1d1d1",
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    backgroundColor: "#ffffff",
-    textAlignVertical: "top",
-    width: 300,
-    height: 300,
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  errorText: {
-    width: 200,
-    textAlign: 'center',
-    color: 'red',
-    marginBottom: 12,
-  },
-  sendButton: {
-    width: 150,
-    backgroundColor: '#2f95dc',
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  sendButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-});

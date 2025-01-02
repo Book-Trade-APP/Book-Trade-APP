@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { api } from '../../api/api';
-import { getUserId } from '../../utils/stroage';
+import { api } from '@/api/api';
+import { getUserId } from '@/utils/stroage';
 import { Ionicons } from '@expo/vector-icons';
-import { Message } from '../interface/Message';
-
+import { Message } from  "../interface/Message";
+import { styles } from '../tabs/styles/chat';
 export default function ChatScreen({ navigation }: { navigation: any }) {
     const [userId, setUserId] = useState<string>('');
     const [chats, setChats] = useState<Message[]>([]);
@@ -89,23 +89,3 @@ export default function ChatScreen({ navigation }: { navigation: any }) {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fff' },
-    header: {
-        fontSize: 24,
-        fontWeight: '600',
-        paddingLeft: 16,
-        paddingTop: 16,
-        marginBottom: 16,
-        color: '#333',
-    },
-    chatItem: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 10, marginBottom: 15 },
-    avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 10 },
-    avatarPlaceholder: { marginRight: 10 },
-    chatInfo: { flex: 1 },
-    username: { fontSize: 16, fontWeight: 'bold' },
-    lastMessage: { fontSize: 14, color: '#666' },
-    chatTime: { fontSize: 12, color: '#999' },
-    emptyMessage: { textAlign: 'center', marginTop: 20, fontSize: 16, color: '#888' },
-});
