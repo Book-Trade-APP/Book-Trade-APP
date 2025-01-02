@@ -5,7 +5,7 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { useHideTabBar } from '../../hook/HideTabBar';
 import { useEffect, useState } from 'react';
 import { Product } from '../../interface/Product';
-import { ProfileStackParamList } from '../../navigation/type';
+import { ProfileStackParamList, RootStackParamList } from '../../navigation/type';
 import { asyncGet, asyncPost } from '../../../utils/fetch';
 import { api } from '../../../api/api';
 import { getUserId } from '../../../utils/stroage';
@@ -52,14 +52,31 @@ export default function EditScreen() {
       setIsLoading(false);
     }
   };
+  const handleBack = () => {
+    RootNavigation.reset({
+      index: 0,
+      routes: [
+        { 
+          name: 'Main',
+          params: {
+            screen: 'Profile',
+            params: {
+              screen: 'Index'
+            }
+          }
+        }
+      ]
+    });
+  };
   const [editItems, setEditItems] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const navigation = useNavigation<NavigationProp<ProfileStackParamList>>();
+  const ProfileNavigation = useNavigation<NavigationProp<ProfileStackParamList>>();
+  const RootNavigation = useNavigation<NavigationProp<RootStackParamList>>();
   useHideTabBar()
   return (
     <>
       <SafeAreaView style={styles.container}>
-        <Headers title='修改商品' back={() => navigation.goBack()} />
+        <Headers title='修改商品' back={handleBack} />
         <FlatList
           data={editItems}
           keyExtractor={(item: Product) => item._id.toString()}
@@ -71,7 +88,7 @@ export default function EditScreen() {
             <TouchableOpacity 
               style={styles.itemContainer} 
               onPress={() => {
-                navigation.navigate("Seller", { product: item });
+                ProfileNavigation.navigate("Seller", { product: item });
               }}
             >
               <Image 

@@ -12,7 +12,13 @@ export default function ForgetScreen() {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [errorText, setErrorText] = useState<string>("");
     const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
-
+    const SendNotification = async (userId: string) => {
+      await asyncPost(api.UserSendNotification, {
+        "user_id": userId,
+        "title": "系統提醒",
+        "message": "請立即更新您的密碼！"
+      })
+    }
     const handleSendEmail = async () => {
       if (email.length !== 0){
         try {
@@ -21,6 +27,7 @@ export default function ForgetScreen() {
             "email": email
           })
           if (response.status === 200) {
+            await SendNotification(response.data.body);
             Alert.alert("成功", "臨時密碼已寄送至電子信箱");
             navigation.navigate('Login');
           } else if (response.status === 404) {
@@ -123,7 +130,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   loginButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#2f95dc',
     width: 200,
     height: 50,
     borderRadius: 5,
@@ -137,7 +144,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   signupLink: {
-    color: '#4CAF50',
+    color: '#2f95dc',
     marginTop: 10,
   },
   button: {

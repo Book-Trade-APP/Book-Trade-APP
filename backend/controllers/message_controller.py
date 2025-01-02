@@ -21,7 +21,7 @@ def send_message_controller():
         "message": "Message sent successfully!",
         "message_id": message_id,
         "inserted_message": inserted_message
-    }), 201
+    }), 200
 
 def get_messages_by_chat_id_controller(chat_id):
     messages = get_chat_messages_by_chat_id(chat_id)

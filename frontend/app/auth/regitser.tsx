@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   registerButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#2f95dc",
     width: 200,
     height: 50,
     borderRadius: 5,
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   login: {
-    color: '#4CAF50',
+    color: '#2f95dc',
     marginTop: 10,
   },
   loginContainer: {

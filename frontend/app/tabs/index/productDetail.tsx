@@ -11,20 +11,19 @@ import { Product } from "../../interface/Product";
 import { getUserId } from "../../../utils/stroage";
 
 export default function ProductDetailScreen() {
-  const tabBarHidden = useHideTabBar();
   const route = useRoute<RouteProp<HomeStackParamList, "Product">>();
-  const navigation = useNavigation<NavigationProp<MainTabParamList>>();
+  const MainTabNavigation = useNavigation<NavigationProp<MainTabParamList>>();
   const { productId, source } = route.params;
-
+  const tabBarHide = useHideTabBar();
   const [isFavorite, setIsFavorite] = useState(false);
   const [product, setProduct] = useState<Product>();
-  const [quantity, setQuantity] = useState<number>(1);
+  const [quantity, setQuantity] = useState<number>(0);
   const [userId, setUserId] = useState<string | null>(null);
   const [sellerId, setSellerId] = useState<string>();
   const [sellerUserName, setSellerUserName] = useState<string>("");
   const [sellerHeadShot, setSellerHeadShot] = useState<string>("");
   const [sellerEvaluate, setSellerEvaluate] = useState<string>("");
-
+  const [sellerTransaction, setSellerTransaction] = useState<number>();
   useEffect(() => {
     const initializeUserId = async () => {
       const id = await getUserId();
@@ -61,7 +60,7 @@ export default function ProductDetailScreen() {
         console.log("Failed to fetch product:", response);
       }
     } catch (error) {
-      console.log("API 调用失败:", error);
+      console.log("Failed to fetch product", error);
     }
   };
 
@@ -73,6 +72,7 @@ export default function ProductDetailScreen() {
         setSellerUserName(sellerData.username);
         setSellerHeadShot(sellerData.headshot);
         setSellerEvaluate(sellerData.evaluate);
+        setSellerTransaction(sellerData.transaction_number);
       } else {
         console.log("Failed to fetch seller information:", response);
       }
@@ -134,7 +134,11 @@ export default function ProductDetailScreen() {
 
   const handleAddToCart = async () => {
     if (quantity <= 0) {
-      Alert.alert("提示", "商品數量不足，無法添加到購物車");
+      Alert.alert("提示", "商品數量不足，無法添加至購物車");
+      return;
+    }
+    if (sellerId === userId) {
+      Alert.alert("提示", "您無法將自己的商品加入購物車");
       return;
     }
     try {
@@ -153,10 +157,18 @@ export default function ProductDetailScreen() {
   };
 
   const handleBuy = async () => {
+    if (quantity <= 0) {
+      Alert.alert("提示", "商品數量不足，無法購買");
+      return;
+    }
+    if (sellerId === userId) {
+      Alert.alert("提示", "您無法購買自己的商品");
+      return;
+    }
     try {
       const response = await asyncPost(api.AddToCart, { user_id: userId, product_id: productId, quantity: 1 });
       if (response.status === 200 || response.status === 400) {
-        navigation.reset({ routes: [{ name: "Cart" }] });
+        MainTabNavigation.reset({ routes: [{ name: "Cart" }] });
       } else {
         console.error("Error buying product:", response);
       }
@@ -164,39 +176,35 @@ export default function ProductDetailScreen() {
       console.error("Error during purchase:", error);
     }
   };
-  const handleChat = async () => {
-    userId;//使用者的id
-    sellerId; //賣家的id
-    sellerHeadShot; //賣家avatar
-    // 導航到聊天室
-    navigation.navigate('Chat', {
+  const handleChat = () => {
+    if (!userId || !sellerId) return;
+    if (userId === sellerId) {
+      Alert.alert("提示", "您無法與自己對話");
+      return;
+    }
+    MainTabNavigation.navigate('Chat', {
       screen: 'ChatDetail',
       params: {
         userId: userId,
         receiver_id: sellerId,
         receiver_username: sellerUserName,
         avatar: sellerHeadShot,
-//         onMessageSent: (data) => {
-//           // 處理消息發送後的回調
-//           console.log('Message sent:', data);
-//         }
       }
     });
-  }
+  };
   const handleGoBack = () => {
     if (source === "Cart") {
-      navigation.reset({ routes: [{ name: "Cart" }] });
+      MainTabNavigation.reset({ routes: [{ name: "Cart" }] });
     } else if (source === "Favorite") {
-      navigation.reset({ routes: [{ name: "Profile", params: { screen: "Favorite" } }] });
+      MainTabNavigation.reset({ routes: [{ name: "Profile", params: { screen: "Favorite" } }] });
     } else {
-      navigation.goBack();
+      MainTabNavigation.goBack();
     }
   };
 
   if (!product) {
     return null;
   }
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -229,8 +237,13 @@ export default function ProductDetailScreen() {
           <View style={styles.userInfoContainer}>
             <Text style={styles.reviewText}>{sellerUserName}</Text>
             <View style={{flexDirection: "row"}}>
-              <Ionicons name="star" size={20} color="#FFD700" />
-              <Text style={styles.ratingText}>{Number(sellerEvaluate).toFixed(1)}</Text>
+              <Ionicons style={{marginTop: 2}} name="star" size={20} color="#FFD700" />
+              {sellerTransaction === 0 
+              ?
+              <Text style={styles.ratingText}>暫無評價</Text>
+              :
+              <Text style={styles.ratingText}>{`${Number(sellerEvaluate).toFixed(1)} (${sellerTransaction})`}</Text>
+              }
             </View>
           </View>
           <TouchableOpacity onPress={handleChat}>
@@ -258,7 +271,7 @@ export default function ProductDetailScreen() {
       <TouchableOpacity style={styles.floatingBackButton} onPress={handleGoBack}>
         <Ionicons name="arrow-back-outline" size={28} color="#fff" />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.floatingCartButton} onPress={() => navigation.reset({ routes: [{ name: "Cart" }] })}>
+      <TouchableOpacity style={styles.floatingCartButton} onPress={() => MainTabNavigation.reset({ routes: [{ name: "Cart" }] })}>
         <Ionicons name="cart-outline" size={28} color="#fff" />
       </TouchableOpacity>
       <View style={styles.bottomNavContainer}>
@@ -370,7 +383,7 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 15,
     marginLeft: 4,
-    color: '#666',
+    color: '#888',
     fontWeight: '500',
   },
   productInfoContainer: {

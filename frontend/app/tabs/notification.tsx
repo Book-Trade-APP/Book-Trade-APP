@@ -5,9 +5,11 @@ import { EnhancedNotification, ApiResponse } from '../interface/Notification';
 import { asyncGet, asyncPost } from '../../utils/fetch';
 import { api } from '../../api/api';
 import { getUserId } from '../../utils/stroage';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 export default function NotificationsScreen() {
   const [notifications, setNotifications] = useState<EnhancedNotification[]>([]);
+  const navigation = useNavigation<NavigationProp<any>>();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'all' | 'unread' | 'read'>('all');
   const [userId, setUserId] = useState<string>("");
@@ -65,7 +67,44 @@ export default function NotificationsScreen() {
       console.error('標記已讀失敗:', error);
     }
   };
+  const handleNotificationPress = async (notification: EnhancedNotification) => {
+    // 先標記為已讀
+    await markAsRead(notification);
 
+    // 根據通知標題處理跳轉
+    switch (notification.title) {
+      case "新的待確認訂單":
+        navigation.navigate("Profile", {
+          screen: "OrderStatus",
+          params: { status: "待確認" }
+        });
+        break;
+      case "訂單已確認":
+        navigation.navigate("Profile", {
+          screen: "OrderStatus",
+          params: { status: "待處理" }
+        });
+        break;
+      case "收到新評價":
+        navigation.navigate("Profile", {
+          screen: "Index"
+        });
+        break;
+      case "訂單已完成":
+        navigation.navigate("Profile", {
+          screen: "OrderStatus",
+          params: { status: "已完成" }
+        });
+      case "系統提醒":
+        navigation.navigate("Profile", {
+          screen: "Setting"
+        })
+        break;
+      default:
+        // 如果不是上述幾種通知，只標記已讀不跳轉
+        break;
+    }
+  };
   const filteredNotifications = notifications
     .filter(notification => {
       switch (activeTab) {
@@ -121,7 +160,7 @@ export default function NotificationsScreen() {
         styles.notification,
         !item.isRead && styles.unreadNotification
       ]}
-      onPress={() => markAsRead(item)}
+      onPress={() => handleNotificationPress(item)}
     >
       <View style={styles.notificationHeader}>
         <Text style={styles.title}>{item.title}</Text>

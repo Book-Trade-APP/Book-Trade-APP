@@ -1,19 +1,25 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Image, ListRenderItem } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../../../api/api';
 import { Ionicons } from '@expo/vector-icons';
+import { NavigationProp, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { ChatStackParamList } from '../../navigation/type';
+import { useHideTabBar } from '../../hook/HideTabBar';
+import { Message } from '../../interface/Message';
 
-export default function ChatDetail({ route }) {
-    const { chat_id: initialChatId, userId, receiver_id, receiver_username, avatar } = route.params;
-    const [chatId, setChatId] = useState(initialChatId);
-    const [messages, setMessages] = useState([]);
+export default function ChatDetail() {
+    const route = useRoute<RouteProp<ChatStackParamList, "ChatDetail">>();
+    const { chat_id: initialChatId, userId, receiver_id, receiver_username, avatar, onMessageSent } = route.params;
+    const [chatId, setChatId] = useState<string>(initialChatId as string);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState('');
-    const flatListRef = useRef(null);
+    const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+    const flatListRef = useRef<FlatList>(null);
 
     useEffect(() => {
         if (initialChatId !== chatId) {
-            setChatId(initialChatId);
+            setChatId(initialChatId as string);
         }
     }, [route.params.chat_id]);
 
@@ -31,36 +37,33 @@ export default function ChatDetail({ route }) {
         initializeChat();
     }, [chatId]);
 
-    const findOrCreateChat = async () => {
+    const findOrCreateChat = async (): Promise<string | null> => {
         try {
-            // 第一步：嘗試查詢是否存在聊天
             const queryResponse = await fetch(
                 `${api.GetChatIdByParticipantIds}/${userId},${receiver_id}`
             );
 
             if (queryResponse.ok) {
                 const data = await queryResponse.json();
-                const existing_chat_id = data["body"];
-                return existing_chat_id;  // 返回已存在的 chatId
+                return data.body as string;
             }
 
-            // 如果聊天不存在，創建新的聊天
             const createResponse = await fetch(`${api.CreateChat}/${userId},${receiver_id}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: {},
+                body: JSON.stringify({}),
             });
 
             if (!createResponse.ok) throw new Error(`HTTP error! status: ${createResponse.status}`);
             const createdChatId = await createResponse.json();
-            return createdChatId; // 返回新創建的 chatId
+            return createdChatId;
         } catch (error) {
             console.error('Error in findOrCreateChat:', error);
             return null;
         }
     };
 
-    const fetchMessages = async () => {
+    const fetchMessages = async (): Promise<void> => {
         try {
             const response = await fetch(`${api.GetMessagesByChatId}${chatId}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -71,7 +74,7 @@ export default function ChatDetail({ route }) {
         }
     };
 
-    const sendMessage = async () => {
+    const sendMessage = async (): Promise<void> => {
         if (!newMessage.trim()) return;
         try {
             const response = await fetch(api.SendMessage, {
@@ -87,51 +90,52 @@ export default function ChatDetail({ route }) {
 
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const json = await response.json();
-            const sentMessage = json["inserted_message"]
-            console.log("sentMessage:", sentMessage);
+            const sentMessage = json.inserted_message as Message;
 
             setMessages((prevMessages) => [...prevMessages, sentMessage]);
-
             route.params.onMessageSent({
                 chatId,
-                lastMessage: sentMessage["content"],
-                lastMessageTime: sentMessage["timestamp"]
-            })
-
+                lastMessage: sentMessage.content,
+                lastMessageTime: sentMessage.timestamp
+            });
             setNewMessage('');
         } catch (error) {
             console.error("Failed to send message", error);
         }
     };
 
-
-    const renderMessageItem = ({ item }) => {
+    const renderMessageItem: ListRenderItem<Message> = ({ item }) => {
         const isMine = item.sender_id === userId;
-        const formatTime = (timestamp) => {
+        const formatTime = (timestamp: string) => {
             const date = new Date(timestamp);
             return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         };
 
         return (
             <View style={[styles.messageItem, isMine ? styles.myMessage : styles.theirMessage]}>
-                <Text style={styles.messageContent}>{item.content}</Text>
-                <Text style={styles.messageTime}>{formatTime(item.timestamp)}</Text>
+                <Text style={[styles.messageContent, { textAlign: isMine ? 'right' : 'left' }]}>{item.content}</Text>
+                <Text style={[styles.messageTime, { textAlign: isMine ? 'right' : 'left' }]}>
+                    {formatTime(item.timestamp)}
+                </Text>
             </View>
         );
     };
 
+    useHideTabBar();
+    
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
+                <TouchableOpacity 
+                    onPress={() => navigation.goBack()} 
+                    style={styles.backButton}
+                >
+                    <Ionicons name="chevron-back" size={28} color="#2c3e50" />
+                </TouchableOpacity>
                 {avatar ? (
                     <Image source={{ uri: avatar }} style={styles.avatar} />
                 ) : (
-                    <Ionicons
-                        name="person-circle-outline"
-                        size={40}
-                        color="#ccc"
-                        style={styles.avatarPlaceholder}
-                    />
+                    <Ionicons name="person-circle-outline" size={40} color="#ccc" style={styles.avatarPlaceholder} />
                 )}
                 <Text style={styles.receiver_username}>{receiver_username}</Text>
             </View>
@@ -139,7 +143,7 @@ export default function ChatDetail({ route }) {
                 ref={flatListRef}
                 data={messages}
                 renderItem={renderMessageItem}
-                keyExtractor={(item, index) => index.toString()}
+                keyExtractor={(_, index) => index.toString()}
                 style={styles.messageList}
                 onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
             />
@@ -160,19 +164,100 @@ export default function ChatDetail({ route }) {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fff' },
-    header: { flexDirection: 'row', alignItems: 'center', padding: 10, backgroundColor: '#f5f5f5' },
-    avatar: { width: 40, height: 40, borderRadius: 20, marginRight: 10 },
-    avatarPlaceholder: { marginRight: 10 },
-    receiver_username: { fontSize: 18, fontWeight: 'bold' },
-    messageList: { flex: 1, padding: 10 },
-    messageItem: { padding: 10, borderRadius: 8, marginBottom: 10 },
-    myMessage: { alignSelf: 'flex-end', backgroundColor: '#dcf8c6' },
-    theirMessage: { alignSelf: 'flex-start', backgroundColor: '#e5e5ea' },
-    messageContent: { fontSize: 16 },
-    messageTime: { fontSize: 12, color: '#999', marginTop: 5, textAlign: 'right' },
-    inputContainer: { flexDirection: 'row', alignItems: 'center', padding: 10, borderTopWidth: 1, borderColor: '#ccc' },
-    input: { flex: 1, borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10, marginRight: 10 },
-    sendButton: { backgroundColor: '#007bff', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20 },
-    sendButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+    container: {
+        flex: 1,
+        backgroundColor: '#f8f9fa',
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 15,
+        backgroundColor: '#ffffff',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    backButton: {
+        padding: 8,
+        marginRight: 8,
+    },
+    avatar: {
+        width: 45,
+        height: 45,
+        borderRadius: 23,
+        marginRight: 12,
+    },
+    avatarPlaceholder: {
+        marginRight: 12,
+    },
+    receiver_username: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#2c3e50',
+    },
+    messageList: {
+        flex: 1,
+        padding: 16,
+    },
+    messageItem: {
+        maxWidth: '80%',
+        padding: 12,
+        borderRadius: 16,
+        marginBottom: 12,
+    },
+    myMessage: {
+        alignSelf: 'flex-end',
+        backgroundColor: '#007AFF',
+    },
+    theirMessage: {
+        alignSelf: 'flex-start',
+        backgroundColor: '#888888',
+    },
+    messageContent: {
+        fontSize: 16,
+        lineHeight: 22,
+        color: '#ffffff',
+    },
+    messageTime: {
+        fontSize: 12,
+        marginTop: 6,
+        color: 'rgba(255, 255, 255, 0.8)',
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 12,
+        backgroundColor: '#ffffff',
+        borderTopWidth: 1,
+        borderTopColor: '#E9ECEF',
+    },
+    input: {
+        flex: 1,
+        minHeight: 40,
+        maxHeight: 100,
+        backgroundColor: '#F8F9FA',
+        borderRadius: 20,
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        marginRight: 12,
+        fontSize: 16,
+    },
+    sendButton: {
+        backgroundColor: '#007AFF',
+        borderRadius: 20,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    sendButtonText: {
+        color: '#ffffff',
+        fontSize: 16,
+        fontWeight: '600',
+    },
 });

@@ -267,7 +267,7 @@ export default function SellerScreen() {
       <SafeAreaView style={styles.container}>
         {product
           ? 
-          <Header title="修改商品" text="修改" navigation={navigation} Change={handleEditProduct} />
+          <Header title="修改商品" text="修改" source='Edit' navigation={navigation} Change={handleEditProduct} />
           :
           <Header title="發佈新商品" text="發佈" navigation={navigation} Change={handlePostProduct} />
         }
@@ -286,9 +286,9 @@ export default function SellerScreen() {
               selectedValue={category}
               onValueChange={(value) => setCategory(value)}
               items={[
-                '文學', '藝術', '哲學宗教', '人文史地', '自然科普',
-                '社會科學', '商業理財', '語言學習', '醫療保健',
-                '旅遊休閒', '電腦資訊', '考試用書', '動畫/遊戲',
+                '文學小說', '自然科普', '哲學宗教', '人文史地',
+                '社會科學', '藝術設計', '商業理財', '語言學習',
+                '醫療保健', '旅遊休閒', '電腦資訊', '考試用書',
               ]}
             />
             <DropdownField
