@@ -62,7 +62,7 @@ class UserService:
             }
 
         hashed_password = self.bcrypt.generate_password_hash(password).decode('utf-8')
-        self.collection.insert_one({
+        result = self.collection.insert_one({
             "username": username,
             "email": email,
             "password": hashed_password,
@@ -81,7 +81,7 @@ class UserService:
         return {
             "code":200,
             "message":"註冊成功",
-            "body": {}
+            "body": str(result.inserted_id)
         }
         
     # 登入邏輯
