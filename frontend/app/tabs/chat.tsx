@@ -6,6 +6,7 @@ import { getUserId } from '@/utils/stroage';
 import { Ionicons } from '@expo/vector-icons';
 import { Message } from  "../interface/Message";
 import { styles } from '../tabs/styles/chat';
+import { asyncGet } from '@/utils/fetch';
 export default function ChatScreen({ navigation }: { navigation: any }) {
     const [userId, setUserId] = useState<string>('');
     const [chats, setChats] = useState<Message[]>([]);

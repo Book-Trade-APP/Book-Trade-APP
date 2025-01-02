@@ -9,27 +9,33 @@ def create_new_chat(participant_ids):
 
 def get_user_chats(user_id):
     user_service = UserService(current_app.config["MongoDB"])
-
     chats = get_chats(user_id)
     processed_chats = []
-
+    
     for chat in chats:
-        other_user_id = [p for p in chat["participants"] if str(p) != user_id][0]
-        other_user_result = user_service.find_user_by_id(other_user_id)
-
-        if other_user_result["code"] == 200:
-            other_user = other_user_result["body"]
-            chat_data = {
-                "chat_id": str(chat["_id"]),
-                "receiver_id": str(other_user['_id']),
-                "username": other_user['username'],
-                "avatar": other_user['headshot'],
-                "last_message": chat.get("last_message", ""),
-                "last_message_time": chat.get("last_message_time")
-            }
-            processed_chats.append(chat_data)
-        else:
-            print(f"無法找到用戶 {other_user_id}，錯誤訊息: {user_result['message']}")
+        try:
+            other_user_id = [p for p in chat["participants"] if str(p) != user_id][0]
+            other_user_result = user_service.find_user_by_id(other_user_id)
+            
+            if other_user_result["code"] == 200:
+                other_user = other_user_result["body"]
+                chat_data = {
+                    "chat_id": str(chat["_id"]),
+                    "receiver_id": str(other_user['_id']),
+                    "username": other_user['username'], 
+                    "avatar": other_user['headshot'],
+                    "last_message": chat.get("last_message", ""),
+                    "last_message_time": chat.get("last_message_time")
+                }
+                processed_chats.append(chat_data)
+            else:
+                print(f"無法找到用戶 {other_user_id}: {other_user_result['message']}")
+                continue
+                
+        except Exception as e:
+            print(f"處理聊天記錄時發生錯誤: {str(e)}")
+            continue
+            
     return processed_chats
 
 def get_chat_id(participant_ids):

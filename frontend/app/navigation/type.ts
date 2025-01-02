@@ -59,6 +59,6 @@ export type ChatStackParamList = {
         receiver_id: string;
         receiver_username: string;
         avatar: string;
-        onMessageSent: (data: { chatId: string; lastMessage: string; lastMessageTime: string }) => void;
+        onMessageSent?: (data: { chatId: string; lastMessage: string; lastMessageTime: string }) => void;
     };
 }
