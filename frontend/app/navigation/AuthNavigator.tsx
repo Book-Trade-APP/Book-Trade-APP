@@ -3,7 +3,7 @@ import { AuthStackParamList } from '../navigation/type';
 
 import LoadingScreen from '../auth/loading';
 import LoginScreen from '../auth/login';
-import RegisterScreen from '../auth/regitser';
+import RegisterScreen from '../auth/register';
 import ForgetScreen from '../auth/forget';
 const AuthStack = createStackNavigator<AuthStackParamList>();
 export function AuthNavigator() {
