@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Image, ActivityIndicator } from 'react-native';
+import { View, Image, ActivityIndicator } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { AuthStackParamList } from '../navigation/type';
+import { styles } from '../tabs/styles/loading';
 
 export default function LoadingScreen() {
     const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
@@ -22,35 +23,3 @@ export default function LoadingScreen() {
         </View>
     )
 }
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    logo: {
-        width: 200,
-        height: 200,
-        marginBottom: 20,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 40,
-    },
-    message: {
-        fontSize: 18,
-        color: '#666',
-    },
-    button: {
-        backgroundColor: '#4CAF50',
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        borderRadius: 5,
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 18,
-    },
-})

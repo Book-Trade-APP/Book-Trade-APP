@@ -1,11 +1,11 @@
 import { NavigationProp, useNavigation } from "@react-navigation/native";
-import { useState } from "react";
-import { Text, TextInput, View, TouchableOpacity, StyleSheet, ImageBackground, Alert } from "react-native";
+import React, { useState } from "react";
+import { Text, TextInput, View, TouchableOpacity, ImageBackground, Alert } from "react-native";
 import { AuthStackParamList } from "../navigation/type";
-import { asyncPost } from "../../utils/fetch";
-import { api } from "../../api/api";
+import { asyncPost } from "@/utils/fetch";
+import { api } from "@/api/api";
 import { LoadingModal } from "../components/LoadingModal";
-import React from "react";
+import { styles } from "../tabs/styles/forget";
 
 export default function ForgetScreen() {
     const [email, setEmail] = useState("");
@@ -48,7 +48,7 @@ export default function ForgetScreen() {
     return (
       <>
         <ImageBackground 
-          source={require('../../assets/Auth-Background.png')}
+          source={require('@/assets/Auth-Background.png')}
           style={styles.backgroundImage}
           resizeMode="cover"
         >
@@ -81,77 +81,6 @@ export default function ForgetScreen() {
           </View>
         </ImageBackground>
         <LoadingModal isLoading={isLoading} message={"正在寄送臨時密碼..."} />
-        </>
-      );
-    }
-    
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'rgb(255, 255, 255)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 32,
-    borderRadius: 24,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    width: '85%',
-    elevation: 5,
-  },
-  backgroundImage: {
-    flex: 1,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logo: {
-    marginBottom: 40,
-  },
-  logoText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  form: {
-    width: '80%',
-    alignItems: 'center',
-  },
-  input: {
-    width: 200,
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginVertical: 10,
-  },
-  errorText: {
-    width: 200,
-    textAlign: 'center',
-    color: 'red',
-    marginBottom: 12,
-  },
-  loginButton: {
-    backgroundColor: '#2f95dc',
-    width: 200,
-    height: 50,
-    borderRadius: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 10,
-  },
-  loginButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  signupLink: {
-    color: '#2f95dc',
-    marginTop: 10,
-  },
-  button: {
-    justifyContent: 'center',
-  },
-  bottom: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-});
+      </>
+    );
+}

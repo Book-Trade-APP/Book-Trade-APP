@@ -1,19 +1,20 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, AlertButton} from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, Image, AlertButton} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useHideTabBar } from '../../hook/HideTabBar';
-import React, { useEffect, useState }from 'react';
+import { useHideTabBar } from '@/app/hook/HideTabBar';
+import React, { useEffect, useState } from 'react';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { FormField } from '../../components/FormField';
-import { DropdownField } from '../../components/DropdownField';
-import { Header } from '../../components/ButtonHeader';
+import { FormField } from '@/app/components/FormField';
+import { DropdownField } from '@/app/components/DropdownField';
+import { Header } from '@/app/components/ButtonHeader';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { asyncPost, uploadImage } from '../../../utils/fetch';
-import { LoadingModal } from '../../components/LoadingModal';
+import { asyncPost, uploadImage } from '@/utils/fetch';
+import { LoadingModal } from '@/app/components/LoadingModal';
 import * as ImagePicker from "expo-image-picker";
-import { ProfileStackParamList } from '../../navigation/type';
-import { api } from '../../../api/api';
-import { getUserId } from '../../../utils/stroage';
+import { ProfileStackParamList } from '@/app/navigation/type';
+import { api } from '@/api/api';
+import { getUserId } from '@/utils/stroage';
+import { styles } from '../styles/seller';
 
 export default function SellerScreen() {
   const [name, setName] = useState('');
@@ -356,57 +357,3 @@ export default function SellerScreen() {
     </>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#f5f5f5",
-  },
-  form: {
-    padding: 15,
-  },
-  field: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  label: {
-    width: 100,
-    fontSize: 16,
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#C0C0C0',
-    borderRadius: 5,
-    padding: 10,
-    backgroundColor: '#FFFFFF',
-  },
-  dropdown: {
-    flex: 1,
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#C0C0C0',
-    borderRadius: 5,
-    backgroundColor: '#FFFFFF',
-  },
-  textArea: {
-    height: 80,
-  },
-  imageButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  imageText: {
-    marginLeft: 6,
-    color: '#007bff',
-  },
-  imageContainer: {
-    alignItems: 'center', 
-    marginVertical: 10,
-  },
-  image: {
-    borderRadius: 10,
-    marginBottom: 50,
-    width: 350,
-    height: 350,
-  }
-});
