@@ -35,7 +35,7 @@ export const styles = StyleSheet.create({
         marginVertical: 10,
     },
     errorText: {
-        width: 200,
+        width: 300,
         textAlign: 'center',
         color: 'red',
         marginBottom: 12,
